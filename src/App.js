@@ -11,35 +11,38 @@ import {
   Code,
   Grid,
   theme,
+  useColorMode,
+  useColorModeValue
 } from '@chakra-ui/react';
-import { ColorModeSwitcher } from './ColorModeSwitcher';
 import { Logo } from './Logo';
 import SidebarWithHeader from './layout/SidebarWithHeader'
 
 //////////////////////////////////////
 // Wallet and Network
 //////////////////////////////////////
-import { WagmiConfig, createClient } from "wagmi";
-import { ConnectKitProvider, ConnectKitButton, getDefaultClient } from "connectkit";
+import { WagmiConfig, createClient, getDefualtClient, chain } from "wagmi";
+import { ConnectKitProvider, getDefaultClient } from "connectkit";
 
 // We are using alchemy for now
+// Choose which chains you'd like to show
+const chains = [chain.hardhat, chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum];
+
 const alchemyId = process.env.ALCHEMY_ID;
 const client = createClient(
   getDefaultClient({
     appName: "Locksmith",
     alchemyId,
+    chains
   })
 );
 
 function App() {
   return (
-    <WagmiConfig client={client}>
-      <ConnectKitProvider>
-        <ChakraProvider theme={theme}>
-          <SidebarWithHeader />
-        </ChakraProvider>
-      </ConnectKitProvider>
-    </WagmiConfig>
+    <ChakraProvider theme={theme}>
+      <WagmiConfig client={client}>
+        <SidebarWithHeader/>
+      </WagmiConfig>
+    </ChakraProvider>
   );
 }
 

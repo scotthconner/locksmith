@@ -48,7 +48,7 @@ import {
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
-import { ConnectKitButton} from "connectkit";
+import { ConnectKitProvider, ConnectKitButton, getDefaultClient } from "connectkit";
 
 interface LinkItemProps {
   name: string;
@@ -68,6 +68,7 @@ export default function SidebarWithHeader({
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
+    <ConnectKitProvider theme='auto' mode={useColorModeValue('light', 'dark')}>
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
       <SidebarContent
         onClose={() => onClose}
@@ -91,6 +92,7 @@ export default function SidebarWithHeader({
         {children}
       </Box>
     </Box>
+    </ConnectKitProvider>
   );
 }
 
@@ -124,7 +126,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
               ml='0.2em' mt='0.5em' mb='0.5em'>
               <HStack>
                   <Icon mr='0.2em' fontSize='1.4em' _groupHover={{color: 'white'}} as={BsShieldLock}/>
-                  <Text fontSize="m" color={useColorModeValue("gray.600", "white")}>Trusts</Text>
+                  <Text fontSize="m" color={useColorModeValue("black.600", "white")}>Trusts</Text>
                 <Box display={{ md: 'flex' }}>
                 <FiChevronDown />
                 </Box>
