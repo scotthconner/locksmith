@@ -48,6 +48,7 @@ import {
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
+import { ConnectKitButton} from "connectkit";
 
 interface LinkItemProps {
   name: string;
@@ -205,8 +206,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         onClick={onOpen}
         variant="outline"
         aria-label="open menu"
-        icon={<FiMenu />}
-      />
+        icon={<FiMenu />}/>
 
       <Text
         display={{ base: 'flex', md: 'none' }}
@@ -218,9 +218,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         New Trust 
       </Button>
       
-      <Button colorScheme='blue' variant='solid'>
-        Connect Wallet 
-      </Button>
+      <ConnectKitButton />
 
       <HStack spacing={{ base: '0', md: '6' }}>
         <Flex alignItems={'center'}>
