@@ -44,12 +44,13 @@ import NewTrustDialog from '../NewTrustDialog';
 interface LinkItemProps {
   name: string;
   icon: IconType;
+  href: string;
 }
 const LinkItems: Array<LinkItemProps> = [
-  { name: 'Keys', icon: HiOutlineKey},
-  { name: 'Assets', icon: FaMoneyBill},
-  { name: 'Trustees', icon: FaRegHandshake},
-  { name: 'Events', icon: HiOutlineLightningBolt}
+  { name: 'Keys', icon: HiOutlineKey, href: '/keys'},
+  { name: 'Assets', icon: FaMoneyBill, href: '/assets'},
+  { name: 'Trustees', icon: FaRegHandshake, href: '/trustees'},
+  { name: 'Events', icon: HiOutlineLightningBolt, href: '/events'}
 ];
 
 export default function SidebarWithHeader({
@@ -136,7 +137,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           </Menu>
         </Flex>
       {LinkItems.map((link) => (
-        <NavItem mt='0.4em' key={link.name} icon={link.icon} fontSize='lg'>
+        <NavItem mt='0.4em' href={link.href} key={link.name} icon={link.icon} fontSize='lg'>
           {link.name}
         </NavItem>
       ))}
@@ -148,9 +149,9 @@ interface NavItemProps extends FlexProps {
   icon: IconType;
   children: ReactText;
 }
-const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
+const NavItem = ({ href, icon, children, ...rest }: NavItemProps) => {
   return (
-    <Link href="#" style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
+    <Link href={href} style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
       <Flex
         align="center"
         p="4"
