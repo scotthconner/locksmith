@@ -15,22 +15,13 @@ import {useAccount, useProvider, useContract} from 'wagmi';
  * @return an query that returns the key Ids
  */
 export function useWalletKeys(address) {
-  const account  = useAccount(); 
-  const wallet   = address || account.address;
-  const provider = useProvider();
-  const contract = useContract(Locksmith.getContract('keyVault', provider));
+  const account    = useAccount(); 
+  const wallet     = address || account.address;
+  const provider   = useProvider();
+  const keyVault   = useContract(Locksmith.getContract('keyVault', provider));
   const walletKeys = useQuery('walletKeys for ' + wallet, async function() {
-    return await contract.getKeys(wallet);
+    return await keyVault.getKeys(wallet);
   });
 
   return walletKeys;
-}
-
-/**
- * useWalletKeyInspection
- *
- * Returns a hashmap of key ID to inspection status
- **/
-export function useWalletKeyInspection(address) {
-
 }

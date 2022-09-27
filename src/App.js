@@ -12,7 +12,6 @@ import SidebarWithHeader from './layout/SidebarWithHeader'
 //////////////////////////////////////
 import { WagmiConfig, createClient, chain } from "wagmi";
 import { getDefaultClient } from "connectkit";
-import KeyWallet from "./KeyWallet.js";
 
 // We are using alchemy for now
 // Choose which chains you'd like to show
@@ -31,10 +30,8 @@ function App() {
   return (
     <ChakraProvider theme={theme}>
       <WagmiConfig client={client}>
-        <KeyWallet>
-          <SidebarWithHeader>
-          </SidebarWithHeader>
-        </KeyWallet>
+        <SidebarWithHeader>
+        </SidebarWithHeader>
       </WagmiConfig>
     </ChakraProvider>
   );
