@@ -40,7 +40,6 @@ import { ReactText } from 'react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
 import { ConnectKitProvider, ConnectKitButton } from "connectkit";
 import NewTrustDialog from '../NewTrustDialog';
-import Locksmith from '../services/Locksmith.js';
 
 interface LinkItemProps {
   name: string;

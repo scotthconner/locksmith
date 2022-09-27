@@ -41,4 +41,4 @@ const Locksmith = (function() {
   }
 })();
 
-export default Locksmith
+export default Locksmith;

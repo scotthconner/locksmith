@@ -1,50 +1,24 @@
 import React, { ReactNode } from 'react';
 import {
-  IconButton,
-  Avatar,
-  Box,
   Button,
-  CloseButton,
-  Flex,
-  Stack,
-  Heading,
-  FormContrl,
   Input,
-  HStack,
   VStack,
-  Icon,
   useColorModeValue,
-  Link,
-  Drawer,
-  DrawerContent,
   FormControl,
   Text,
   useDisclosure,
-  BoxProps,
-  FlexProps,
   Modal,
   ModalOverlay,
-  ModalContent,
-  ModalHeader,
   ModalBody,
-  ModalFooter,
+  ModalHeader,
   ModalCloseButton,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList,
+  ModalFooter,
+  ModalContent
 } from '@chakra-ui/react';
 import { IoIosAdd } from 'react-icons/io';
 import {
-  BsShieldLock,
-} from 'react-icons/bs';
-import {
   HiOutlineKey,
 } from 'react-icons/hi';
-import { IconType } from 'react-icons';
-import { ReactText } from 'react';
-import { ConnectKitProvider, ConnectKitButton, getDefaultClient } from "connectkit";
 import { useAccount } from 'wagmi'
 
 export default function NewTrustDialog({
