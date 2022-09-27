@@ -1,13 +1,10 @@
 import React, { ReactNode } from 'react';
 import {
   IconButton,
-  Avatar,
   Box,
-  Button,
   CloseButton,
   Flex,
   HStack,
-  VStack,
   Icon,
   useColorModeValue,
   Link,
@@ -27,13 +24,7 @@ import {
   FaRegHandshake
 } from 'react-icons/fa';
 import {
-  FiHome,
-  FiTrendingUp,
-  FiCompass,
-  FiStar,
-  FiSettings,
   FiMenu,
-  FiBell,
   FiChevronDown,
 } from 'react-icons/fi';
 import { FaMoneyBill } from 'react-icons/fa';
@@ -41,14 +32,15 @@ import {
   HiOutlineKey,
   HiOutlineLightningBolt
 } from 'react-icons/hi';
-import { IoIosAdd } from 'react-icons/io';
 import {
   BsShieldLock,
 } from 'react-icons/bs';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
-import { ConnectKitProvider, ConnectKitButton, getDefaultClient } from "connectkit";
+import { ConnectKitProvider, ConnectKitButton } from "connectkit";
+import NewTrustDialog from '../NewTrustDialog';
+import Locksmith from '../services/Locksmith.js';
 
 interface LinkItemProps {
   name: string;
@@ -62,11 +54,12 @@ const LinkItems: Array<LinkItemProps> = [
 ];
 
 export default function SidebarWithHeader({
-  children,
+  children
 }: {
   children: ReactNode;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <ConnectKitProvider theme='auto' mode={useColorModeValue('light', 'dark')}>
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
@@ -143,7 +136,6 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             </MenuList>
           </Menu>
         </Flex>
-      <hr/>
       {LinkItems.map((link) => (
         <NavItem mt='0.4em' key={link.name} icon={link.icon} fontSize='lg'>
           {link.name}
@@ -216,10 +208,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         fontWeight="bold">Locksmith 
       </Text>
 
-      <Button leftIcon={<IoIosAdd/>} colorScheme='blue' variant='ghost'>
-        New Trust 
-      </Button>
-      
+      <NewTrustDialog/>
+
       <ConnectKitButton />
 
       <HStack spacing={{ base: '0', md: '6' }}>
