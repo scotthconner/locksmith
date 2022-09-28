@@ -1,7 +1,13 @@
 import Locksmith from '../services/Locksmith.js';
 import {useState, useEffect} from 'react';
 import {useQuery} from 'react-query';
-import {useAccount, useProvider, useContract} from 'wagmi';
+import {
+  useAccount, 
+  useProvider, 
+  useContract,
+  usePrepareContractWrite,
+  useContractWrite
+} from 'wagmi';
 import {ethers} from 'ethers';
 
 /**
@@ -81,21 +87,13 @@ export function useKeyInfo(keyId, address = null) {
   return keyInfo;
 }
 
-/**
- * useTrustSlug
- *
- * Use this to look into the public trust registry.
- *
- * @param trustId the trust Id you want the slug for.
- * @return the Trust struct from the contract.
- **/
-export function useTrustSlug(trustId) {
-  const provider   = useProvider();
-  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
-  const trustInfo = useQuery('trustSlug for ' + trustId, async function() {
-    let response = await locksmith.trustRegistry(trustId);
-    console.log(response);
-  });
+export function useCreateTrustAndRootKey(trustName) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('locksmith', 'createTrustAndRootKey', 
+      [ethers.utils.formatBytes32String(trustName.trim())], 
+      trustName.trim().length > 0));
 
-  return trustInfo;
+  const call = useContractWrite(preparation.config);
+
+  return call;
 }

@@ -64,7 +64,7 @@ function Keys() {
   return (
     <Stack m='1em' spacing='1em'>
       <Heading size='md'>Keys in Your Wallet</Heading>
-        <Wrap padding='3em' spacing='2em'>
+        <Wrap padding='3em' spacing='2em' pb='6em'>
           {keyBody}
         </Wrap>
     </Stack>
@@ -112,8 +112,8 @@ const Key = ({keyId, ...rest}: KeyProps) => {
       cursor='pointer'
       _hover= {{
         transform: 'scale(1.1)',
-        transition: 'all 0.2s ease-in-out'
-      }}>
+      }}
+      transition='all 0.2s ease-in-out'>
       {body}
     </WrapItem>
   );
