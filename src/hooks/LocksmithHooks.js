@@ -25,3 +25,21 @@ export function useWalletKeys(address) {
 
   return walletKeys;
 }
+
+/**
+ * useKeyInfo 
+ *
+ * This hook takes a KeyId, and calls Locksmith#inspectKey. 
+ *
+ * @param keyId the key you want to you inspect 
+ * @return an query that returns the key Ids
+ */
+export function useKeyInfo(keyId) {
+  const provider   = useProvider();
+  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
+  const keyInfo = useQuery('keyInfo for ' + keyId, async function() {
+    return await locksmith.inspectKey(keyId);
+  });
+
+  return keyInfo;
+}

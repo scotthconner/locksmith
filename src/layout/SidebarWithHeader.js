@@ -7,7 +7,6 @@ import {
   HStack,
   Icon,
   useColorModeValue,
-  Link,
   Drawer,
   DrawerContent,
   Text,
@@ -20,6 +19,7 @@ import {
   MenuItem,
   MenuList,
 } from '@chakra-ui/react';
+import {Link} from 'react-router-dom';
 import {
   FaRegHandshake
 } from 'react-icons/fa';
@@ -151,7 +151,7 @@ interface NavItemProps extends FlexProps {
 }
 const NavItem = ({ href, icon, children, ...rest }: NavItemProps) => {
   return (
-    <Link href={href} style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
+    <Link to={href} style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
       <Flex
         align="center"
         p="4"
@@ -160,7 +160,7 @@ const NavItem = ({ href, icon, children, ...rest }: NavItemProps) => {
         role="group"
         cursor="pointer"
         _hover={{
-          bg: 'blue.500',
+          bg: useColorModeValue('gray.500','gray.700'),
           color: 'white',
         }}
         {...rest}>

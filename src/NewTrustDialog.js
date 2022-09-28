@@ -5,6 +5,7 @@ import {
   VStack,
   useColorModeValue,
   FormControl,
+  HStack,
   Text,
   useDisclosure,
   Modal,
@@ -31,7 +32,7 @@ export default function NewTrustDialog({
 
   return (
     <>
-    <Button isDisabled={!isConnected} leftIcon={<IoIosAdd/>} colorScheme='blue' variant='ghost' onClick={onOpen}>
+    <Button isDisabled={!isConnected} leftIcon={<IoIosAdd/>} colorScheme='gray' variant='ghost' onClick={onOpen}>
       New Trust
     </Button>
     <Modal onClose={onClose} isOpen={isOpen} isCentered>
@@ -55,16 +56,18 @@ export default function NewTrustDialog({
           </VStack>
         </ModalBody>
         <ModalFooter>
-          <Button
+          <HStack>
+            <Button
               leftIcon={<HiOutlineKey/>}
-              bg={'blue.400'}
-              color={'white'}
+              bg='yellow.400'
+              color={'black'}
               _hover={{
-                bg: 'blue.500',
+                bg: 'yellow.300', 
               }}>
               Mint Root Key
             </Button>
-          <Button onClick={onClose}>Close</Button>
+            <Button onClick={onClose}>Close</Button>
+          </HStack>
         </ModalFooter>
       </ModalContent>
     </Modal>

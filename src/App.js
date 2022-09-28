@@ -40,9 +40,9 @@ const client = createClient(
 
 function App() {
   return (
-    <Router>
-      <ChakraProvider theme={theme}>
-        <WagmiConfig client={client}>
+    <ChakraProvider theme={theme}>
+      <WagmiConfig client={client}>
+        <Router>
           <SidebarWithHeader>
             <Routes>
               <Route exact path='/' exact element={<Home/>} />
@@ -52,9 +52,9 @@ function App() {
               <Route path='/events' element={<Events/>} />
             </Routes>
           </SidebarWithHeader>
-        </WagmiConfig>
-      </ChakraProvider>
-    </Router>
+        </Router>
+      </WagmiConfig>
+    </ChakraProvider>
   );
 }
 
