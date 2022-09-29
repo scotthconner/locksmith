@@ -3,9 +3,17 @@
 //////////////////////////////////////
 import {
   Box, BoxProps,
+  Button,
   Center,
   Heading,
   HStack,
+  Modal,
+  ModalOverlay,
+  ModalHeader,
+  ModalCloseButton,
+  ModalContent,
+  ModalBody,
+  ModalFooter,
   Skeleton,
   Stack,
   Tag,
@@ -14,7 +22,8 @@ import {
   Wrap,
   WrapItem,
   VStack,
-  useColorModeValue
+  useColorModeValue,
+  useDisclosure
 } from '@chakra-ui/react'
 
 import { FaTimes } from 'react-icons/fa';
@@ -38,6 +47,7 @@ import {
 //////////////////////////////////////
 function Keys() {
   const keys = useWalletKeys();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   let keyBody = '';
 
   if (!keys.isSuccess) {
@@ -58,24 +68,29 @@ function Keys() {
         </Box>
       </WrapItem></>); 
   } else {
-    keyBody = (keys.data.map((k) => (<Key key={k} keyId={k}/>)));
+    keyBody = (keys.data.map((k) => (
+      <Key onClick={onOpen} key={k} keyId={k}/>
+    )));
   }
 
-  return (
+  return (<>
     <Stack m='1em' spacing='1em'>
       <Heading size='md'>Keys in Your Wallet</Heading>
         <Wrap padding='3em' spacing='2em' pb='6em'>
           {keyBody}
         </Wrap>
     </Stack>
-  );
+    <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'> 
+      <KeyDetailBody onClose={onClose}/>
+    </Modal>
+  </>);
 }
 
 interface KeyProps extends BoxProps {
   keyId: BigNumber
 }
 
-const Key = ({keyId, ...rest}: KeyProps) => {
+const Key = ({keyId, onClick, ...rest}: KeyProps) => {
   var boxColor = useColorModeValue('white', 'gray.800');
   var account = useAccount(); 
   var keyInfo = useKeyInfo(keyId, account.address);
@@ -96,7 +111,7 @@ const Key = ({keyId, ...rest}: KeyProps) => {
             <Text fontSize='2xl'>{keyInfo.data.inventory.toString()}</Text>
           </HStack>
           <Text>{keyInfo.data.alias}</Text>
-          {keyInfo.data.soulbound.toString() != '0' && 
+          {keyInfo.data.soulbound.toString() !== '0' && 
             <Tag colorScheme='purple'><TagLabel>{keyInfo.data.soulbound.toString()} × Soulbound</TagLabel></Tag>}
         </VStack>
       </Center>
@@ -113,11 +128,29 @@ const Key = ({keyId, ...rest}: KeyProps) => {
       _hover= {{
         transform: 'scale(1.1)',
       }}
-      transition='all 0.2s ease-in-out'>
+      transition='all 0.2s ease-in-out'
+      onClick={onClick}>
       {body}
     </WrapItem>
   );
 }
 
+const KeyDetailBody = ({keyId, onClose, ...rest}: KeyProps) => {
+  return (<>
+    <ModalOverlay backdropFilter='blur(10px)'/>
+    <ModalContent>
+      <ModalHeader>Key Detail</ModalHeader>
+      <ModalCloseButton />
+      <ModalBody>
+        This is the modal body
+      </ModalBody>
+      <ModalFooter>
+        <HStack>
+          <Button onClick={onClose}>Close</Button>
+        </HStack>
+      </ModalFooter>
+    </ModalContent>
+  </>);
+};
 
 export default Keys;

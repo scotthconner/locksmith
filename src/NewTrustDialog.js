@@ -20,7 +20,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { IoIosAdd } from 'react-icons/io';
 import {
   HiOutlineKey,
@@ -35,8 +35,9 @@ export default function NewTrustDialog({
 }: {
   children: ReactNode;
 }) {
+  const initialRef = useRef(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { address, isConnected, isConnecting, isDisconnected } = useAccount();
+  const { isConnected } = useAccount();
   const [input, setInput] = useState('');
   const handleInputChange = (e) => setInput(e.target.value);
   const isError = input.trim().length === 0;
@@ -79,8 +80,8 @@ export default function NewTrustDialog({
     <Button isDisabled={!isConnected} leftIcon={<IoIosAdd/>} colorScheme='gray' variant='ghost' onClick={onOpen}>
       New Trust
     </Button>
-    <Modal onClose={onModalClose} isOpen={isOpen} isCentered>
-      <ModalOverlay />
+    <Modal onClose={onModalClose} isOpen={isOpen} isCentered initialFocusRef={initialRef}>
+      <ModalOverlay backdropFilter='blur(10px)'/>
       <ModalContent>
         <ModalHeader>Create New Trust</ModalHeader>
         <ModalCloseButton />
@@ -94,6 +95,7 @@ export default function NewTrustDialog({
           <FormControl id="trustName" isInvalid={isError}>
             <FormLabel>Trust Name</FormLabel>
             <Input
+              ref={initialRef}
               placeholder="My Living Trust"
               _placeholder={{ color: 'gray.500' }}
               onChange={handleInputChange}

@@ -1,5 +1,5 @@
+import useDebounce from './UseDebounce.js';
 import Locksmith from '../services/Locksmith.js';
-import {useState, useEffect} from 'react';
 import {useQuery} from 'react-query';
 import {
   useAccount, 
@@ -88,10 +88,11 @@ export function useKeyInfo(keyId, address = null) {
 }
 
 export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
+  const debouncedTrustName = useDebounce(trustName.trim(), 500);
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('locksmith', 'createTrustAndRootKey', 
-      [ethers.utils.formatBytes32String(trustName.trim())], 
-      trustName.trim().length > 0));
+      [ethers.utils.formatBytes32String(debouncedTrustName)], 
+      debouncedTrustName.length > 0));
 
   const call = useContractWrite({...preparation.config, 
     onError(error) {

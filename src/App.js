@@ -45,7 +45,7 @@ function App() {
         <Router>
           <SidebarWithHeader>
             <Routes>
-              <Route exact path='/' exact element={<Home/>} />
+              <Route exact path='/' element={<Home/>} />
               <Route path='/keys' element={<Keys/>} />
               <Route path='/assets' element={<Assets/>} />
               <Route path='/trustees' element={<Trustees/>} />
