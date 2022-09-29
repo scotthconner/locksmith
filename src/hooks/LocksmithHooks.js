@@ -87,13 +87,20 @@ export function useKeyInfo(keyId, address = null) {
   return keyInfo;
 }
 
-export function useCreateTrustAndRootKey(trustName) {
+export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('locksmith', 'createTrustAndRootKey', 
       [ethers.utils.formatBytes32String(trustName.trim())], 
       trustName.trim().length > 0));
 
-  const call = useContractWrite(preparation.config);
+  const call = useContractWrite({...preparation.config, 
+    onError(error) {
+      errorFunc(error);
+    }, 
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
 
   return call;
 }

@@ -10,14 +10,15 @@ import {
   FormLabel,
   HStack,
   Text,
-  useDisclosure,
   Modal,
   ModalOverlay,
   ModalBody,
   ModalHeader,
   ModalCloseButton,
   ModalFooter,
-  ModalContent
+  ModalContent,
+  useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { IoIosAdd } from 'react-icons/io';
@@ -39,10 +40,38 @@ export default function NewTrustDialog({
   const [input, setInput] = useState('');
   const handleInputChange = (e) => setInput(e.target.value);
   const isError = input.trim().length === 0;
-  const writeConfig = useCreateTrustAndRootKey(input);
+  const toast = useToast();
+  const writeConfig = useCreateTrustAndRootKey(input, function(error) {
+    // error
+    toast({
+      title: 'Transaction Error!',
+      description: error.toString(), 
+      status: 'error',
+      duration: 9000,
+      isClosable: true
+    });
+  }, function(data) {
+    // success
+    toast({
+      title: 'Trust Created!',
+      description: 'The root key is now in your wallet.',
+      status: 'success',
+      duration: 9000,
+      isClosable: true
+    });
+    setInput('');
+    onClose();
+  });
+
+  var buttonProps = writeConfig.isLoading ? {isLoading: true} : {};
 
   const onSubmit = () => {
     writeConfig.write?.();
+  }
+
+  const onModalClose = () => {
+    setInput('');
+    onClose();
   }
 
   return (
@@ -50,7 +79,7 @@ export default function NewTrustDialog({
     <Button isDisabled={!isConnected} leftIcon={<IoIosAdd/>} colorScheme='gray' variant='ghost' onClick={onOpen}>
       New Trust
     </Button>
-    <Modal onClose={onClose} isOpen={isOpen} isCentered>
+    <Modal onClose={onModalClose} isOpen={isOpen} isCentered>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Create New Trust</ModalHeader>
@@ -86,7 +115,9 @@ export default function NewTrustDialog({
                 bg: 'yellow.300', 
               }}
               onClick={onSubmit}
-              isDisabled={isError}>
+              loadingText='Signing'
+              isDisabled={isError}
+              {...buttonProps}>
               Mint Root Key
             </Button>
             <Button onClick={onClose}>Close</Button>
