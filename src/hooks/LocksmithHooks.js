@@ -71,6 +71,7 @@ export function useKeyInfo(keyId, address = null) {
 
     return {
       isValid: response[0],
+      keyId: keyId.toString(),
       alias: ethers.utils.parseBytes32String(response[1]),
       inventory: held,
       soulbound: soulboundCount,

@@ -5,6 +5,7 @@ import {
   Box, BoxProps,
   Button,
   Center,
+  Flex,
   Heading,
   HStack,
   Modal,
@@ -15,6 +16,7 @@ import {
   ModalBody,
   ModalFooter,
   Skeleton,
+  Spacer,
   Stack,
   Tag,
   TagLabel,
@@ -27,8 +29,11 @@ import {
 } from '@chakra-ui/react'
 
 import { FaTimes } from 'react-icons/fa';
+import { FiSend } from 'react-icons/fi';
 import { GiBossKey } from 'react-icons/gi';
 import { HiOutlineKey } from 'react-icons/hi';
+
+import { useState } from 'react';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
@@ -47,7 +52,6 @@ import {
 //////////////////////////////////////
 function Keys() {
   const keys = useWalletKeys();
-  const { isOpen, onOpen, onClose } = useDisclosure();
   let keyBody = '';
 
   if (!keys.isSuccess) {
@@ -69,7 +73,7 @@ function Keys() {
       </WrapItem></>); 
   } else {
     keyBody = (keys.data.map((k) => (
-      <Key onClick={onOpen} key={k} keyId={k}/>
+      <Key key={k} keyId={k}/>
     )));
   }
 
@@ -80,9 +84,6 @@ function Keys() {
           {keyBody}
         </Wrap>
     </Stack>
-    <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'> 
-      <KeyDetailBody onClose={onClose}/>
-    </Modal>
   </>);
 }
 
@@ -91,6 +92,7 @@ interface KeyProps extends BoxProps {
 }
 
 const Key = ({keyId, onClick, ...rest}: KeyProps) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   var boxColor = useColorModeValue('white', 'gray.800');
   var account = useAccount(); 
   var keyInfo = useKeyInfo(keyId, account.address);
@@ -118,7 +120,7 @@ const Key = ({keyId, onClick, ...rest}: KeyProps) => {
     )
   }
 
-  return (
+  return (<>
     <WrapItem key={keyId} p='1em' w='10em' h='12em' 
       border={keyInfo.isSuccess && keyInfo.data.isRoot ? '2px' : '0px'} 
       borderColor={keyInfo.isSuccess && keyInfo.data.isRoot ? 'yellow.400' : 'white'}
@@ -129,25 +131,36 @@ const Key = ({keyId, onClick, ...rest}: KeyProps) => {
         transform: 'scale(1.1)',
       }}
       transition='all 0.2s ease-in-out'
-      onClick={onClick}>
+      onClick={onOpen}>
       {body}
     </WrapItem>
-  );
+    <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'>
+      <KeyDetailBody onClose={onClose} keyInfo={keyInfo}/>
+    </Modal>
+  </>);
 }
 
-const KeyDetailBody = ({keyId, onClose, ...rest}: KeyProps) => {
+const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
   return (<>
     <ModalOverlay backdropFilter='blur(10px)'/>
     <ModalContent>
       <ModalHeader>Key Detail</ModalHeader>
       <ModalCloseButton />
       <ModalBody>
-        This is the modal body
+        <Flex>
+          {keyInfo.data.isRoot ? <GiBossKey size='70px'/> : <HiOutlineKey size='70px'/>}
+          <VStack ml='1em' spacing='0.1em' align='stretch'>
+            <Text><b>Trust Name:</b> {keyInfo.data.trust.name}</Text>
+            <Text><b>Key Alias:</b> {keyInfo.data.alias}</Text>
+            <Text><b>Key ID:</b> {keyInfo.data.keyId}</Text>
+          </VStack>
+          <Spacer/>
+          <Center>
+            <Button leftIcon={<FiSend/>}>Transfer</Button>
+          </Center>
+        </Flex>
       </ModalBody>
       <ModalFooter>
-        <HStack>
-          <Button onClick={onClose}>Close</Button>
-        </HStack>
       </ModalFooter>
     </ModalContent>
   </>);
