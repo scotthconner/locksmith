@@ -34,11 +34,26 @@ export function useWalletKeys(address) {
 }
 
 /**
+ * useKeyBalance
+ *
+ * Gets the key balance of an address
+ **/
+export function useKeyBalance(keyId, address) {
+  const provider   = useProvider();
+  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  return useQuery('keyBalance for ' + keyId + ' with holder ' + address, async function() {
+    return keyId ? await keyVault.balanceOf(address, keyId) : 0;
+  });
+}
+
+/**
  * useKeyInfo 
  *
  * This hook takes a KeyId, and calls 
  *  - Locksmith#inspectKey
  *  - Locksmith#trustRegistry
+ *  - KeyVault#balanceOf
+ *  - KeyVault#soulboundKeyAmounts
  *
  * @param keyId the key you want to you inspect 
  * @return an query that returns the key Ids
@@ -47,7 +62,7 @@ export function useKeyInfo(keyId, address = null) {
   const provider   = useProvider();
   const locksmith = useContract(Locksmith.getContract('locksmith', provider));
   const keyVault = useContract(Locksmith.getContract('keyVault', provider));
-  const keyInfo = useQuery('keyInfo for ' + keyId, async function() {
+  const keyInfo = useQuery('keyInfo for ' + keyId + ' with holder ' + address, async function() {
     let trust = null;
     let held = null;
     let soulboundCount = null;
@@ -63,10 +78,10 @@ export function useKeyInfo(keyId, address = null) {
       // get the user's inventory
       if(address) {
         held = await keyVault.balanceOf(address, keyId);
+        
+        // determine how many of them are soulbound
+        soulboundCount = await keyVault.soulboundKeyAmounts(address, keyId); 
       }
-
-      // determine how many of them are soulbound
-      soulboundCount = await keyVault.soulboundKeyAmounts(address, keyId); 
     }
 
     return {
@@ -88,6 +103,68 @@ export function useKeyInfo(keyId, address = null) {
   return keyInfo;
 }
 
+/**
+ * useKeyHolders
+ *
+ * Hook into the addresses holding the given key.
+ */
+export function useKeyHolders(keyId) {
+  const provider = useProvider();
+  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  const keyHolders = useQuery('keyHolders for ' + keyId, async function() {
+    return await keyVault.getHolders(keyId);
+  });
+  return keyHolders;
+}
+
+/**
+ * useKeyInventory
+ *
+ * This method introspects on a keyID and determines
+ * the total outstanding mint amounts as well as who
+ * is holding how many, and how many of them are
+ * soulbound.
+ */
+export function useKeyInventory(keyId) {
+  const provider = useProvider();
+  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  const keyInventory = useQuery('keyInventory for ' + keyId, async function() {
+    // first get the addresses that hold the key
+    let holderInfo = {};
+    let total = 0;
+    let holders = await keyVault.getHolders(keyId);
+    for(const h in holders) {
+      let b = await keyVault.balanceOf(holders[h], keyId);
+      total += b.toNumber(); 
+      holderInfo[holders[h]] = { 
+        balance: b,
+        soulbound: await keyVault.soulboundKeyAmounts(holders[h], keyId),
+      };
+    };
+
+    return {
+      total: total,
+      holders: holderInfo
+    };
+  });
+
+  return keyInventory; 
+}
+
+/**
+ * useCreateTrustAndRootKey
+ *
+ * Prepares and writes to the Locksmith contract,
+ * calling #createTrustAndRootKey.
+ *
+ * The caller must take the query and eventually call write?() to initate
+ * the wallet interaction.
+ *
+ * @param trustName the human readable trustname you want to make
+ * @param errorFunc what to do if this fails at signing or is aborted
+ * @param successFun what to do when the transaction has been signed and broadast
+ * @return a query of the contract write
+ **/
 export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
   const debouncedTrustName = useDebounce(trustName.trim(), 500);
   const preparation = usePrepareContractWrite(
@@ -105,4 +182,57 @@ export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
   });
 
   return call;
+}
+
+/**
+ * useTrustInfo
+ * 
+ * Takes a trust ID, and grabs a lot of information
+ * about it to build a trust detail page.
+ *
+ * @param trustId the trust id to intospect
+ * @return {
+ *    trustId,
+ *    name,
+ *    rootkKeyId,
+ *    trustKeyCount
+ *    keys[]
+ * }  
+ */
+export function useTrustInfo(trustId) {
+  const provider  = useProvider();
+  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
+
+  const trustInfo = useQuery('trust for ' + trustId, async function() {
+    // grab the trust information
+    let trust = await locksmith.trustRegistry(trustId);
+
+    return {
+      trustId: trust[0],
+      name: ethers.utils.parseBytes32String(trust[1]),
+      rootKeyId: trust[2],
+      trustKeyCount: trust[3]
+    }
+  });
+
+  return trustInfo;
+}
+
+/**
+ * useTrustKeys
+ *
+ * Returns an array of Key IDs for a given
+ * trust Id. Returns null if the trust ID is null.
+ * This is useful when chaining hooks. 
+ */
+export function useTrustKeys(trustId) {
+  const provider  = useProvider();
+  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
+
+  const trustKeys = useQuery('getKeys for trust ' + trustId, async function() {
+    // if the input is invalid just forget it  
+    return trustId == null ? [] : await locksmith.getKeys(trustId.toString());
+  })
+
+  return trustKeys;
 }

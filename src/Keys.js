@@ -32,8 +32,8 @@ import { FaTimes } from 'react-icons/fa';
 import { FiSend } from 'react-icons/fi';
 import { GiBossKey } from 'react-icons/gi';
 import { HiOutlineKey } from 'react-icons/hi';
-
-import { useState } from 'react';
+import { BsEye } from 'react-icons/bs';
+import { Link } from 'react-router-dom';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
@@ -45,6 +45,7 @@ import {
 import {
   useWalletKeys,
   useKeyInfo,
+  useKeyInventory
 } from './hooks/LocksmithHooks.js';
 
 //////////////////////////////////////
@@ -100,7 +101,15 @@ const Key = ({keyId, onClick, ...rest}: KeyProps) => {
 
   if(!keyInfo.isSuccess) {
     body = (
-      <></>
+      <Center w='8em'>
+        <VStack spacing='1em'>
+          <Skeleton width='8em' height='0.6em'/>
+          <HStack>
+            <Skeleton width='6em' height='5em'/>
+          </HStack>
+          <Skeleton width='5.5em' height='1em'/>
+        </VStack>
+      </Center>
     );
   } else {
     body = (
@@ -110,11 +119,11 @@ const Key = ({keyId, onClick, ...rest}: KeyProps) => {
           <HStack>
             {keyInfo.data.isRoot ? <GiBossKey size='56px'/> : <HiOutlineKey size='56px'/>}
             <FaTimes/>
-            <Text fontSize='2xl'>{keyInfo.data.inventory.toString()}</Text>
+            <Text fontSize='2xl'>{(keyInfo.data.inventory || '').toString()}</Text>
           </HStack>
           <Text>{keyInfo.data.alias}</Text>
-          {keyInfo.data.soulbound.toString() !== '0' && 
-            <Tag colorScheme='purple'><TagLabel>{keyInfo.data.soulbound.toString()} × Soulbound</TagLabel></Tag>}
+          {(keyInfo.data.soulbound || '').toString() !== '0' && 
+            <Tag colorScheme='purple'><TagLabel>{(keyInfo.data.soulbound||'').toString()} × Soulbound</TagLabel></Tag>}
         </VStack>
       </Center>
     )
@@ -141,6 +150,9 @@ const Key = ({keyId, onClick, ...rest}: KeyProps) => {
 }
 
 const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
+  let keyInventory = useKeyInventory(keyInfo.data.keyId);
+  let transferBound = keyInfo.data.soulbound >= keyInfo.data.inventory;
+
   return (<>
     <ModalOverlay backdropFilter='blur(10px)'/>
     <ModalContent>
@@ -148,15 +160,39 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
       <ModalCloseButton />
       <ModalBody>
         <Flex>
-          {keyInfo.data.isRoot ? <GiBossKey size='70px'/> : <HiOutlineKey size='70px'/>}
+          <VStack>
+            {keyInfo.data.isRoot ? <GiBossKey size='70px'/> : <HiOutlineKey size='70px'/>}
+            {keyInfo.data.isRoot && 
+              <Tag colorScheme='yellow'><TagLabel>Root Key</TagLabel></Tag>}
+            {keyInfo.data.soulbound.toString() !== '0' &&
+              <Tag colorScheme='purple'><TagLabel>{keyInfo.data.soulbound.toString()} × Soulbound</TagLabel></Tag>}
+          </VStack>
           <VStack ml='1em' spacing='0.1em' align='stretch'>
             <Text><b>Trust Name:</b> {keyInfo.data.trust.name}</Text>
             <Text><b>Key Alias:</b> {keyInfo.data.alias}</Text>
             <Text><b>Key ID:</b> {keyInfo.data.keyId}</Text>
+            <HStack>
+              <Text>
+                <b>Inventory:</b>&nbsp; 
+                {keyInfo.data.inventory.toString()} of {keyInventory.isSuccess && keyInventory.data.total}
+              </Text>
+              {!keyInventory.isSuccess && <Skeleton width='1.1em' height='1.1em'/>}
+            </HStack>
           </VStack>
           <Spacer/>
           <Center>
-            <Button leftIcon={<FiSend/>}>Transfer</Button>
+            <VStack>
+              <Link to={'/trust/' + keyInfo.data.trust.id}>
+                <Button colorScheme='gray' leftIcon={<BsEye/>}>See Trust</Button>
+              </Link>
+              {!transferBound && (<Button colorScheme='blue' leftIcon={<FiSend/>}>Send Key</Button>)}
+              {transferBound && (
+                <VStack>
+                  <Button colorScheme='blue' isDisabled leftIcon={<FiSend/>}>Send Key</Button>
+                  <Text fontSize='sm' fontStyle='italic' color='gray.500'>Keys are soulbound</Text>
+                </VStack>
+              )}
+            </VStack>
           </Center>
         </Flex>
       </ModalBody>

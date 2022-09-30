@@ -12,12 +12,7 @@ import {
   Text,
   useDisclosure,
   BoxProps,
-  FlexProps,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList,
+  FlexProps
 } from '@chakra-ui/react';
 import {Link} from 'react-router-dom';
 import {
@@ -25,7 +20,6 @@ import {
 } from 'react-icons/fa';
 import {
   FiMenu,
-  FiChevronDown,
 } from 'react-icons/fi';
 import { FaMoneyBill } from 'react-icons/fa';
 import {
@@ -47,6 +41,7 @@ interface LinkItemProps {
   href: string;
 }
 const LinkItems: Array<LinkItemProps> = [
+  { name: 'Trusts', icon: BsShieldLock, href: '/trusts'},
   { name: 'Keys', icon: HiOutlineKey, href: '/keys'},
   { name: 'Assets', icon: FaMoneyBill, href: '/assets'},
   { name: 'Trustees', icon: FaRegHandshake, href: '/trustees'},
@@ -62,7 +57,7 @@ export default function SidebarWithHeader({
 
   return (
     <ConnectKitProvider theme='auto' mode={useColorModeValue('light', 'dark')}>
-    <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
+    <Box minH="100vh" bg={useColorModeValue('gray.200', 'gray.900')}>
       <SidebarContent
         onClose={() => onClose}
         display={{ base: 'none', md: 'block' }}
@@ -110,32 +105,6 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </Text>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
-       <Flex alignItems='center' mx='8'>
-          <Menu>
-            <MenuButton
-              py={2}
-              transition="all 0.3s"
-              _focus={{ boxShadow: 'none' }}
-              ml='0.2em' mt='0.5em' mb='0.5em'>
-              <HStack>
-                  <Icon mr='0.2em' fontSize='1.4em' _groupHover={{color: 'white'}} as={BsShieldLock}/>
-                  <Text fontSize="m" color={useColorModeValue("black.600", "white")}>Trusts</Text>
-                <Box display={{ md: 'flex' }}>
-                <FiChevronDown />
-                </Box>
-              </HStack>
-            </MenuButton>
-            <MenuList
-              bg={useColorModeValue('white', 'gray.900')}
-              borderColor={useColorModeValue('gray.200', 'gray.700')}>
-              <MenuItem>Will</MenuItem>
-              <MenuItem>Hunter's</MenuItem>
-              <MenuItem>My non-profit</MenuItem>
-              <MenuDivider />
-              <MenuItem>New</MenuItem>
-            </MenuList>
-          </Menu>
-        </Flex>
       {LinkItems.map((link) => (
         <NavItem mt='0.4em' href={link.href} key={link.name} icon={link.icon} fontSize='lg'>
           {link.name}

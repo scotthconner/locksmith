@@ -20,6 +20,10 @@ import { getDefaultClient } from "connectkit";
 import { BrowserRouter as Router, Routes, Route}
     from 'react-router-dom';
 import Home from './Home.js';
+import {
+  Trusts, 
+  Trust
+} from './Trusts.js';
 import Keys from './Keys.js';
 import Assets from './Assets.js';
 import Trustees from './Trustees.js';
@@ -46,6 +50,8 @@ function App() {
           <SidebarWithHeader>
             <Routes>
               <Route exact path='/' element={<Home/>} />
+              <Route path='/trusts' element={<Trusts/>} />
+              <Route path='/trust/:id' element={<Trust/>} />
               <Route path='/keys' element={<Keys/>} />
               <Route path='/assets' element={<Assets/>} />
               <Route path='/trustees' element={<Trustees/>} />
