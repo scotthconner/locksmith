@@ -28,10 +28,11 @@ import {
   useDisclosure
 } from '@chakra-ui/react'
 
+import { KeyInfoIcon } from './components/KeyInfo.js';
 import { FaTimes } from 'react-icons/fa';
 import { FiSend } from 'react-icons/fi';
-import { GiBossKey } from 'react-icons/gi';
 import { HiOutlineKey } from 'react-icons/hi';
+import { FcKey } from 'react-icons/fc';
 import { BsEye } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 
@@ -117,7 +118,7 @@ const Key = ({keyId, onClick, ...rest}: KeyProps) => {
         <VStack spacing='1em'>
           <Text fontSize='xs' fontStyle='italic' color='gray.500'>{keyInfo.data.trust.name}</Text>
           <HStack>
-            {keyInfo.data.isRoot ? <GiBossKey size='56px'/> : <HiOutlineKey size='56px'/>}
+            {keyInfo.data.isRoot ? <FcKey size='56px'/> : <HiOutlineKey size='56px'/>}
             <FaTimes/>
             <Text fontSize='2xl'>{(keyInfo.data.inventory || '').toString()}</Text>
           </HStack>
@@ -161,7 +162,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
       <ModalBody>
         <Flex>
           <VStack>
-            {keyInfo.data.isRoot ? <GiBossKey size='70px'/> : <HiOutlineKey size='70px'/>}
+            {keyInfo.data.isRoot ? <FcKey size='70px'/> : <HiOutlineKey size='70px'/> } 
             {keyInfo.data.isRoot && 
               <Tag colorScheme='yellow'><TagLabel>Root Key</TagLabel></Tag>}
             {keyInfo.data.soulbound.toString() !== '0' &&

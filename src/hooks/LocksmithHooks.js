@@ -42,7 +42,20 @@ export function useKeyBalance(keyId, address) {
   const provider   = useProvider();
   const keyVault = useContract(Locksmith.getContract('keyVault', provider));
   return useQuery('keyBalance for ' + keyId + ' with holder ' + address, async function() {
-    return keyId ? await keyVault.balanceOf(address, keyId) : 0;
+    return await keyVault.balanceOf(address, keyId);
+  });
+}
+
+/**
+ * useSoulboundKeyAmounts 
+ *
+ * Gets the soulbound count of an address
+ **/
+export function useSoulboundKeyAmounts(keyId, address) {
+  const provider   = useProvider();
+  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  return useQuery('soulbound count for ' + keyId + ' with holder ' + address, async function() {
+    return await keyVault.soulboundKeyAmounts(address, keyId);
   });
 }
 
