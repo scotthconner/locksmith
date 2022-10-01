@@ -175,7 +175,7 @@ export function useKeyInventory(keyId) {
  *
  * @param trustName the human readable trustname you want to make
  * @param errorFunc what to do if this fails at signing or is aborted
- * @param successFun what to do when the transaction has been signed and broadast
+ * @param successFunc what to do when the transaction has been signed and broadast
  * @return a query of the contract write
  **/
 export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
@@ -189,6 +189,66 @@ export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
     onError(error) {
       errorFunc(error);
     }, 
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+
+  return call;
+}
+
+/**
+ * useBurnKey
+ *
+ * Prepares and writes to the Locksmith contract,
+ * calling #burnKey.
+ *
+ * The caller must take the query and eventually call write?() to initate
+ * the wallet interaction.
+ *
+ * This transaction is going to fail if the holder isn't root.
+ */
+export function useBurnKey(rootKeyId, keyId, address, errorFunc, successFunc) {
+  const debouncedAddress = useDebounce(address.trim(), 500);
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('locksmith', 'burnKey',
+      [rootKeyId, keyId, debouncedAddress],
+      debouncedAddress.length > 0));
+
+  const call = useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+
+  return call;
+}
+
+/**
+ * useCopyKey
+ *
+ * Prepares and writes to the Locksmith contract,
+ * calling #copyKey.
+ *
+ * The caller must take the query and eventually call write?() to initate
+ * the wallet interaction.
+ *
+ * This transaction is going to fail if the holder isn't root.
+ */
+export function useCopyKey(rootKeyId, keyId, address, soulbind, errorFunc, successFunc) {
+  const debouncedAddress = useDebounce(address.trim(), 500);
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('locksmith', 'copyKey',
+      [rootKeyId, keyId, debouncedAddress, soulbind],
+      debouncedAddress.length > 0));
+
+  const call = useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
     onSuccess(data) {
       successFunc(data);
     }

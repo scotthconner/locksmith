@@ -88,7 +88,7 @@ export default function NewTrustDialog({
         <ModalBody>
           <VStack>
           <Text
-            fontSize={{ base: 'sm', sm: 'md' }}
+            mb='1.5em'
             color={useColorModeValue('gray.800', 'gray.400')}>
             Name your trust, and mint the root key into your wallet. 
           </Text>

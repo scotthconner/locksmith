@@ -9,8 +9,14 @@ import {
   BoxProps,
   Button,
   Center,
+  Collapse,
   Divider,
   Flex,
+  Input,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
   Heading,
   HStack,
   List,
@@ -24,7 +30,7 @@ import {
   ModalBody,
   ModalFooter,
   Skeleton,
-  Collapse,
+  Switch,
   Slider,
   SliderTrack,
   SliderFilledTrack,
@@ -49,8 +55,9 @@ import {
   WrapItem,
   useColorModeValue,
   useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   KeyInfoIcon
 } from './components/KeyInfo.js';
@@ -75,10 +82,11 @@ import {
   useKeyHolders,
   useKeyBalance,
   useSoulboundKeyAmounts,
+  useCopyKey,
+  useBurnKey,
 } from './hooks/LocksmithHooks.js';
-import {
-  useAccount
-} from 'wagmi';
+import {ethers} from 'ethers';
+import { useAccount } from 'wagmi';
 
 //////////////////////////////////////
 // Trustees Function Component
@@ -132,6 +140,7 @@ const TrustKey = ({keyId, rootKeyId, ...rest}: KeyProps) => {
   var userKeyBalance = useKeyBalance(rootKeyId, account.address);
   var keyHolders = useKeyHolders(keyId);
   const { onToggle, isOpen, getDisclosureProps, getButtonProps } = useDisclosure();
+  const copyKeyDisclosure = useDisclosure();
   const buttonProps = getButtonProps();
   const disclosureProps = getDisclosureProps();
   var boxColor = useColorModeValue('white', 'gray.800');
@@ -167,7 +176,12 @@ const TrustKey = ({keyId, rootKeyId, ...rest}: KeyProps) => {
               {!keyInventory.isSuccess || !keyInfo.isSuccess ? 
               <Skeleton width='2.2em' height='1.3em'/> : 
               <Button {... !(hasRoot) ? {isDisabled: true} : {}}
-              size='sm' leftIcon={KeyInfoIcon(keyInfo)}>{keyInventory.data.total}</Button>}
+                onClick={copyKeyDisclosure.onOpen}
+                size='sm' leftIcon={KeyInfoIcon(keyInfo)}>{keyInventory.data.total}</Button>}
+              <KeyActionModal
+                rootKeyId={rootKeyId} keyId={keyId}
+                isOpen={copyKeyDisclosure.isOpen} onOpen={copyKeyDisclosure.onOpen} 
+                onClose={copyKeyDisclosure.onClose}/>
             </HStack>
             <HStack>
               {!keyHolders.isSuccess ? 
@@ -181,7 +195,7 @@ const TrustKey = ({keyId, rootKeyId, ...rest}: KeyProps) => {
               <List width='100%' mt='1em' spacing='1em' {... disclosureProps} transition='all 0.2s ease-in-out'>
                 <Divider/>
                 <Collapse in={isOpen} width='100%'>
-                  <KeyHolderList hasRoot={hasRoot} keyId={keyId} keyHolders={keyHolders.data}/>
+                  <KeyHolderList rootKeyId={rootKeyId} hasRoot={hasRoot} keyId={keyId} keyHolders={keyHolders.data}/>
                 </Collapse>
               </List>} 
         </HStack>
@@ -189,20 +203,21 @@ const TrustKey = ({keyId, rootKeyId, ...rest}: KeyProps) => {
   )
 }
 
-const KeyHolderList = ({keyId, keyHolders, hasRoot, ...rest}: KeyProps) => { 
+const KeyHolderList = ({rootKeyId, keyId, keyHolders, hasRoot, ...rest}: KeyProps) => { 
   return keyHolders.map((address, x) => (
     <AddressKeyBalance hasRoot={hasRoot} 
       key={'key: ' + keyId + " address " + address} 
-        rowNum={x} keyId={keyId} address={address}/>
+        rootKeyId={rootKeyId} rowNum={x} keyId={keyId} address={address}/>
   ));
 }
 
-const AddressKeyBalance = ({keyId, address, rowNum, hasRoot, ...rest}: KeyProps) => { 
+const AddressKeyBalance = ({rootKeyId, keyId, address, rowNum, hasRoot, ...rest}: KeyProps) => { 
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure();
   const account = useAccount();
   const keyBalance = useKeyBalance(keyId, address);
   const soulboundCount = useSoulboundKeyAmounts(keyId, address);
   const stripeColor = useColorModeValue('gray.100', 'gray.700');
+  const hasNoSoulbound = (soulboundCount.isSuccess ? soulboundCount.data : '0').toString() === '0';
 
   var buttonContent = null;
   var rootProps = hasRoot ? {} : {isDisabled: true};
@@ -214,13 +229,15 @@ const AddressKeyBalance = ({keyId, address, rowNum, hasRoot, ...rest}: KeyProps)
         <Text>{address == account.address ? <i>(you)</i> : address}</Text>
         <Spacer/>
         <HStack>
-          <Button size='sm' {... rootProps} {... modalProps} leftIcon={<HiOutlineKey/>} variant='outline' colorScheme='blue'>
-            {(soulboundCount.isSuccess ? soulboundCount.data : '0').toString() === '0' ? '' : 
+          <Button size='sm' {... rootProps} {... modalProps} 
+            leftIcon={ hasNoSoulbound ? <HiOutlineKey/> : <BiGhost/>} 
+            variant='outline' colorScheme='blue'>
+              {hasNoSoulbound ? '' : 
                 soulboundCount.data.toString() + ' / '}&nbsp;{keyBalance.isSuccess ? keyBalance.data.toString() : '?'}
           </Button>
           {!soulboundCount.isSuccess ? '' : (
             <AddressKeyActionModal
-              keyId={keyId} address={address} 
+              rootKeyId={rootKeyId} keyId={keyId} address={address} 
               soulbound={soulboundCount.data.toNumber()} 
               isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>)}
         </HStack>
@@ -229,7 +246,111 @@ const AddressKeyBalance = ({keyId, address, rowNum, hasRoot, ...rest}: KeyProps)
   )
 }
 
-const AddressKeyActionModal = ({keyId, address, soulbound, onOpen, onClose, isOpen, ...rest}: KeyProps) => {
+const KeyActionModal = ({rootKeyId, keyId, onOpen, onClose, isOpen, ...rest}: KeyProps) => {
+  const initialRef = useRef(null);
+  const [isChecked, setChecked] = useState(false);
+  const toast = useToast();
+  const account = useAccount();
+  const keyInfo = useKeyInfo(keyId);
+  const [input, setInput] = useState('');
+  var isError = !ethers.utils.isAddress(input);
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+  }
+
+  const writeConfig = useCopyKey(rootKeyId, keyId, input || '', isChecked, function(error) {
+    // error
+    toast({
+      title: 'Transaction Error!',
+      description: error.toString(),
+      status: 'error',
+      duration: 9000,
+      isClosable: true
+    });
+  }, function(data) {
+    // success
+    toast({
+      title: 'Key copied!',
+      description: 'The key is now in ' + input,
+      status: 'success',
+      duration: 9000,
+      isClosable: true
+    });
+    setInput('');
+    onClose();
+  });
+
+  var buttonProps = writeConfig.isLoading ? {isLoading: true} : {};
+  
+  const onSubmit = () => {
+    writeConfig.write?.(); 
+  }
+
+  const onModalClose = () => {
+    setInput('');
+    onClose();
+  }
+
+  return (
+    <Modal onClose={onModalClose} isOpen={isOpen} isCentered size='lg' initalFocusRef={initialRef}>
+      <ModalOverlay backdropFilter='blur(10px)'/>
+      <ModalContent>
+        <ModalHeader>
+          <HStack>
+            {keyInfo.isSuccess && KeyInfoIcon(keyInfo) }
+            <Text>{keyInfo.isSuccess && keyInfo.data.alias}</Text>
+          </HStack>
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <VStack>
+            <Text
+              mb='1.5em'
+              color={useColorModeValue('gray.800', 'gray.400')}>
+              You can <b>copy</b> this key into another wallet.
+            </Text>
+            <FormControl id="destination" isInvalid={isError}>
+              <FormLabel>Destination Address</FormLabel>
+              <Input
+                ref={initialRef}
+                placeholder="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+                _placeholder={{ color: 'gray.500' }}
+                onChange={handleInputChange}/>
+              { isError && <FormErrorMessage>Destination address invalid</FormErrorMessage>}
+            </FormControl>
+            <FormControl>
+              <HStack mt='1.5em'>
+                <FormLabel>Do you want to <b>soulbind</b> this key?</FormLabel>
+                <Spacer/>
+                <Switch colorScheme='purple' size='lg' 
+                  onChange={(e) => {setChecked(e.target.checked);}}/>
+              </HStack>
+            </FormControl>
+          </VStack> 
+        </ModalBody>
+        <ModalFooter>
+          <HStack>
+            <Button
+              leftIcon={<HiOutlineKey/>}
+              bg='yellow.400'
+              color={'black'}
+              _hover={{
+                bg: 'yellow.300',
+              }}
+              onClick={onSubmit}
+              loadingText='Signing'
+              isDisabled={isError}
+              {...buttonProps}>
+              Copy Key
+            </Button>
+            <Button onClick={onClose}>Close</Button>
+          </HStack>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>)
+}
+
+const AddressKeyActionModal = ({rootKeyId, keyId, address, soulbound, onOpen, onClose, isOpen, ...rest}: KeyProps) => {
   const account = useAccount();
   const [soulbindAmount, setSoulbindAmount] = useState(soulbound);
   const keyBalance = useKeyBalance(keyId, address);
@@ -288,13 +409,55 @@ const AddressKeyActionModal = ({keyId, address, soulbound, onOpen, onClose, isOp
           <HStack>
           <Text>You <b>burn</b> keys to take them away.</Text>
             <Spacer/>
-            <Button leftIcon={<AiOutlineFire/>} colorScheme='red'>
-              Burn {burnLabel} 
-            </Button>
+            { soulbound < 1 && <BurnFormControl
+              rootKeyId={rootKeyId} keyId={keyId} address={address}
+              onClose={onClose}
+              burnLabel={burnLabel}/>}
+            { soulbound >= 1 &&
+               <Button isDisabled leftIcon={<AiOutlineFire/>} colorScheme='red'>
+                    Burn {burnLabel}
+               </Button>
+            }
           </HStack>
         </ModalBody>
         <ModalFooter>
         </ModalFooter>
       </ModalContent>
     </Modal>)
+}
+
+
+const BurnFormControl = ({rootKeyId, keyId, address, burnLabel, onClose, ...rest}: KeyProps) => {
+  const toast = useToast();
+  const burnConfig = useBurnKey(rootKeyId, keyId, address, function(error) {
+    // error
+    toast({
+      title: 'Transaction Error!',
+      description: error.toString(),
+      status: 'error',
+      duration: 9000,
+      isClosable: true
+    });
+  }, function(data) {
+    // success
+    toast({
+      title: 'Keys burned!',
+      description: 'This user\'s keys are gone.',
+      status: 'success',
+      duration: 9000,
+      isClosable: true
+    });
+    onClose();
+  });
+  var burnButtonProps = burnConfig.isLoading ? {isLoading: true} : {};
+
+  const onBurnSubmit= () => {
+    burnConfig.write?.();
+  }
+
+  return (
+    <Button {... burnButtonProps} onClick={onBurnSubmit}
+      leftIcon={<AiOutlineFire/>} colorScheme='red'>
+        Burn {burnLabel}
+    </Button>)
 }

@@ -36,7 +36,10 @@ const Locksmith = (function() {
         contractInterface: interfaces[contract].abi,
         functionName: method,
         args: args,
-        enabled: enabled
+        enabled: enabled,
+        onError(error) {
+          console.log("Something really bad happened: " + error);
+        }
       }
     }
   }
