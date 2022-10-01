@@ -208,12 +208,12 @@ export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
  *
  * This transaction is going to fail if the holder isn't root.
  */
-export function useBurnKey(rootKeyId, keyId, address, errorFunc, successFunc) {
-  const debouncedAddress = useDebounce(address.trim(), 500);
+export function useBurnKey(rootKeyId, keyId, address, burnAmount, errorFunc, successFunc) {
+  const debouncedBurn = useDebounce(burnAmount, 500);
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('locksmith', 'burnKey',
-      [rootKeyId, keyId, debouncedAddress],
-      debouncedAddress.length > 0));
+      [rootKeyId, keyId, address, debouncedBurn],
+      debouncedBurn > 0));
 
   const call = useContractWrite({...preparation.config,
     onError(error) {
@@ -244,6 +244,35 @@ export function useCopyKey(rootKeyId, keyId, address, soulbind, errorFunc, succe
     Locksmith.getContractWrite('locksmith', 'copyKey',
       [rootKeyId, keyId, debouncedAddress, soulbind],
       debouncedAddress.length > 0));
+
+  const call = useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+
+  return call;
+}
+
+/**
+ * useSoulbindKey
+ *
+ * Prepares and writes to the Locksmith contract,
+ * calling #soulbindKey.
+ *
+ * The caller must take the query and eventually call write?() to initate
+ * the wallet interaction.
+ *
+ * This transaction is going to fail if the holder isn't root.
+ */
+export function useSoulbindKey(rootKeyId, keyId, address, soulbindAmount, errorFunc, successFunc) {
+  const debouncedAmount = useDebounce(soulbindAmount, 500);
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('locksmith', 'soulbindKey',
+      [rootKeyId, address, keyId, debouncedAmount], true));
 
   const call = useContractWrite({...preparation.config,
     onError(error) {

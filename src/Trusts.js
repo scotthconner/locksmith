@@ -84,6 +84,7 @@ import {
   useSoulboundKeyAmounts,
   useCopyKey,
   useBurnKey,
+  useSoulbindKey,
 } from './hooks/LocksmithHooks.js';
 import {ethers} from 'ethers';
 import { useAccount } from 'wagmi';
@@ -352,17 +353,10 @@ const KeyActionModal = ({rootKeyId, keyId, onOpen, onClose, isOpen, ...rest}: Ke
 
 const AddressKeyActionModal = ({rootKeyId, keyId, address, soulbound, onOpen, onClose, isOpen, ...rest}: KeyProps) => {
   const account = useAccount();
-  const [soulbindAmount, setSoulbindAmount] = useState(soulbound);
   const keyBalance = useKeyBalance(keyId, address);
   const soulboundCount = useSoulboundKeyAmounts(keyId, address);
   const keyInfo = useKeyInfo(keyId);
   const carefulColor = useColorModeValue('red.600','orange');
-  var burnLabel = '';
-
-  if(keyBalance.isSuccess) {
-    burnLabel = (keyBalance.data.toNumber() + " ") 
-      + (keyBalance.data.toNumber() > 1 ? "Keys" : "Key");
-  }
 
   return ( 
     <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'>
@@ -385,40 +379,13 @@ const AddressKeyActionModal = ({rootKeyId, keyId, address, soulbound, onOpen, on
               </VStack>
             </Box>
           </Center>
-          <HStack spacing='1em'>
-            <Box width='60%'>
-              <Slider width='90%' m='1em' mt='2em' defaultValue={soulbindAmount} min={0} 
-                max={keyBalance.isSuccess ? keyBalance.data : 1} step={1} 
-                onChangeEnd={setSoulbindAmount}>
-              <SliderTrack bg='purple.200'>
-                <Box position='relative' right={10} />
-                <SliderFilledTrack bg='purple.600'/>
-              </SliderTrack>
-              <SliderThumb boxSize={10}>
-                <Box color='purple'><HiOutlineKey size='30px'/></Box> 
-              </SliderThumb>
-            </Slider>
-            </Box>
-            <Text fontSize='lg' fontWeight='bold'>
-              {soulbindAmount} /&nbsp;
-                  {(keyBalance.isSuccess ? keyBalance.data.toString() : '0')}
-            </Text>
-            <Spacer/>
-            <Button leftIcon={<BiGhost/>} colorScheme='purple'>Soulbind</Button>
-          </HStack>
-          <HStack>
-          <Text>You <b>burn</b> keys to take them away.</Text>
-            <Spacer/>
-            { soulbound < 1 && <BurnFormControl
+          {keyBalance.isSuccess && soulboundCount.isSuccess && <BindFormControl
               rootKeyId={rootKeyId} keyId={keyId} address={address}
-              onClose={onClose}
-              burnLabel={burnLabel}/>}
-            { soulbound >= 1 &&
-               <Button isDisabled leftIcon={<AiOutlineFire/>} colorScheme='red'>
-                    Burn {burnLabel}
-               </Button>
-            }
-          </HStack>
+              onClose={onClose} keyBalance={keyBalance.data.toNumber()}
+              soulbound={soulboundCount.data.toNumber()}/>}
+          {keyBalance.isSuccess && <BurnFormControl
+              rootKeyId={rootKeyId} keyId={keyId} address={address}
+              onClose={onClose} keyBalance={keyBalance.data.toNumber()}/>}
         </ModalBody>
         <ModalFooter>
         </ModalFooter>
@@ -426,10 +393,65 @@ const AddressKeyActionModal = ({rootKeyId, keyId, address, soulbound, onOpen, on
     </Modal>)
 }
 
-
-const BurnFormControl = ({rootKeyId, keyId, address, burnLabel, onClose, ...rest}: KeyProps) => {
+const BindFormControl = ({rootKeyId, keyId, address, keyBalance, soulbound, onClose, ...rest}: KeyProps) => {
   const toast = useToast();
-  const burnConfig = useBurnKey(rootKeyId, keyId, address, function(error) {
+  const [soulbindAmount, setSoulbindAmount] = useState(soulbound);
+  const bindConfig = useSoulbindKey(rootKeyId, keyId, address, soulbindAmount, function(error) {
+    // error
+    toast({
+      title: 'Transaction Error!',
+      description: error.toString(),
+      status: 'error',
+      duration: 9000,
+      isClosable: true
+    });
+  }, function(data) {
+    // success
+    toast({
+      title: 'Keys bound!',
+      description: 'The user now has ' + soulbindAmount + ' bound keys.',
+      status: 'success',
+      duration: 9000,
+      isClosable: true
+    });
+    onClose();
+  });
+
+  var bindButtonProps = bindConfig.isLoading ? {isLoading: true} : {};
+
+  const onBindSubmit= () => {
+    bindConfig.write?.();
+  }
+
+  return (
+    <HStack spacing='1em'>
+      <Box width='60%'>
+        <Slider width='90%' m='1em' mt='2em' defaultValue={soulbound} min={0}
+          max={keyBalance} step={1}
+          onChangeEnd={setSoulbindAmount}>
+        <SliderTrack bg='purple.200'>
+          <Box position='relative' right={10} />
+          <SliderFilledTrack bg='purple.600'/>
+        </SliderTrack>
+        <SliderThumb boxSize={10}>
+          <Box color='purple'><HiOutlineKey size='30px'/></Box>
+        </SliderThumb>
+        </Slider>
+      </Box>
+      <Text fontSize='lg' fontWeight='bold'>
+        {soulbindAmount}&nbsp;/&nbsp;{keyBalance}
+      </Text>
+      <Spacer/>
+      <Button {... bindButtonProps} onClick={onBindSubmit}
+        leftIcon={<BiGhost/>} colorScheme='purple'>Bind</Button>
+    </HStack>
+  )
+}
+
+const BurnFormControl = ({rootKeyId, keyId, address, keyBalance, onClose, ...rest}: KeyProps) => {
+  const toast = useToast();
+  const [burnAmount, setBurnAmount] = useState(0);
+  const burnConfig = useBurnKey(rootKeyId, keyId, address, burnAmount, function(error) {
     // error
     toast({
       title: 'Transaction Error!',
@@ -456,8 +478,26 @@ const BurnFormControl = ({rootKeyId, keyId, address, burnLabel, onClose, ...rest
   }
 
   return (
-    <Button {... burnButtonProps} onClick={onBurnSubmit}
-      leftIcon={<AiOutlineFire/>} colorScheme='red'>
-        Burn {burnLabel}
-    </Button>)
+    <HStack spacing='1em'>
+      <Box width='60%'>
+        <Slider width='90%' m='1em' mt='2em' defaultValue={0} min={0}
+          max={keyBalance} step={1}
+          onChangeEnd={setBurnAmount}>
+        <SliderTrack bg='red.200'>
+          <Box position='relative' right={10} />
+          <SliderFilledTrack bg='red.600'/>
+        </SliderTrack>
+        <SliderThumb boxSize={10}>
+          <Box color='red'><HiOutlineKey size='30px'/></Box>
+        </SliderThumb>
+        </Slider>
+      </Box>
+      <Text fontSize='lg' fontWeight='bold'>
+        {burnAmount}&nbsp;/&nbsp;{keyBalance}
+      </Text>
+      <Spacer/>
+      <Button {... burnButtonProps} onClick={onBurnSubmit}
+        leftIcon={<AiOutlineFire/>} colorScheme='red'>Burn</Button>
+    </HStack>
+  )
 }
