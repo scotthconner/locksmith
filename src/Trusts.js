@@ -56,7 +56,8 @@ import {
 } from './components/KeyInfo.js';
 import { 
   AiOutlineUser,
-  AiOutlineNumber
+  AiOutlineNumber,
+  AiOutlineFire,
 } from 'react-icons/ai';
 import { HiOutlineKey } from 'react-icons/hi';
 import { FcKey } from 'react-icons/fc';
@@ -99,18 +100,7 @@ export function Trust() {
   let trustInfo = useTrustInfo(id);
   let trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
   let { isOpen, onOpen, onClose, onToggle } = useDisclosure();
-  let [dialogKeyId, setDialogKeyId] = useState(null);
-  let [dialogAddress, setDialogAddress]  = useState(null);
-  let [dialogSoulbound, setDialogSoulbound] = useState(null);
-  let [dialogTotal, setDialogTotal] = useState(null);
 
-  var showKeyActionDialog = function(keyId, address, soulbound, total) {
-    setDialogKeyId(keyId);
-    setDialogAddress(address);
-    setDialogSoulbound(soulbound);
-    setDialogTotal(total);
-    onToggle(); 
-  }
 
   return (<>
     {!trustInfo.isSuccess ? (
@@ -127,19 +117,15 @@ export function Trust() {
       <VStack padding='3em' spacing='2em' pb='6em'>
         { (!trustKeys.isSuccess || trustInfo.data.trustKeyCount < 1) ? (<></>) : 
           trustKeys.data.map((k) => (
-            <TrustKey showDialog={showKeyActionDialog} rootKeyId={trustInfo.data.rootKeyId} key={k} keyId={k}/>
+            <TrustKey rootKeyId={trustInfo.data.rootKeyId} key={k} keyId={k}/>
           ))
         }
       </VStack>
-      <AddressKeyActionModal 
-        keyId={dialogKeyId} address={dialogAddress} 
-        soulbound={dialogSoulbound} total={dialogTotal} 
-        isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>
     </>)} 
   </>)
 }
 
-const TrustKey = ({keyId, rootKeyId, showDialog, ...rest}: KeyProps) => {
+const TrustKey = ({keyId, rootKeyId, ...rest}: KeyProps) => {
   var account = useAccount();
   var keyInfo = useKeyInfo(keyId);
   var keyInventory = useKeyInventory(keyId);
@@ -195,7 +181,7 @@ const TrustKey = ({keyId, rootKeyId, showDialog, ...rest}: KeyProps) => {
               <List width='100%' mt='1em' spacing='1em' {... disclosureProps} transition='all 0.2s ease-in-out'>
                 <Divider/>
                 <Collapse in={isOpen} width='100%'>
-                  <KeyHolderList showDialog={showDialog} hasRoot={hasRoot} keyId={keyId} keyHolders={keyHolders.data}/>
+                  <KeyHolderList hasRoot={hasRoot} keyId={keyId} keyHolders={keyHolders.data}/>
                 </Collapse>
               </List>} 
         </HStack>
@@ -203,15 +189,16 @@ const TrustKey = ({keyId, rootKeyId, showDialog, ...rest}: KeyProps) => {
   )
 }
 
-const KeyHolderList = ({keyId, keyHolders, hasRoot, showDialog, ...rest}: KeyProps) => { 
+const KeyHolderList = ({keyId, keyHolders, hasRoot, ...rest}: KeyProps) => { 
   return keyHolders.map((address, x) => (
-    <AddressKeyBalance showDialog={showDialog} hasRoot={hasRoot} 
+    <AddressKeyBalance hasRoot={hasRoot} 
       key={'key: ' + keyId + " address " + address} 
         rowNum={x} keyId={keyId} address={address}/>
   ));
 }
 
-const AddressKeyBalance = ({keyId, address, rowNum, hasRoot, showDialog, ...rest}: KeyProps) => { 
+const AddressKeyBalance = ({keyId, address, rowNum, hasRoot, ...rest}: KeyProps) => { 
+  const { isOpen, onOpen, onClose, onToggle } = useDisclosure();
   const account = useAccount();
   const keyBalance = useKeyBalance(keyId, address);
   const soulboundCount = useSoulboundKeyAmounts(keyId, address);
@@ -219,24 +206,7 @@ const AddressKeyBalance = ({keyId, address, rowNum, hasRoot, showDialog, ...rest
 
   var buttonContent = null;
   var rootProps = hasRoot ? {} : {isDisabled: true};
-  var modalProps = {onClick: () => { showDialog(keyId, address, soulboundCount.data.toString(), keyBalance.data.toString()); }}; 
-
-  // if we have them both, evaluate for soulbound
-  if (keyBalance.isSuccess && (soulboundCount.data || '0').toString() !== '0' ) {
-    buttonContent = (
-      <Button size='sm' {... rootProps} {... modalProps} leftIcon={<BiGhost/>} variant='outline' colorScheme='blue'>
-        {soulboundCount.data.toString()} / {keyBalance.data.toString()}  
-      </Button>
-    )
-  } else if (keyBalance.isSuccess) {
-    buttonContent = (
-      <Button {... rootProps} {... modalProps} size='sm' leftIcon={<HiOutlineKey/>} variant='outline' colorScheme='blue'>
-        {keyBalance.data.toString()}  
-      </Button>
-    )
-  } else {
-    buttonContent = (<Skeleton width='1.7em' height='1em'/>)
-  }
+  var modalProps = {onClick: () => { onToggle(); }}; 
 
   return (<ListItem padding='1em' bg={rowNum % 2 == 0 ? stripeColor : ''}> 
       <HStack>
@@ -244,39 +214,87 @@ const AddressKeyBalance = ({keyId, address, rowNum, hasRoot, showDialog, ...rest
         <Text>{address == account.address ? <i>(you)</i> : address}</Text>
         <Spacer/>
         <HStack>
-          {buttonContent}
+          <Button size='sm' {... rootProps} {... modalProps} leftIcon={<HiOutlineKey/>} variant='outline' colorScheme='blue'>
+            {(soulboundCount.isSuccess ? soulboundCount.data : '0').toString() === '0' ? '' : 
+                soulboundCount.data.toString() + ' / '}&nbsp;{keyBalance.isSuccess ? keyBalance.data.toString() : '?'}
+          </Button>
+          {!soulboundCount.isSuccess ? '' : (
+            <AddressKeyActionModal
+              keyId={keyId} address={address} 
+              soulbound={soulboundCount.data.toNumber()} 
+              isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>)}
         </HStack>
       </HStack>
     </ListItem>
   )
 }
 
-const AddressKeyActionModal = ({keyId, address, soulbound, total, onOpen, onClose, isOpen, ...rest}: KeyProps) => {
-  return ( soulbound && total ?  
+const AddressKeyActionModal = ({keyId, address, soulbound, onOpen, onClose, isOpen, ...rest}: KeyProps) => {
+  const account = useAccount();
+  const [soulbindAmount, setSoulbindAmount] = useState(soulbound);
+  const keyBalance = useKeyBalance(keyId, address);
+  const soulboundCount = useSoulboundKeyAmounts(keyId, address);
+  const keyInfo = useKeyInfo(keyId);
+  const carefulColor = useColorModeValue('red.600','orange');
+  var burnLabel = '';
+
+  if(keyBalance.isSuccess) {
+    burnLabel = (keyBalance.data.toNumber() + " ") 
+      + (keyBalance.data.toNumber() > 1 ? "Keys" : "Key");
+  }
+
+  return ( 
     <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'>
       <ModalOverlay backdropFilter='blur(10px)'/>
       <ModalContent>
-        <ModalHeader>Key Holder Actions</ModalHeader>
+        <ModalHeader>
+          <HStack>
+            {keyInfo.isSuccess && KeyInfoIcon(keyInfo) }
+            <Text>{keyInfo.isSuccess && keyInfo.data.alias}</Text>
+          </HStack>
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <HStack mb='1em'>
-            <AiOutlineUser/>
-            <Text>{address}</Text>
-          </HStack>
-          <HStack spacing='3em'>
-            <Slider defaultValue={1} min={0} max={total} step={1} width='50%'>
+          <Center>
+            <Box padding='2em'> 
+              <VStack>
+                <Text fontWeight='bold' fontStyle='italic' fontSize='md'>{address}</Text>
+                {address === account.address && 
+                  <Text fontSize='2xl' color={carefulColor}><i>Careful, this is <b>you!</b></i></Text>}
+              </VStack>
+            </Box>
+          </Center>
+          <HStack spacing='1em'>
+            <Box width='60%'>
+              <Slider width='90%' m='1em' mt='2em' defaultValue={soulbindAmount} min={0} 
+                max={keyBalance.isSuccess ? keyBalance.data : 1} step={1} 
+                onChangeEnd={setSoulbindAmount}>
               <SliderTrack bg='purple.200'>
                 <Box position='relative' right={10} />
                 <SliderFilledTrack bg='purple.600'/>
               </SliderTrack>
-              <SliderThumb boxSize={6} />
+              <SliderThumb boxSize={10}>
+                <Box color='purple'><HiOutlineKey size='30px'/></Box> 
+              </SliderThumb>
             </Slider>
+            </Box>
+            <Text fontSize='lg' fontWeight='bold'>
+              {soulbindAmount} /&nbsp;
+                  {(keyBalance.isSuccess ? keyBalance.data.toString() : '0')}
+            </Text>
+            <Spacer/>
             <Button leftIcon={<BiGhost/>} colorScheme='purple'>Soulbind</Button>
           </HStack>
-          {(soulbound).toString()} / {(total).toString()} 
+          <HStack>
+          <Text>You <b>burn</b> keys to take them away.</Text>
+            <Spacer/>
+            <Button leftIcon={<AiOutlineFire/>} colorScheme='red'>
+              Burn {burnLabel} 
+            </Button>
+          </HStack>
         </ModalBody>
         <ModalFooter>
         </ModalFooter>
       </ModalContent>
-    </Modal>: <></>)
+    </Modal>)
 }
