@@ -5,7 +5,13 @@ import {
   Box, BoxProps,
   Button,
   Center,
+  Collapse,
+  Divider,
   Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  FormErrorMessage,
   Heading,
   HStack,
   Modal,
@@ -16,6 +22,10 @@ import {
   ModalBody,
   ModalFooter,
   Skeleton,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
   Spacer,
   Stack,
   Tag,
@@ -25,9 +35,10 @@ import {
   WrapItem,
   VStack,
   useColorModeValue,
-  useDisclosure
+  useDisclosure,
+  useToast,
 } from '@chakra-ui/react'
-
+import { useState } from 'react';
 import { KeyInfoIcon } from './components/KeyInfo.js';
 import { FaTimes } from 'react-icons/fa';
 import { FiSend } from 'react-icons/fi';
@@ -39,6 +50,7 @@ import { Link } from 'react-router-dom';
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
+import { ethers } from 'ethers';
 import {
   useAccount
 } from 'wagmi';
@@ -46,7 +58,8 @@ import {
 import {
   useWalletKeys,
   useKeyInfo,
-  useKeyInventory
+  useKeyInventory,
+  useSendKey,
 } from './hooks/LocksmithHooks.js';
 
 //////////////////////////////////////
@@ -151,8 +164,47 @@ const Key = ({keyId, onClick, ...rest}: KeyProps) => {
 }
 
 const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
-  let keyInventory = useKeyInventory(keyInfo.data.keyId);
-  let transferBound = keyInfo.data.soulbound >= keyInfo.data.inventory;
+  const keyInventory = useKeyInventory(keyInfo.data.keyId);
+  const transferBound = keyInfo.data.soulbound >= keyInfo.data.inventory;
+  const sendDisclosure = useDisclosure();
+  const [sendAmount, setSendAmount] = useState(0);
+  const [address, setAddress] = useState('');
+  var isError = !ethers.utils.isAddress(address);
+  const toast = useToast();
+
+  var handleChange = (e) => {
+
+    setAddress(e.target.value);
+  }
+
+  const sendConfig = useSendKey(keyInfo.data.keyId, address, sendAmount, function(error) {
+    // error
+    toast({
+      title: 'Transaction Error!',
+      description: error.toString(),
+      status: 'error',
+      duration: 9000,
+      isClosable: true
+    });
+  }, function(data) {
+    // success
+    toast({
+      title: 'Keys Sent!',
+      description: 'I hope you meant to do that.',
+      status: 'success',
+      duration: 9000,
+      isClosable: true
+    });
+    onClose();
+  });
+
+  var sendButtonProps = sendConfig.isLoading ? {isLoading: true} : (
+    isError || sendAmount < 1 ? {isDisabled: true} : {}
+  );
+
+  const onSubmit = () => {
+    sendConfig.write?.();
+  }
 
   return (<>
     <ModalOverlay backdropFilter='blur(10px)'/>
@@ -160,6 +212,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
       <ModalHeader>Key Detail</ModalHeader>
       <ModalCloseButton />
       <ModalBody>
+        <Collapse in={!sendDisclosure.isOpen} width='100%'>
         <Flex>
           <VStack>
             {keyInfo.data.isRoot ? <FcKey size='70px'/> : <HiOutlineKey size='70px'/> } 
@@ -181,23 +234,59 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
             </HStack>
           </VStack>
           <Spacer/>
-          <Center>
-            <VStack>
-              <Link to={'/trust/' + keyInfo.data.trust.id}>
-                <Button colorScheme='gray' leftIcon={<BsEye/>}>See Trust</Button>
-              </Link>
-              {!transferBound && (<Button colorScheme='blue' leftIcon={<FiSend/>}>Send Key</Button>)}
-              {transferBound && (
-                <VStack>
-                  <Button colorScheme='blue' isDisabled leftIcon={<FiSend/>}>Send Key</Button>
-                  <Text fontSize='sm' fontStyle='italic' color='gray.500'>Keys are soulbound</Text>
-                </VStack>
-              )}
-            </VStack>
-          </Center>
+          <VStack>
+            <Link to={'/trust/' + keyInfo.data.trust.id}>
+              <Button colorScheme='gray' leftIcon={<BsEye/>}>See Trust</Button>
+            </Link>
+            {!transferBound && (
+              <Button colorScheme='blue' 
+                onClick={sendDisclosure.onToggle}
+                leftIcon={<FiSend/>}>Send Key</Button>)}
+            {transferBound && (
+              <VStack>
+                <Button colorScheme='blue' isDisabled leftIcon={<FiSend/>}>Send Key</Button>
+                <Text fontSize='sm' fontStyle='italic' color='gray.500'>Keys are soulbound</Text>
+              </VStack>
+            )}
+          </VStack>
         </Flex>
+        </Collapse>
+        <Collapse in={sendDisclosure.isOpen} width='100%'>
+          <FormControl id="destination" isInvalid={isError}>
+            <FormLabel>Destination Address</FormLabel>
+              <Input
+                placeholder="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+                _placeholder={{ color: 'gray.500' }}
+                onChange={handleChange}/>
+            { isError && <FormErrorMessage>Destination address invalid</FormErrorMessage>}
+          </FormControl>
+          <HStack>
+            <Box width='68%'>
+              <Slider width='90%' m='1em' mt='1em' defaultValue={0} min={0}
+                max={keyInfo.data.inventory.toNumber()} step={1}
+                onChangeEnd={setSendAmount}>
+                <SliderTrack bg='blue.200'>
+                  <Box position='relative' right={10} />
+                  <SliderFilledTrack bg='blue.600'/>
+                </SliderTrack>
+                <SliderThumb boxSize={10}>
+                  <Box color='blue'><HiOutlineKey size='30px'/></Box>
+                </SliderThumb>
+              </Slider>
+            </Box>
+            <Text fontSize='lg' fontWeight='bold'>
+              {sendAmount}&nbsp;/&nbsp;{keyInfo.data.inventory.toNumber()}
+            </Text>
+            <Spacer/>
+            <Button {... sendButtonProps} onClick={onSubmit}
+              leftIcon={<FiSend/>} colorScheme='blue'>Send</Button>
+          </HStack>
+        </Collapse>
       </ModalBody>
       <ModalFooter>
+        <Collapse in={sendDisclosure.isOpen}>
+          <Button onClick={sendDisclosure.onToggle}>Nevermind</Button>
+        </Collapse>
       </ModalFooter>
     </ModalContent>
   </>);

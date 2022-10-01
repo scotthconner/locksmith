@@ -287,6 +287,37 @@ export function useSoulbindKey(rootKeyId, keyId, address, soulbindAmount, errorF
 }
 
 /**
+ * useSendKey
+ * 
+ * Will call #safeTransferFrom from the current user
+ * and will sign the transaction for sending. Does not
+ * check for soulbound conditions.
+ */
+export function useSendKey(keyId, address, amount, errorFunc, successFunc) {
+  const account = useAccount();
+  const debouncedAmount = useDebounce(amount, 500);
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('keyVault', 'safeTransferFrom',
+      [account.address, address, 
+        keyId, debouncedAmount, 
+        ethers.utils.formatBytes32String('')], 
+      debouncedAmount > 0 && ethers.utils.isAddress(address))
+  );
+
+  const call = useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+
+  return call;
+}
+
+
+/**
  * useTrustInfo
  * 
  * Takes a trust ID, and grabs a lot of information

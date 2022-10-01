@@ -123,7 +123,7 @@ export function Trust() {
     ): (<>
       <Heading>{trustInfo.data.trustKeyCount < 1 ? 'Invalid Trust' : trustInfo.data.name}</Heading>
       <Text mt='1.5em' fontSize='lg'>This trust has <b>{trustInfo.data.trustKeyCount.toString()}</b> keys.</Text>
-      <VStack padding='3em' spacing='2em' pb='6em'>
+      <VStack  spacing='2em' pb='6em' pt='2em'>
         { (!trustKeys.isSuccess || trustInfo.data.trustKeyCount < 1) ? (<></>) : 
           trustKeys.data.map((k) => (
             <TrustKey rootKeyId={trustInfo.data.rootKeyId} key={k} keyId={k}/>
@@ -464,7 +464,7 @@ const BurnFormControl = ({rootKeyId, keyId, address, keyBalance, onClose, ...res
     // success
     toast({
       title: 'Keys burned!',
-      description: 'This user\'s keys are gone.',
+      description: 'User now has ' + burnAmount + ' less key(s).',
       status: 'success',
       duration: 9000,
       isClosable: true
