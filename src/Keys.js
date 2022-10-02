@@ -6,11 +6,10 @@ import {
   Button,
   Center,
   Collapse,
-  Divider,
-  Flex,
   FormControl,
   FormLabel,
   Input,
+  Flex,
   FormErrorMessage,
   Heading,
   HStack,
@@ -39,7 +38,6 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { useState } from 'react';
-import { KeyInfoIcon } from './components/KeyInfo.js';
 import { FaTimes } from 'react-icons/fa';
 import { FiSend } from 'react-icons/fi';
 import { HiOutlineKey } from 'react-icons/hi';

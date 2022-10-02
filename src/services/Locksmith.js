@@ -13,23 +13,6 @@ const Locksmith = (function() {
 
   return {
     ////////////////////////////////////////////
-    // getCollateralProviderName 
-    ////////////////////////////////////////////
-    getCollateralProviderName: function(address) {
-      switch(address) {
-        case Locksmith.getContractAddress('vault'):
-          return 'Ether Vault';
-          break;
-        case Locksmith.getContractAddress('tokenVault'):
-          return 'ERC20 Vault';
-          break;
-        default:
-          return address;
-      }
-
-      return address;
-    },
-    ////////////////////////////////////////////
     // getContractAddress
     ////////////////////////////////////////////
     getContractAddress: function(contract) {
