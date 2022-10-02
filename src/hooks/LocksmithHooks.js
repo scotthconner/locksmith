@@ -369,3 +369,42 @@ export function useTrustKeys(trustId) {
 
   return trustKeys;
 }
+
+/**
+ * useTrustedLedgerRoleList
+ *
+ * Calls the notary and pulls in the count of the given
+ * ledger role.
+ *
+ * Assumes the ledger from Locksmith.
+ */
+export function useTrustedLedgerRoleCount(trustId, role, ledger = Locksmith.getContractAddress('ledger')) {
+  const provider  = useProvider();
+  const notary    = useContract(Locksmith.getContract('notary', provider));
+
+  const trustedLedgerActorSize = useQuery('trustedLedgerRoles for trust ' + trustId + ' and role ' + role, async function() {
+    return await notary.actorRegistrySize(ledger, trustId, role);
+  })
+
+  return trustedLedgerActorSize;
+}
+
+/**
+ * useTrustedLedgerRoleAddress
+ *
+ * Calls the notary and pulls the contract address
+ * for a given index in a ledger role.
+ *
+ * Assumes the ledger from Locksmith.
+ */
+export function useTrustedLedgerRoleAddress(trustId, role, index, ledger = Locksmith.getContractAddress('ledger')) {
+  const provider  = useProvider();
+  const notary    = useContract(Locksmith.getContract('notary', provider));
+
+  const trustedLedgerActorAddress = useQuery('trustedLedgerRoleAddress' + trustId + '/' + role + "/" + index, async function() {
+    return await notary.actorRegistry(ledger, trustId, role, index);
+  })
+
+  return trustedLedgerActorAddress;
+}
+

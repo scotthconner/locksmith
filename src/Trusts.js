@@ -85,7 +85,10 @@ import {
   useCopyKey,
   useBurnKey,
   useSoulbindKey,
+  useTrustedLedgerRoleCount,
+  useTrustedLedgerRoleAddress,
 } from './hooks/LocksmithHooks.js';
+import Locksmith from './services/Locksmith.js';
 import {ethers} from 'ethers';
 import { useAccount } from 'wagmi';
 
@@ -108,8 +111,8 @@ export function Trust() {
   let { id } = useParams();
   let trustInfo = useTrustInfo(id);
   let trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
+  let providerCount = useTrustedLedgerRoleCount(id, 0);
   let { isOpen, onOpen, onClose, onToggle } = useDisclosure();
-
 
   return (<>
     {!trustInfo.isSuccess ? (
@@ -122,6 +125,12 @@ export function Trust() {
       </HStack>
     ): (<>
       <Heading>{trustInfo.data.trustKeyCount < 1 ? 'Invalid Trust' : trustInfo.data.name}</Heading>
+      {providerCount.isSuccess && <>
+        <Text mt='1.5em' fontSize='lg'>This trust has <b>{providerCount.data.toString()}</b> collateral providers</Text>
+        <Wrap padding='3em' pb='3em' spacing='2em'>
+          <TrustCollateralProviders trustId={trustInfo.data.trustId.toNumber()} providerCount={providerCount.data.toNumber()}/>
+        </Wrap>
+      </>}
       <Text mt='1.5em' fontSize='lg'>This trust has <b>{trustInfo.data.trustKeyCount.toString()}</b> keys.</Text>
       <VStack  spacing='2em' pb='6em' pt='2em'>
         { (!trustKeys.isSuccess || trustInfo.data.trustKeyCount < 1) ? (<></>) : 
@@ -501,3 +510,39 @@ const BurnFormControl = ({rootKeyId, keyId, address, keyBalance, onClose, ...res
     </HStack>
   )
 }
+
+const TrustCollateralProviders = ({trustId, providerCount, ...rest}) => {
+  var boxColor = useColorModeValue('white', 'gray.800');
+  
+  return [... Array(providerCount)].map((_, x) => {
+    return <WrapItem
+      width='15em'
+      borderRadius='lg'
+      boxShadow='dark-lg'
+      bg={boxColor}
+      cursor='pointer'
+      _hover= {{
+        transform: 'scale(1.1)',
+      }}
+      transition='all 0.2s ease-in-out'
+      padding='1em'>
+        <TrustCollateralProvider trustId={trustId} pIndex={x}/>
+    </WrapItem>
+  });
+}
+
+const TrustCollateralProvider = ({trustId, pIndex, ...rest}) => {
+  const providerAddress = useTrustedLedgerRoleAddress(trustId, 0, pIndex);
+  
+  return (
+    <Center w='15em'>
+      <VStack>
+        {!providerAddress.isSuccess ? <Skeleton width='6.5em' height='1em'/> :
+          <Text>
+            {Locksmith.getCollateralProviderName(providerAddress.data)}
+          </Text>}
+      </VStack>
+    </Center>
+  )
+} 
+
