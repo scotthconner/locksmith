@@ -29,6 +29,7 @@ import {
 import {
   BsShieldLock,
 } from 'react-icons/bs';
+import { RiLock2Fill } from 'react-icons/ri';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
@@ -100,13 +101,15 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       h="full"
       {...rest}>
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Text fontSize="2xl" fontWeight="bold">
-          Locksmith 
-        </Text>
+        <HStack spacing={0}>
+          <Text fontSize='2xl'><b>L</b></Text>
+          <RiLock2Fill size='22px'/>
+          <Text fontSize='2xl'><b>cksmith</b></Text>
+        </HStack>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem mt='0.4em' href={link.href} key={link.name} icon={link.icon} fontSize='lg'>
+        <NavItem onClick={onClose} mt='0.4em' href={link.href} key={link.name} icon={link.icon} fontSize='lg'>
           {link.name}
         </NavItem>
       ))}
@@ -171,11 +174,11 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         aria-label="open menu"
         icon={<FiMenu />}/>
 
-      <Text
-        display={{ base: 'flex', md: 'none' }}
-        fontSize="2xl"
-        fontWeight="bold">Locksmith 
-      </Text>
+      <HStack spacing={0} display={{base: 'flex', md: 'none'}}>
+        <Text fontSize='2xl'><b>L</b></Text>
+        <RiLock2Fill size='22px'/>
+        <Text fontSize='2xl'><b>cksmith</b></Text>
+      </HStack>
 
       <NewTrustDialog/>
 
