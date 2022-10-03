@@ -38,6 +38,10 @@ import {
   SCRIBE,
   useTrustedActors,
 } from './hooks/NotaryHooks.js';
+import {
+  TRUST_CONTEXT_ID,
+  useContextArnRegistry
+} from './hooks/LedgerHooks.js';
 import { useAccount } from 'wagmi';
 
 //////////////////////////////////////
@@ -52,8 +56,9 @@ export function Trusts() {
 }
 
 export function Trust() {
-  let { id } = useParams();
+  let { id, tab } = useParams();
   let trustInfo = useTrustInfo(id);
+  let trustArns = useContextArnRegistry(TRUST_CONTEXT_ID, id);
   let trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
   let trustedProviders = useTrustedActors(id, COLLATERAL_PROVIDER);
   let trustedScribes = useTrustedActors(id, SCRIBE);
@@ -64,6 +69,9 @@ export function Trust() {
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false;
 
   // tab counts
+  let trustArnCount = trustArns.isSuccess ?
+    <Tag mr='1em'><TagLabel>{trustArns.data.length}</TagLabel></Tag> :
+    <Skeleton mr='1em' width='1em' height='1em'/>;
   let trustKeyCount = trustInfo.isSuccess ? 
     <Tag mr='1em'><TagLabel>{trustInfo.data.trustKeyCount.toNumber()}</TagLabel></Tag> : 
     <Skeleton mr='1em' width='1em' height='1em'/>;
@@ -80,13 +88,17 @@ export function Trust() {
         {trustInfo.data.trustKeyCount < 1 ? 'Invalid Trust' : trustInfo.data.name}
       </Heading>
     }
-    <Tabs isLazy isFitted mt='1.5em'>
+    <Tabs isLazy isFitted mt='1.5em' defaultIndex={['assets','keys','providers','scribes'].indexOf(tab)}>
       <TabList>
+        <Tab>{trustArnCount}Assets</Tab>
         <Tab>{trustKeyCount}Keys</Tab>
         <Tab>{providerCount}Collateral Providers</Tab>
         <Tab>{scribeCount}Scribes</Tab>
       </TabList>
       <TabPanels>
+        <TabPanel>
+          These are your trust's assets!
+        </TabPanel>
         <TabPanel>
           {!trustInfo.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
             <Text mt='1.5em' fontSize='lg'>

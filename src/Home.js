@@ -8,7 +8,6 @@ import {
   SimpleGrid,
   Icon,
   Text,
-  Stack,
   HStack,
   VStack,
 } from '@chakra-ui/react';

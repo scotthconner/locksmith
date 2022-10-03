@@ -233,7 +233,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
           </VStack>
           <Spacer/>
           <VStack>
-            <Link to={'/trust/' + keyInfo.data.trust.id}>
+            <Link to={'/trust/' + keyInfo.data.trust.id + '/keys/'}>
               <Button colorScheme='gray' leftIcon={<BsEye/>}>See Trust</Button>
             </Link>
             {!transferBound && (

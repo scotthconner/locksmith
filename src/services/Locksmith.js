@@ -8,7 +8,8 @@ const Locksmith = (function() {
   const interfaces = {
     keyVault: require("../contracts/KeyVault.sol/KeyVault.json"),
     locksmith: require("../contracts/Locksmith.sol/Locksmith.json"),
-    notary: require("../contracts/Notary.sol/Notary.json")
+    notary: require("../contracts/Notary.sol/Notary.json"),
+    ledger: require("../contracts/Ledger.sol/Ledger.json")
   };
 
   return {
