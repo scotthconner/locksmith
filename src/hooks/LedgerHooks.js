@@ -28,6 +28,20 @@ export function useContextArnRegistry(context, context_id, collateralProvider = 
 }
 
 /**
+ * useContextProviderRegistry
+ *
+ * Calls the ledger, and gets the list of providers for
+ * a given context, and optional arn.
+ */
+export function useContextProviderRegistry(context, context_id, arn = ethers.constants.HashZero) {
+  const provider = useProvider();
+  const ledger = useContract(Locksmith.getContract('ledger', provider));
+  return useQuery('getContextProviderRegistry ' + context + ' ' + context_id + ' ' + arn, async function() {
+    return await ledger.getContextProviderRegistry(context, context_id, arn);
+  });
+}
+
+/**
  * useContextArnBalance
  *
  * Calls the ledger, and for a given ARN gives you the context
