@@ -258,8 +258,8 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
                 onChange={handleChange}/>
             { isError && <FormErrorMessage>Destination address invalid</FormErrorMessage>}
           </FormControl>
-          <HStack>
-            <Box width='68%'>
+          <HStack spacing='1em'>
+            <Box ml='0.5em' width='68%'>
               <Slider width='90%' m='1em' mt='1em' defaultValue={0} min={0}
                 max={keyInfo.data.inventory.toNumber()} step={1}
                 onChangeEnd={setSendAmount}>
@@ -268,7 +268,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
                   <SliderFilledTrack bg='blue.600'/>
                 </SliderTrack>
                 <SliderThumb boxSize={10}>
-                  <Box color='blue'><HiOutlineKey size='30px'/></Box>
+                  <Box color='blue.700'><HiOutlineKey size='30px'/></Box>
                 </SliderThumb>
               </Slider>
             </Box>

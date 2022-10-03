@@ -42,7 +42,7 @@ export function useKeyBalance(keyId, address) {
   const provider   = useProvider();
   const keyVault = useContract(Locksmith.getContract('keyVault', provider));
   return useQuery('keyBalance for ' + keyId + ' with holder ' + address, async function() {
-    return await keyVault.balanceOf(address, keyId);
+    return keyId ? await keyVault.balanceOf(address, keyId) : 0;
   });
 }
 
