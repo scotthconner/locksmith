@@ -56,7 +56,7 @@ import {
 import {
   useWalletKeys,
   useKeyInfo,
-  useKeyInventory,
+  useKeySupply,
   useSendKey,
 } from './hooks/LocksmithHooks.js';
 
@@ -162,7 +162,7 @@ const Key = ({keyId, onClick, ...rest}: KeyProps) => {
 }
 
 const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
-  const keyInventory = useKeyInventory(keyInfo.data.keyId);
+  const keyInventory = useKeySupply(keyInfo.data.keyId);
   const transferBound = keyInfo.data.soulbound >= keyInfo.data.inventory;
   const sendDisclosure = useDisclosure();
   const [sendAmount, setSendAmount] = useState(0);
@@ -171,7 +171,6 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
   const toast = useToast();
 
   var handleChange = (e) => {
-
     setAddress(e.target.value);
   }
 
@@ -226,7 +225,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
             <HStack>
               <Text>
                 <b>Inventory:</b>&nbsp; 
-                {keyInfo.data.inventory.toString()} of {keyInventory.isSuccess && keyInventory.data.total}
+                {keyInfo.data.inventory.toString()} of {keyInventory.isSuccess && keyInventory.data.toString()}
               </Text>
               {!keyInventory.isSuccess && <Skeleton width='1.1em' height='1.1em'/>}
             </HStack>

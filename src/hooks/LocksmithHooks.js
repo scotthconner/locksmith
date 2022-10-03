@@ -60,6 +60,19 @@ export function useSoulboundKeyAmounts(keyId, address) {
 }
 
 /**
+ * useKeySupply
+ *
+ * Returns the total number of keys for a given id.
+ */
+export function useKeySupply(keyId) {
+  const provider   = useProvider();
+  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  return useQuery('key count for ' + keyId, async function() { 
+    return await keyVault.keySupply(keyId);
+  });
+}
+
+/**
  * useKeyInfo 
  *
  * This hook takes a KeyId, and calls 
@@ -128,40 +141,6 @@ export function useKeyHolders(keyId) {
     return await keyVault.getHolders(keyId);
   });
   return keyHolders;
-}
-
-/**
- * useKeyInventory
- *
- * This method introspects on a keyID and determines
- * the total outstanding mint amounts as well as who
- * is holding how many, and how many of them are
- * soulbound.
- */
-export function useKeyInventory(keyId) {
-  const provider = useProvider();
-  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
-  const keyInventory = useQuery('keyInventory for ' + keyId, async function() {
-    // first get the addresses that hold the key
-    let holderInfo = {};
-    let total = 0;
-    let holders = await keyVault.getHolders(keyId);
-    for(const h in holders) {
-      let b = await keyVault.balanceOf(holders[h], keyId);
-      total += b.toNumber(); 
-      holderInfo[holders[h]] = { 
-        balance: b,
-        soulbound: await keyVault.soulboundKeyAmounts(holders[h], keyId),
-      };
-    };
-
-    return {
-      total: total,
-      holders: holderInfo
-    };
-  });
-
-  return keyInventory; 
 }
 
 /**

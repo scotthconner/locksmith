@@ -24,7 +24,9 @@ import {
   TrustedLedgerActors, 
   AddTrustedLedgerActorModal
 } from './trusts/LedgerActors.js';
-
+import {
+  TrustArn 
+} from './trusts/Assets.js';
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
@@ -40,7 +42,8 @@ import {
 } from './hooks/NotaryHooks.js';
 import {
   TRUST_CONTEXT_ID,
-  useContextArnRegistry
+  useContextArnRegistry,
+  useContextArnBalances,
 } from './hooks/LedgerHooks.js';
 import { useAccount } from 'wagmi';
 
@@ -56,14 +59,16 @@ export function Trusts() {
 }
 
 export function Trust() {
-  let { id, tab } = useParams();
-  let trustInfo = useTrustInfo(id);
-  let trustArns = useContextArnRegistry(TRUST_CONTEXT_ID, id);
-  let trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
-  let trustedProviders = useTrustedActors(id, COLLATERAL_PROVIDER);
-  let trustedScribes = useTrustedActors(id, SCRIBE);
-  let providerDisclosure = useDisclosure();
-  let scribeDisclosure = useDisclosure();
+  const { id, tab } = useParams();
+  const trustInfo = useTrustInfo(id);
+  const trustArns = useContextArnRegistry(TRUST_CONTEXT_ID, id);
+  const trustArnBalances = useContextArnBalances(TRUST_CONTEXT_ID, id,
+    trustArns.isSuccess ? trustArns.data : null);
+  const trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
+  const trustedProviders = useTrustedActors(id, COLLATERAL_PROVIDER);
+  const trustedScribes = useTrustedActors(id, SCRIBE);
+  const providerDisclosure = useDisclosure();
+  const scribeDisclosure = useDisclosure();
   var account = useAccount();
   var userKeyBalance = useKeyBalance(trustInfo.isSuccess ? trustInfo.data.rootKeyId : null, account.address);
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false;
@@ -97,13 +102,31 @@ export function Trust() {
       </TabList>
       <TabPanels>
         <TabPanel>
-          These are your trust's assets!
+          {!trustArns.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
+            <Text mt='1.5em' fontSize='lg'>
+              This trust has <b>{trustArns.data.length}</b> asset&nbsp;
+              {trustArns.data.length > 1 ? 'types' : 'type'}.
+            </Text>}
+          {!(trustArnBalances.isSuccess && trustArns.isSuccess) ?
+            <VStack mt='1.5em'>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+            </VStack>
+            :
+            <VStack  spacing='2em' pb='2em' pt='2em'>
+              { trustArns.data.map((arn, x) => (
+                <TrustArn rootKeyId={trustInfo.data.rootKeyId} 
+                  key={arn} arn={arn} balance={trustArnBalances.data[x]}/>
+              ))}
+            </VStack>}
         </TabPanel>
         <TabPanel>
           {!trustInfo.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
             <Text mt='1.5em' fontSize='lg'>
               This trust has <b>{trustInfo.data.trustKeyCount.toString()}</b>&nbsp;
-              {trustInfo.data.trustKeyCount > 1 ? 'keys' : 'key'}
+              {trustInfo.data.trustKeyCount > 1 ? 'keys' : 'key'}.
             </Text>}
           {!trustKeys.isSuccess ?
             <VStack mt='1.5em'>

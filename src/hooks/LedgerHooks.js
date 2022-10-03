@@ -23,6 +23,21 @@ export function useContextArnRegistry(context, context_id, collateralProvider = 
   const provider = useProvider();
   const ledger = useContract(Locksmith.getContract('ledger', provider));
   return useQuery('getContextArnRegistry ' + context + ' ' + context_id + ' ' + collateralProvider, async function() {
-    return ledger.getContextArnRegistry(context, context_id, collateralProvider);
+    return await ledger.getContextArnRegistry(context, context_id, collateralProvider);
+  });
+}
+
+/**
+ * useContextArnBalance
+ *
+ * Calls the ledger, and for a given ARN gives you the context
+ * level balance, or per-provider within the context if provided.
+ */
+export function useContextArnBalances(context, context_id, arns, collateralProvider = ethers.constants.AddressZero) {
+  const provider = useProvider();
+  const ledger = useContract(Locksmith.getContract('ledger', provider));
+  return useQuery('getContextArnBalance ' + context + ' ' + context_id + 
+    ' ' + ' ' + arns + ' ' + collateralProvider, async function() {
+      return arns ? await ledger.getContextArnBalances(context, context_id, collateralProvider, arns) : [];
   });
 }

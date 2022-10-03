@@ -54,7 +54,7 @@ import { BiGhost } from 'react-icons/bi';
 //////////////////////////////////////
 import { 
   useKeyInfo,
-  useKeyInventory,
+  useKeySupply,
   useKeyHolders,
   useKeyBalance,
   useSoulboundKeyAmounts,
@@ -71,7 +71,7 @@ import { useAccount } from 'wagmi';
 export function TrustKey({keyId, rootKeyId, ...rest}) {
   var account = useAccount();
   var keyInfo = useKeyInfo(keyId);
-  var keyInventory = useKeyInventory(keyId);
+  var keyInventory = useKeySupply(keyId);
   var userKeyBalance = useKeyBalance(rootKeyId, account.address);
   var keyHolders = useKeyHolders(keyId);
   const { isOpen, getDisclosureProps, getButtonProps } = useDisclosure();
@@ -112,7 +112,7 @@ export function TrustKey({keyId, rootKeyId, ...rest}) {
               <Skeleton width='2.2em' height='1.3em'/> : 
               <Button {... !(hasRoot) ? {isDisabled: true} : {}}
                 onClick={copyKeyDisclosure.onOpen}
-                size='sm' leftIcon={KeyInfoIcon(keyInfo)}>{keyInventory.data.total}</Button>}
+                size='sm' leftIcon={KeyInfoIcon(keyInfo)}>{keyInventory.data.toString()}</Button>}
               <KeyActionModal
                 rootKeyId={rootKeyId} keyId={keyId}
                 isOpen={copyKeyDisclosure.isOpen} onOpen={copyKeyDisclosure.onOpen} 
