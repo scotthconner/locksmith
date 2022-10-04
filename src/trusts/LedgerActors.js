@@ -89,7 +89,7 @@ export function TrustedLedgerActors({trustId, rootKeyId, role, actor, roleIcon, 
           {roleIcon} 
           <VStack align='stretch'>
             {!actorAlias.isSuccess ? <Skeleton width='7.5em' height='1.1em'/> :
-            <Text><b>{ethers.utils.parseBytes32String(actorAlias.data)}</b></Text>}
+            <Text><b>{actorAlias.data}</b></Text>}
             <Text noOfLines={1} color='gray.500'><i>{actor}</i></Text>
           </VStack>
           <Spacer/>

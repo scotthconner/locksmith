@@ -6,7 +6,6 @@ import {
   Button,
   Center,
   Collapse,
-  Divider,
   Input,
   FormControl,
   FormErrorMessage,
@@ -74,10 +73,9 @@ export function TrustKey({keyId, rootKeyId, ...rest}) {
   var keyInventory = useKeySupply(keyId);
   var userKeyBalance = useKeyBalance(rootKeyId, account.address);
   var keyHolders = useKeyHolders(keyId);
-  const { isOpen, getDisclosureProps, getButtonProps } = useDisclosure();
+  const { isOpen, getButtonProps } = useDisclosure();
   const copyKeyDisclosure = useDisclosure();
   const buttonProps = getButtonProps();
-  const disclosureProps = getDisclosureProps();
   var boxColor = useColorModeValue('white', 'gray.800');
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false; 
 
@@ -127,12 +125,11 @@ export function TrustKey({keyId, rootKeyId, ...rest}) {
         </HStack>
         <HStack>
         {!keyHolders.isSuccess ? '' :
-              <List width='100%' mt='1em' spacing='1em' {... disclosureProps} transition='all 0.2s ease-in-out'>
-                <Divider/>
-                <Collapse in={isOpen} width='100%'>
-                  <KeyHolderList rootKeyId={rootKeyId} hasRoot={hasRoot} keyId={keyId} keyHolders={keyHolders.data}/>
-                </Collapse>
-              </List>} 
+        <List width='100%' mt={isOpen ? '1em' : '0'} spacing='1em'> 
+            <Collapse in={isOpen} width='100%'>
+              <KeyHolderList rootKeyId={rootKeyId} hasRoot={hasRoot} keyId={keyId} keyHolders={keyHolders.data}/>
+            </Collapse>
+          </List>} 
         </HStack>
     </Box>
   )

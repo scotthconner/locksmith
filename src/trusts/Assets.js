@@ -6,11 +6,8 @@ import {
   Button,
   Collapse,
   HStack,
-  FormControl,
-  FormLabel,
-  Input,
-  FormErrorMessage,
-  FormHelperText,
+  List,
+  ListItem,
   Modal,
   ModalOverlay,
   ModalBody,
@@ -24,17 +21,23 @@ import {
   VStack,
   useDisclosure,
   useColorModeValue,
-  useToast
 } from '@chakra-ui/react';
 import { RiSafeLine } from 'react-icons/ri';
-import { useState, useRef } from 'react';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
 import { ethers } from 'ethers';
-import { useAccount } from 'wagmi';
 import { AssetResource } from '../services/AssetResource.js';
+import {
+  COLLATERAL_PROVIDER,
+  useTrustedActorAlias
+} from '../hooks/NotaryHooks.js';
+import { 
+  TRUST_CONTEXT_ID,
+  useContextProviderRegistry,
+  useContextArnBalances,
+} from '../hooks/LedgerHooks.js';
 import { 
   useCoinCapPrice,
   USDFormatter,
@@ -43,7 +46,7 @@ import {
 //////////////////////////////////////
 // Function Component
 //////////////////////////////////////
-export function TrustArn({rootKeyId, arn, balance, ...rest}) {
+export function TrustArn({rootKeyId, trustId, arn, balance, ...rest}) {
   var asset = AssetResource.getMetadata(arn);
   var assetPrice = useCoinCapPrice(asset.coinCapId);
   var assetValue = assetPrice.isSuccess ?
@@ -79,11 +82,54 @@ export function TrustArn({rootKeyId, arn, balance, ...rest}) {
             </HStack>
           </VStack>
         </HStack>
-        <HStack>
+        <List width='100%'>
           <Collapse in={providerDisclosure.isOpen} width='100%'>
-            Here are your providers
+            <TrustArnProviderList rootKeyId={rootKeyId}
+              trustId={trustId} arn={arn}/>
           </Collapse>
-        </HStack>
+        </List>
     </Box>
   )
+}
+
+export function TrustArnProviderList({rootKeyId, trustId, arn, ...rest}) {
+  const arnProviders = useContextProviderRegistry(TRUST_CONTEXT_ID, trustId, arn);
+  const stripeColor = useColorModeValue('gray.100', 'gray.700');
+
+  return (<>
+    {!arnProviders.isSuccess && [...Array(2)].map((y,x) => 
+      <ListItem key={x} padding='1em' width='100%' bg={x % 2 === 0 ? stripeColor : ''}>
+        <HStack spacing='1em'>
+          <Skeleton width='10em' height='1em'/>
+          <Spacer/>
+          <Skeleton width='3em' height='1em'/>
+        </HStack>
+      </ListItem>)}
+    {arnProviders.isSuccess &&
+      arnProviders.data.map((provider, x) => (
+        <ListItem key={provider} p='1em' width='100%'
+          bg={x % 2 === 0 ? stripeColor : ''}>
+          <TrustArnProvider rootKeyId={rootKeyId}
+            trustId={trustId} arn={arn} provider={provider}/>
+        </ListItem>
+      ))
+    }
+    </>)
+}
+
+export function TrustArnProvider({rootKeyId, trustId, arn, provider, ...rest}) {
+  const providerAlias = useTrustedActorAlias(trustId, COLLATERAL_PROVIDER, provider);
+  const providerBalance = useContextArnBalances(TRUST_CONTEXT_ID, trustId, [arn], provider);
+  var asset = AssetResource.getMetadata(arn);
+
+  return (<HStack align='stretch'>
+    {!providerAlias.isSuccess && <Skeleton width='8em' height='1em'/>}
+    {providerAlias.isSuccess && <> 
+      <RiSafeLine size={24}/>
+      <Text>{providerAlias.data}</Text></>}
+    <Spacer/>
+    {!providerBalance.isSuccess && <Skeleton width='4em' height='1em'/>}
+    {providerBalance.isSuccess && 
+      <Text>{ethers.utils.formatEther(providerBalance.data[0])} {asset.symbol}</Text>}
+  </HStack>)
 }

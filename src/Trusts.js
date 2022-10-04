@@ -117,7 +117,7 @@ export function Trust() {
             :
             <VStack  spacing='2em' pb='2em' pt='2em'>
               { trustArns.data.map((arn, x) => (
-                <TrustArn rootKeyId={trustInfo.data.rootKeyId} 
+                <TrustArn trustId={id} rootKeyId={trustInfo.data.rootKeyId} 
                   key={arn} arn={arn} balance={trustArnBalances.data[x]}/>
               ))}
             </VStack>}
