@@ -43,6 +43,7 @@ export const AssetResource = (function() {
     name: 'Ethereum',
     symbol: 'ETH',
     decimals: 18,
+    coinCapId: 'ethereum',
     icon: function(props = {color: '#716b94'}) {
       return <ETH {...props}/>;
     }
@@ -53,6 +54,7 @@ export const AssetResource = (function() {
     name: 'Chainlink',
     symbol: 'LINK',
     decimals: 18,
+    coinCapId: 'chainlink',
     icon: function(props = {color: '#375BD2'}) {
       return <LINK {...props}/>;
     }
@@ -61,6 +63,7 @@ export const AssetResource = (function() {
     name: 'Polygon',
     symbol: 'MATIC',
     decimals: 18,
+    coinCapId: 'polygon',
     icon: function(props = {color: '#8247e5'}) {
       return <MATIC {...props}/>;
     }
@@ -69,6 +72,7 @@ export const AssetResource = (function() {
     name: 'Wormhole',
     symbol: 'WAVAX',
     decimals: 18,
+    coinCapId: 'avalanche',
     icon: function(props = {color: '#e84142'}) {
       return <AVAX {...props}/>;
     }
@@ -77,6 +81,7 @@ export const AssetResource = (function() {
     name: 'The Graph',
     symbol: 'GRT',
     decimals: 18,
+    coinCapId: 'the-graph',
     icon: function(props = {color: '#6f4cff'}) {
       return <GRT {...props}/>;
     }
@@ -85,6 +90,7 @@ export const AssetResource = (function() {
     name: 'USDC',
     symbol: 'USDC',
     decimals: 18,
+    coinCapId: 'usd-coin',
     icon: function(props = {color: '#2775ca'}) {
       return <USDC {...props}/>;
     }
@@ -93,6 +99,7 @@ export const AssetResource = (function() {
     name: 'Dai',
     symbol: 'DAI',
     decimals: 18,
+    coinCapId: 'multi-collateral-dai',
     icon: function(props = {color: '#febe44'}) {
       return <DAI {...props}/>;
     }
