@@ -323,7 +323,6 @@ export function useSendKey(keyId, address, amount, errorFunc, successFunc) {
  * does not hold the root key for the trust
  */
 export function useCreateKey(rootKeyId, keyName, receiver, bind, errorFunc, successFunc) {
-  const account = useAccount();
   const debouncedName = useDebounce(keyName, 500);
   const debouncedAddress = useDebounce(receiver, 500);
   const preparation = usePrepareContractWrite(

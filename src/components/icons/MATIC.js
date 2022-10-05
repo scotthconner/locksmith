@@ -6,7 +6,7 @@ export const MATIC = ({ color, size, ...rest }) => (
   </svg>
 )
 
-MATIC .defaultProps = {
+MATIC.defaultProps = {
   color: '#000',
   size: 32,
 }

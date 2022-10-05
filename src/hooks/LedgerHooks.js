@@ -50,8 +50,8 @@ export function useContextProviderRegistry(context, context_id, arn = ethers.con
 export function useContextArnBalances(context, context_id, arns, collateralProvider = ethers.constants.AddressZero) {
   const provider = useProvider();
   const ledger = useContract(Locksmith.getContract('ledger', provider));
-  return useQuery('getContextArnBalance ' + context + ' ' + context_id + 
-    ' ' + ' ' + arns + ' ' + collateralProvider, async function() {
+  return useQuery('getContextArnBalance ' + context + context_id + 
+    arns + collateralProvider, async function() {
       return arns ? await ledger.getContextArnBalances(context, context_id, collateralProvider, arns) : [];
   });
 }
