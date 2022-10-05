@@ -19,7 +19,10 @@ import {
 } from '@chakra-ui/react';
 import { IoIosAdd } from 'react-icons/io';
 import { RiSafeLine, RiQuillPenLine } from 'react-icons/ri';
-import { TrustKey } from './trusts/TrustKeys.js';
+import { 
+  TrustKey,
+  CreateKeyModal
+} from './trusts/TrustKeys.js';
 import { 
   TrustedLedgerActors, 
   AddTrustedLedgerActorModal
@@ -69,6 +72,7 @@ export function Trust() {
   const trustedScribes = useTrustedActors(id, SCRIBE);
   const providerDisclosure = useDisclosure();
   const scribeDisclosure = useDisclosure();
+  const createKeyDisclosure = useDisclosure();
   var account = useAccount();
   var userKeyBalance = useKeyBalance(trustInfo.isSuccess ? trustInfo.data.rootKeyId : null, account.address);
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false;
@@ -115,19 +119,33 @@ export function Trust() {
               <Skeleton width='100%' height='4em'/>
             </VStack>
             :
-            <VStack  spacing='2em' pb='2em' pt='2em'>
+            <VStack spacing='2em' pb='2em' pt='2em'>
               { trustArns.data.map((arn, x) => (
                 <TrustArn trustId={id} rootKeyId={trustInfo.data.rootKeyId} 
-                  key={arn} arn={arn} balance={trustArnBalances.data[x]}/>
+                  key={arn} arn={arn} balance={trustArnBalances.data[x]}
+                  trustKeys={trustKeys}/>
               ))}
             </VStack>}
         </TabPanel>
         <TabPanel>
           {!trustInfo.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
-            <Text mt='1.5em' fontSize='lg'>
-              This trust has <b>{trustInfo.data.trustKeyCount.toString()}</b>&nbsp;
-              {trustInfo.data.trustKeyCount > 1 ? 'keys' : 'key'}.
-            </Text>}
+            <HStack mt='1.5em'>
+              <Text fontSize='lg'>
+                This trust has <b>{trustInfo.data.trustKeyCount.toString()}</b>&nbsp;
+                {trustInfo.data.trustKeyCount > 1 ? 'keys' : 'key'}.
+              </Text>
+              <Spacer/>
+                {hasRoot && <Button
+                  colorScheme='blue'
+                  leftIcon={<IoIosAdd/>}
+                  onClick={createKeyDisclosure.onOpen}>
+                    Add Key</Button>}
+                {hasRoot && <CreateKeyModal
+                  trustId={id} rootKeyId={trustInfo.data.rootKeyId}
+                  isOpen={createKeyDisclosure.isOpen}
+                  onClose={createKeyDisclosure.onClose}/>}
+            </HStack>
+          }
           {!trustKeys.isSuccess ?
             <VStack mt='1.5em'>
               <Skeleton width='100%' height='4em'/>

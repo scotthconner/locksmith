@@ -73,6 +73,27 @@ export function useKeySupply(keyId) {
 }
 
 /**
+ * useInspectKey
+ *
+ * Calls inspect key for a given keyId.
+ */
+export function useInspectKey(keyId) {
+  const provider   = useProvider();
+  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
+  return useQuery('inspectKey for ' + keyId, async function() {
+    let response = await locksmith.inspectKey(keyId);
+
+    return {
+      isValid: response[0],
+      alias: ethers.utils.parseBytes32String(response[1]),
+      trustId: response[2],
+      isRoot: response[3],
+      trustKeys: response[4]
+    }
+  });
+}
+
+/**
  * useKeyInfo 
  *
  * This hook takes a KeyId, and calls 
@@ -295,6 +316,33 @@ export function useSendKey(keyId, address, amount, errorFunc, successFunc) {
   return call;
 }
 
+/**
+ * useCreate Key
+ *
+ * Will call #createKey. This will barf if the signer
+ * does not hold the root key for the trust
+ */
+export function useCreateKey(rootKeyId, keyName, receiver, bind, errorFunc, successFunc) {
+  const account = useAccount();
+  const debouncedName = useDebounce(keyName, 500);
+  const debouncedAddress = useDebounce(receiver, 500);
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('locksmith', 'createKey',
+      [rootKeyId, ethers.utils.formatBytes32String(debouncedName), debouncedAddress, bind],
+      debouncedName.length > 0 && ethers.utils.isAddress(debouncedAddress))
+  );
+
+  const call = useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+
+  return call;
+}
 
 /**
  * useTrustInfo

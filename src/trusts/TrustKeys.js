@@ -9,6 +9,7 @@ import {
   Input,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   FormLabel,
   HStack,
   List,
@@ -58,6 +59,7 @@ import {
   useKeyBalance,
   useSoulboundKeyAmounts,
   useCopyKey,
+  useCreateKey,
   useBurnKey,
   useSoulbindKey,
 } from '../hooks/LocksmithHooks.js';
@@ -428,5 +430,91 @@ const BurnFormControl = ({rootKeyId, keyId, address, keyBalance, onClose, ...res
       <Button {... burnButtonProps} onClick={onBurnSubmit}
         leftIcon={<AiOutlineFire/>} colorScheme='red'>Burn</Button>
     </HStack>
+  )
+}
+
+export function CreateKeyModal({trustId, rootKeyId, isOpen, onClose, ...rest}) {
+  const initialRef = useRef(null);
+  const toast = useToast();
+  const [alias, setAlias] = useState('');
+  const [address, setAddress] = useState('');
+  const [bind, setBind] = useState('');
+  var isInvalidAlias   = alias.length < 3;
+  var isInvalidAddress = !ethers.utils.isAddress(address);
+
+  var createKey = useCreateKey(rootKeyId, alias, address, bind, 
+    function(error) {
+      toast({
+        title: 'Transaction Error!',
+        description: error.toString(),
+        status: 'error',
+        duration: 9000,
+        isClosable: true
+      });
+    },
+    function(data) {
+      toast({
+        title: 'Key ' + alias + ' created!',
+        description: 'It has been sent to ' + address + '.',
+        status: 'success',
+        duration: 9000,
+        isClosable: true
+      });
+      onClose();
+    }
+  );
+
+  var buttonProps = createKey.isLoading ? {isLoading: true} : 
+    (isInvalidAlias || isInvalidAddress ? {isDisabled: true} : {}); 
+
+  return (
+    <Modal onClose={onClose} isOpen={isOpen} isCentered initialFocusRef={initialRef} size='xl'>
+      <ModalOverlay backdropFilter='blur(10px)'/>
+      <ModalContent>
+        <ModalHeader>Create Key</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Text>By creating a <b>key</b>, you can craft unique permissions for your trust.</Text>
+          <FormControl id='key_alias' isInvalid={isInvalidAlias} mt='1.5em'>
+            <FormLabel>Key Name</FormLabel>
+            <Input
+              ref={initialRef}
+              placeholder="Beneficiary #1"
+              _placeholder={{ color: 'gray.500' }}
+              onChange={(e) => { setAlias(e.target.value); }}/>
+            { isInvalidAlias ?
+              <FormErrorMessage>Key name must be at least three characters.</FormErrorMessage> :
+              <FormHelperText>Name the key for its designed purpose.</FormHelperText>
+            }
+          </FormControl>
+          <FormControl id='receiver_address' isInvalid={isInvalidAddress} mt='1.5em'>
+            <FormLabel>Receiver Wallet Address</FormLabel>
+            <Input
+              placeholder="0xfd471836031dc5108809d173a067e8486b9047a3"
+              _placeholder={{ color: 'gray.500' }}
+              onChange={(e) => { setAddress(e.target.value); }}/>
+            { isInvalidAddress ?
+              <FormErrorMessage>This doesn't seem like a valid address.</FormErrorMessage> :
+              <FormHelperText>The newly created key will go here.</FormHelperText>
+            }
+          </FormControl>
+          <FormControl>
+              <HStack mt='1.5em'>
+                <FormLabel>Do you want to <b>soulbind</b> this key?</FormLabel>
+                <Spacer/>
+                <Switch colorScheme='purple' size='lg'
+                  onChange={(e) => {setBind(e.target.checked);}}/>
+              </HStack>
+            </FormControl>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={() => { createKey.write?.(); }}
+            {... buttonProps}
+            leftIcon={<HiOutlineKey/>} ml='1.5em'
+            colorScheme='yellow'>Create Key</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   )
 }
