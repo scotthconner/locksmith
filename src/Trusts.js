@@ -6,16 +6,21 @@ import {
 } from 'react-router-dom';
 import {
   Button,
+  Center,
   Heading,
   HStack,
   Skeleton,
+  Stack,
   Spacer,
   Tag, TagLabel,
   Tabs, TabList, Tab,
   TabPanels, TabPanel,
   Text,
   VStack,
+  Wrap,
+  WrapItem,
   useDisclosure,
+  useColorModeValue
 } from '@chakra-ui/react';
 import { IoIosAdd } from 'react-icons/io';
 import { RiSafeLine, RiQuillPenLine } from 'react-icons/ri';
@@ -34,6 +39,8 @@ import {
 // Wallet, Network, Contracts
 //////////////////////////////////////
 import {
+  useWalletKeys,
+  useWalletTrusts,
   useKeyBalance,
   useTrustInfo, 
   useTrustKeys,
@@ -54,11 +61,56 @@ import { useAccount } from 'wagmi';
 // Trusts Function Component
 //////////////////////////////////////
 export function Trusts() {
+  // this could be as bad as O(n) + 1 where n 
+  // is the number of keys in the wallet. In most
+  // cases, it will be O(1).
+  const trusts = useWalletTrusts(); 
+
   return (
-    <>
-      Trusts! 
-    </>
+    <Stack m='1em' spacing='1em'>
+      <Heading size='md'>Your Trust Participation</Heading>
+        <Wrap padding='3em' spacing='2em' pb='6em'>
+          {!trusts.isSuccess && <> 
+            <WrapItem>
+              <Skeleton width='14em' height='16em'/>
+            </WrapItem>
+            <WrapItem>
+              <Skeleton width='14em' height='16em'/>
+            </WrapItem>
+            <WrapItem>
+              <Skeleton width='14em' height='16em'/>
+            </WrapItem></>}
+          {trusts.isSuccess &&
+            trusts.data.map((t) => <TrustSummary trustId={t}/>)}
+        </Wrap>
+    </Stack>
   );
+}
+export function TrustSummary({trustId, ... rest}) {
+  const trustInfo = useTrustInfo(trustId);
+  const walletKeys = useWalletKeys();
+  const boxColor = useColorModeValue('white', 'gray.800');
+  const hasRoot = !(trustInfo.isSuccess && walletKeys.isSuccess) ? false :
+    walletKeys.data.map((k) => { return k.toString() })
+      .includes(trustInfo.data.rootKeyId.toString());
+
+  return (
+    <WrapItem key={trustId} p='1em' w='14em' h='16em'
+      border={hasRoot ? '2px' : '0px'}
+      borderColor={hasRoot ? 'yellow.400' : 'white'}
+      borderRadius='lg'
+      bg={boxColor} boxShadow='dark-lg'
+      cursor='pointer'
+      _hover= {{
+        transform: 'scale(1.1)',
+      }}
+      transition='all 0.2s ease-in-out'>
+        <Center width='14em'>
+          {!trustInfo.isSuccess && <Skeleton width='8em' height='1em'/>}
+          {trustInfo.isSuccess && <Text fontSize='lg'><b>{trustInfo.data.name}</b></Text>}
+        </Center>
+    </WrapItem>
+  )
 }
 
 export function Trust() {

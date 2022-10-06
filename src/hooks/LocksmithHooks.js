@@ -34,6 +34,54 @@ export function useWalletKeys(address) {
 }
 
 /**
+ * useWalletTrusts
+ *
+ * This is a tricky piece of code to get the associated trusts
+ * for all the keys in the wallet. This does chain some async calls,
+ * so this will be slower than most calls. It does however
+ * reduce components, ghost rendering, and repeat calls.
+ *
+ * It will return an array of trust IDs.
+ */
+export function useWalletTrusts(address) {
+  const account    = useAccount();
+  const wallet     = address || account.address;
+  const provider   = useProvider();
+  const keyVault   = useContract(Locksmith.getContract('keyVault', provider));
+  const locksmith  = useContract(Locksmith.getContract('locksmith', provider));
+  return useQuery('wallet trusts for ' + wallet, async function() {
+    // here are the trust IDs we want to ultimately return
+    let walletTrusts = [];
+
+    // this is the keys we've seen and collected for. This prevents us
+    // from grabbing the same trust info for keys that will result in the same trust ID.
+    let witnessedKeys = [];
+
+    // grab the keys first. We don't keep track of 
+    // trusts per wallet address, but via keys.
+    let keys = await keyVault.getKeys(wallet);
+
+    // then, for each key go in and determine the trustID by inspecting
+    // the key. Skip any keys we've already witnessed. 
+    for(var x = 0; x < keys.length; x++) {
+      if(!witnessedKeys.includes(keys[x].toString())) {
+        // go ahead and inspect the key.
+        let inspection = await locksmith.inspectKey(keys[x]);
+        
+        // grab the trust ID and keep it
+        walletTrusts.push(inspection[2]);
+
+        // prevent us from fetching keys that will result
+        // in the same trust ID
+        witnessedKeys.push(...inspection[4].map((k) => { return k.toString(); }));
+      }
+    }
+
+    return walletTrusts;
+  });
+}
+
+/**
  * useKeyBalance
  *
  * Gets the key balance of an address
@@ -353,7 +401,7 @@ export function useCreateKey(rootKeyId, keyName, receiver, bind, errorFunc, succ
  * @return {
  *    trustId,
  *    name,
- *    rootkKeyId,
+ *    rootKeyId,
  *    trustKeyCount
  *    keys[]
  * }  
