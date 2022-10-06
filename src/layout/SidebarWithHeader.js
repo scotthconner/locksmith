@@ -21,7 +21,7 @@ import {
 import {
   FiMenu,
 } from 'react-icons/fi';
-import { FaMoneyBill } from 'react-icons/fa';
+import { BiCoinStack } from 'react-icons/bi';
 import {
   HiOutlineKey,
   HiOutlineLightningBolt
@@ -44,7 +44,7 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Trusts', icon: BsShieldLock, href: '/trusts'},
   { name: 'Keys', icon: HiOutlineKey, href: '/keys'},
-  { name: 'Assets', icon: FaMoneyBill, href: '/assets'},
+  { name: 'Assets', icon: BiCoinStack, href: '/assets'},
   { name: 'Trustees', icon: FaRegHandshake, href: '/trustees'},
   { name: 'Events', icon: HiOutlineLightningBolt, href: '/events'}
 ];

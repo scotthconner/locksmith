@@ -141,7 +141,7 @@ export function TrustArnProvider({rootKeyId, trustId, arn, provider, trustKeys, 
     </HStack>
     <List width='100%'>
       <Collapse in={keyBalanceDisclosure.isOpen} width='100%'>
-        {trustKeys.data.map((k,x) => 
+        {(trustKeys.data || []).map((k,x) => 
           <TrustArnKeyBalance rootKeyId={rootKeyId} asset={asset}
             trustId={trustId} arn={arn} provider={provider}
             keyId={k} key={arn + '-' + k + '-' + provider + x}/>

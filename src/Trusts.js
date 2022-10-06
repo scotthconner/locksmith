@@ -207,7 +207,7 @@ export function Trust() {
           {!trustArns.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
             <Text mt='1.5em' fontSize='lg'>
               This trust has <b>{trustArns.data.length}</b> asset&nbsp;
-              {trustArns.data.length > 1 ? 'types' : 'type'}.
+              {trustArns.data.length > 1 || trustArns.data.length === 0 ? 'types' : 'type'}.
             </Text>}
           {!(trustArnBalances.isSuccess && trustArns.isSuccess) ?
             <VStack mt='1.5em'>
@@ -270,7 +270,8 @@ export function Trust() {
               <HStack mt='1.5em'> 
                 <Text fontSize='lg'>
                   This trust has <b>{trustedProviders.data.length}</b>&nbsp;
-                  trusted collateral {trustedProviders.data.length > 1 ? 'providers' : 'provider'}.
+                  trusted collateral {trustedProviders.data.length > 1 || 
+                    trustedProviders.data.length === 0 ? 'providers' : 'provider'}.
                 </Text>
                 <Spacer/>
                 {hasRoot && <Button 
@@ -315,7 +316,7 @@ export function Trust() {
             <HStack mt='1.5em'>
               <Text fontSize='lg'>
                 This trust has <b>{trustedScribes.data.length}</b> trusted ledger&nbsp;
-                {trustedScribes.data.length > 1 ? 'scribes' : 'scribe'}. 
+                {trustedScribes.data.length > 1 || trustedScribes.data.length === 0 ? 'scribes' : 'scribe'}. 
               </Text>
               <Spacer/>
               {hasRoot && <Button
