@@ -29,11 +29,12 @@ export const USDFormatter = new Intl.NumberFormat('en-US', {
  * service for now.
  */
 export function useCoinCapPrice(coinCapId) {
-  return useQuery("CoinCap price for symbol " + coinCapId, async function() {
-    var response = await fetch("https://api.coincap.io/v2/assets/" + coinCapId, {
+  return useQuery("CoinCap price for symbol " + coinCapId.toString(), async function() {
+    var response = await fetch("https://api.coincap.io/v2/assets/" + coinCapId.toString(), {
       method: 'GET',
       redirect: 'follow'
     });
     return (await response.json()).data.priceUsd;
   });
 }
+

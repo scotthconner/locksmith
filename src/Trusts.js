@@ -23,6 +23,8 @@ import {
   useColorModeValue
 } from '@chakra-ui/react';
 import { IoIosAdd } from 'react-icons/io';
+import { BiCoinStack } from 'react-icons/bi';
+import { HiOutlineKey } from 'react-icons/hi';
 import { RiSafeLine, RiQuillPenLine } from 'react-icons/ri';
 import { 
   TrustKey,
@@ -32,9 +34,9 @@ import {
   TrustedLedgerActors, 
   AddTrustedLedgerActorModal
 } from './trusts/LedgerActors.js';
-import {
-  TrustArn 
-} from './trusts/Assets.js';
+import { TrustArn } from './trusts/Assets.js';
+import { useNavigate } from 'react-router-dom';
+
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
@@ -55,6 +57,9 @@ import {
   useContextArnRegistry,
   useContextArnBalances,
 } from './hooks/LedgerHooks.js';
+import {
+  TrustBalanceUSD
+} from './components/Trust.js';
 import { useAccount } from 'wagmi';
 
 //////////////////////////////////////
@@ -71,23 +76,27 @@ export function Trusts() {
       <Heading size='md'>Your Trust Participation</Heading>
         <Wrap padding='3em' spacing='2em' pb='6em'>
           {!trusts.isSuccess && <> 
-            <WrapItem>
+            <WrapItem key='1'>
               <Skeleton width='14em' height='16em'/>
             </WrapItem>
-            <WrapItem>
+            <WrapItem key='2'>
               <Skeleton width='14em' height='16em'/>
             </WrapItem>
-            <WrapItem>
+            <WrapItem key='3'>
               <Skeleton width='14em' height='16em'/>
             </WrapItem></>}
           {trusts.isSuccess &&
-            trusts.data.map((t) => <TrustSummary trustId={t}/>)}
+            trusts.data.map((t) => <TrustSummary key={'trust-' + t} trustId={t}/>)}
         </Wrap>
     </Stack>
   );
 }
-export function TrustSummary({trustId, ... rest}) {
+export function TrustSummary({trustId, ...rest}) {
+  const navigate = useNavigate();
   const trustInfo = useTrustInfo(trustId);
+  const trustArns = useContextArnRegistry(TRUST_CONTEXT_ID, trustId);
+  const trustedProviders = useTrustedActors(trustId, COLLATERAL_PROVIDER);
+  const trustedScribes = useTrustedActors(trustId, SCRIBE);
   const walletKeys = useWalletKeys();
   const boxColor = useColorModeValue('white', 'gray.800');
   const hasRoot = !(trustInfo.isSuccess && walletKeys.isSuccess) ? false :
@@ -95,19 +104,56 @@ export function TrustSummary({trustId, ... rest}) {
       .includes(trustInfo.data.rootKeyId.toString());
 
   return (
-    <WrapItem key={trustId} p='1em' w='14em' h='16em'
+    <WrapItem key={'summary-' + trustId} p='1em' w='14em' h='16em'
       border={hasRoot ? '2px' : '0px'}
       borderColor={hasRoot ? 'yellow.400' : 'white'}
       borderRadius='lg'
       bg={boxColor} boxShadow='dark-lg'
-      cursor='pointer'
       _hover= {{
         transform: 'scale(1.1)',
       }}
       transition='all 0.2s ease-in-out'>
         <Center width='14em'>
-          {!trustInfo.isSuccess && <Skeleton width='8em' height='1em'/>}
-          {trustInfo.isSuccess && <Text fontSize='lg'><b>{trustInfo.data.name}</b></Text>}
+          <VStack spacing='1em'>
+            {!trustInfo.isSuccess && <Skeleton width='8em' height='1em'/>}
+            {trustInfo.isSuccess && <Text fontSize='lg'><b>{trustInfo.data.name}</b></Text>}
+            <VStack spacing='0em'>
+              <TrustBalanceUSD mt='2em' trustId={trustId} textProps={{
+                fontSize: '2xl',
+                cursor: 'pointer',
+                onClick: () => { navigate('/trust/' + trustId + '/assets/')}
+              }} skeletonProps={{width: '6em', height: '1.5em'}}/>
+              <Text fontSize='sm' color='gray.500'><i>in total assets</i></Text>
+            </VStack>
+            <HStack spacing='1em'>
+              {!trustArns.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
+              {trustArns.isSuccess &&
+                <Button borderRadius='full' leftIcon={<BiCoinStack/>}
+                  onClick={() => { navigate('/trust/' + trustId + '/assets/')}}>
+                  {trustArns.data.length}
+                </Button>}
+              {!trustInfo.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
+              {trustInfo.isSuccess && 
+                <Button borderRadius='full' leftIcon={<HiOutlineKey/>}
+                  onClick={() => { navigate('/trust/' + trustId + '/keys/')}}>
+                  {trustInfo.data.trustKeyCount.toString()}
+                </Button>}
+            </HStack>
+            <HStack spacing='1em'>
+              {!trustedProviders.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
+              {trustedProviders.isSuccess &&
+                <Button borderRadius='full' leftIcon={<RiSafeLine/>}
+                  onClick={() => { navigate('/trust/' + trustId + '/providers/')}}>
+                  {trustedProviders.data.length}
+                </Button>}
+              {!trustedScribes.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
+              {trustedScribes.isSuccess &&
+                <Button borderRadius='full' leftIcon={<RiQuillPenLine/>}
+                  onClick={() => { navigate('/trust/' + trustId + '/scribes/')}}>
+                  {trustedScribes.data.length}
+                </Button>}
+            </HStack>
+          </VStack>
         </Center>
     </WrapItem>
   )

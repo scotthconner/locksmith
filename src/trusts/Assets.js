@@ -47,7 +47,7 @@ import {
 //////////////////////////////////////
 export function TrustArn({rootKeyId, trustId, arn, balance, trustKeys, ...rest}) {
   var asset = AssetResource.getMetadata(arn);
-  var assetPrice = useCoinCapPrice(asset.coinCapId);
+  var assetPrice = useCoinCapPrice([asset.coinCapId]);
   var assetValue = assetPrice.isSuccess ?
     USDFormatter.format(assetPrice.data * ethers.utils.formatEther(balance)) : null;
   var boxColor = useColorModeValue('white', 'gray.800');
