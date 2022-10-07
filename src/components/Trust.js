@@ -8,8 +8,7 @@ import {
 } from '../hooks/PriceHooks.js';
 import {
   TRUST_CONTEXT_ID,
-  useContextArnRegistry,
-  useContextArnBalances,
+  useContextBalanceSheet
 } from '../hooks/LedgerHooks.js';
 import {
   AssetResource
@@ -17,23 +16,14 @@ import {
 import { ethers } from 'ethers';
 
 export function TrustBalanceUSD({trustId, skeletonProps, textProps, ...rest}) {
+  const trustBalanceSheet = useContextBalanceSheet(TRUST_CONTEXT_ID, trustId);
+
   // get the trust context arn registry for the given trust ID
-  const arns = useContextArnRegistry(TRUST_CONTEXT_ID, trustId);
+  const arns = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[0] : [];
+  const arnBalances = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[1] : [];
 
-  // for each arn we want to get the asset balance. I've gone back
-  // and forth if I should return an arn array along with the balances
-  // for Ledger.sol, preventing this serialization. Another more robust
-  // way to solve this is to use a graph or index. In the end, the two
-  // serial calls is sub-optimal but worth the trade-off. Having to handle
-  // the additional array on return every time even if you know what you're
-  // getting seems like a heavy cost. I could introduce more byte-code
-  // to provide the serialized introspection, but that's valuble contract
-  // space. You can wait another 300ms.
-  const arnBalances = useContextArnBalances(TRUST_CONTEXT_ID, trustId, 
-    arns.isSuccess ? arns.data : null);
-
-  return !(arnBalances.isSuccess && arns.isSuccess) ? <Skeleton {... textProps} {...skeletonProps}/> :
-    (arns.data.length !== 0 ? <RecursiveTrustBalanceUSD arns={arns.data} arnBalances={arnBalances.data} 
+  return !trustBalanceSheet.isSuccess ? <Skeleton {... textProps} {...skeletonProps}/> :
+    (arns.length !== 0 ? <RecursiveTrustBalanceUSD arns={arns} arnBalances={arnBalances} 
           position={0} total={0} textProps={textProps}/> : <Text {...textProps}>$0.00</Text>)
 }
 

@@ -26,9 +26,7 @@ import {
 } from './hooks/LocksmithHooks.js';
 import {
   KEY_CONTEXT_ID,
-  useContextArnRegistry,
-  useContextProviderRegistry,
-  useContextArnBalances,
+  useContextBalanceSheet,
 } from './hooks/LedgerHooks.js';
 import {
   useCoinCapPrice,
@@ -48,33 +46,46 @@ function Assets() {
             <Skeleton width='100%' height='4em'/>
           </VStack>}
         {(keys.isSuccess && keys.data.length > 0) && 
-          <RecursiveWalletArnCollector keys={keys.data} position={0} arns={[]}/>} 
+          <WalletBalanceSheet keys={keys.data} position={0} balanceSheet={{}}/>} 
     </Stack>
   );
 }
 
-const RecursiveWalletArnCollector = ({keys, position, arns, ...rest}) => {
-  // we need to grab the arns for for the active key position
-  const keyArns = useContextArnRegistry(KEY_CONTEXT_ID, keys[position]);
-  const collectedArns = !keyArns.isSuccess ? arns : [...arns, ...keyArns.data];
-  
+const WalletBalanceSheet = ({keys, position, balanceSheet, ...rest}) => {
+  const keyBalanceSheet = useContextBalanceSheet(KEY_CONTEXT_ID, keys[position]);
+  const newBalanceSheet = !keyBalanceSheet.isSuccess ? balanceSheet :
+    // for each arn, add the key balance to the balance sheet
+    keyBalanceSheet.data[0].reduce((p, n, x) => { 
+      // if the arn balance sheet is empty, make it
+      p[n] = p[n] || {}
+      // add the key balance to the sheet
+      p[n][keys[position].toString()] = keyBalanceSheet.data[1][x];
+      return p;
+    }, balanceSheet);
+
   return (position === keys.length - 1) ? 
-    <WalletArnList keys={keys} arns={[...(new Set(arns))]}/> :
-    <RecursiveWalletArnCollector keys={keys} position={position+1}
-      arns={collectedArns}/> 
+    <WalletArnList keys={keys} balanceSheet={newBalanceSheet}/> :  
+    <WalletBalanceSheet keys={keys} position={position+1}
+      balanceSheet={newBalanceSheet}/>
 }
 
-const WalletArnList = ({arns, keys, ...rest}) => {
+const WalletArnList = ({arns, keys, balanceSheet, ...rest}) => {
   return <VStack spacing='2em' pb='2em'>
-      {arns.map((a,x) => <WalletArn key={'wallet-arn-' + a} 
-        keys={keys} arn={a} arnPosition={x}/> 
+      {Object.keys(balanceSheet||{}).map((a) => <WalletArn key={'wallet-arn-' + a} 
+        arn={a} arnBalanceSheet={balanceSheet[a]}/> 
       )}
   </VStack>
 }
 
-const WalletArn = ({arn, keys, keyBalances, ...rest}) => {
+const WalletArn = ({arn, arnBalanceSheet, ...rest}) => {
   var asset = AssetResource.getMetadata(arn);
   var boxColor = useColorModeValue('white', 'gray.800');
+  var total = ethers.utils.formatEther(
+    Object.values(arnBalanceSheet||[]).reduce((p, n) =>
+      p.add(n), BigNumber.from(0)))
+  var assetPrice = useCoinCapPrice([asset.coinCapId]);
+  var assetValue = assetPrice.isSuccess ?
+    USDFormatter.format(assetPrice.data * total) : null;
 
   return <Box p='1em' width='90%'
     borderRadius='lg'
@@ -89,26 +100,18 @@ const WalletArn = ({arn, keys, keyBalances, ...rest}) => {
           <font color='gray'>({asset.symbol})</font>
         </Text>
         <Spacer/>
-        <RecursiveKeyArnBalanceCollector asset={asset} arn={arn} keys={keys}
-          position={0} arnBalance={BigNumber.from(0)}/>
+        <VStack>
+          <HStack>
+            <Spacer/>
+            {assetValue ? <Text>{assetValue}</Text> : <Skeleton width='4em' height='1em'/>}
+          </HStack>
+          <HStack>
+            <Spacer/>
+            <Text><font color='gray'>{total} {asset.symbol}</font></Text>
+          </HStack>
+        </VStack>
       </HStack>
   </Box>
-}
-
-const RecursiveKeyArnBalanceCollector = ({asset, arn, keys, position, arnBalance, ...rest}) => {
-  // get the arn balance for the key position
-  const keyArnBalance = useContextArnBalances(KEY_CONTEXT_ID, keys[position], [arn]);
-  let keyArnBalanceAmount = keyArnBalance.isSuccess && keyArnBalance.data.length > 0 ?
-    keyArnBalance.data[0] : BigNumber.from(0)
-  
-  return position === (keys.length - 1) ? 
-    <VStack>
-      <Text><font color='gray'>
-        {ethers.utils.formatEther(arnBalance.add(keyArnBalanceAmount))} {asset.symbol}
-      </font></Text>
-    </VStack> :
-    <RecursiveKeyArnBalanceCollector arn={arn} keys={keys} asset={asset}
-      position={position+1} arnBalance={arnBalance.add(keyArnBalanceAmount)}/> 
 }
 
 export default Assets;

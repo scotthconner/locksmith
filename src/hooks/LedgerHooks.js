@@ -55,3 +55,19 @@ export function useContextArnBalances(context, context_id, arns, collateralProvi
       return arns ? await ledger.getContextArnBalances(context, context_id, collateralProvider, arns) : [];
   });
 }
+
+/**
+ * useContextArnBalance
+ * 
+ * Calls the ledger, and for a given context returns
+ * both the arns and the balances of those arns, or per-provider
+ * within teh context if provided.
+ */
+export function useContextBalanceSheet(context, context_id, collateralProvider = ethers.constants.AddressZero) {
+  const provider = useProvider();
+  const ledger = useContract(Locksmith.getContract('ledger', provider));
+  return useQuery('getContextBalanceSheet ' + context + context_id + collateralProvider, async function() {
+      return context_id && collateralProvider ? 
+        await ledger.getContextBalanceSheet(context, context_id, collateralProvider) : [[],[]];
+  });
+}

@@ -55,7 +55,7 @@ import {
 import {
   TRUST_CONTEXT_ID,
   useContextArnRegistry,
-  useContextArnBalances,
+  useContextBalanceSheet
 } from './hooks/LedgerHooks.js';
 import {
   TrustBalanceUSD
@@ -162,9 +162,9 @@ export function TrustSummary({trustId, ...rest}) {
 export function Trust() {
   const { id, tab } = useParams();
   const trustInfo = useTrustInfo(id);
-  const trustArns = useContextArnRegistry(TRUST_CONTEXT_ID, id);
-  const trustArnBalances = useContextArnBalances(TRUST_CONTEXT_ID, id,
-    trustArns.isSuccess ? trustArns.data : null);
+  const trustBalanceSheet = useContextBalanceSheet(TRUST_CONTEXT_ID, id);
+  const trustArns = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[0] : []; 
+  const trustArnBalances = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[1] : [];
   const trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
   const trustedProviders = useTrustedActors(id, COLLATERAL_PROVIDER);
   const trustedScribes = useTrustedActors(id, SCRIBE);
@@ -176,8 +176,8 @@ export function Trust() {
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false;
 
   // tab counts
-  let trustArnCount = trustArns.isSuccess ?
-    <Tag mr='1em'><TagLabel>{trustArns.data.length}</TagLabel></Tag> :
+  let trustArnCount = trustBalanceSheet.isSuccess ?
+    <Tag mr='1em'><TagLabel>{trustArns.length}</TagLabel></Tag> :
     <Skeleton mr='1em' width='1em' height='1em'/>;
   let trustKeyCount = trustInfo.isSuccess ? 
     <Tag mr='1em'><TagLabel>{trustInfo.data.trustKeyCount.toNumber()}</TagLabel></Tag> : 
@@ -204,12 +204,12 @@ export function Trust() {
       </TabList>
       <TabPanels>
         <TabPanel>
-          {!trustArns.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
+          {!trustBalanceSheet.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
             <Text mt='1.5em' fontSize='lg'>
-              This trust has <b>{trustArns.data.length}</b> asset&nbsp;
-              {trustArns.data.length > 1 || trustArns.data.length === 0 ? 'types' : 'type'}.
+              This trust has <b>{trustArns.length}</b> asset&nbsp;
+              {trustArns.length > 1 || trustArns.length === 0 ? 'types' : 'type'}.
             </Text>}
-          {!(trustArnBalances.isSuccess && trustArns.isSuccess) ?
+          {!trustBalanceSheet.isSuccess ?
             <VStack mt='1.5em'>
               <Skeleton width='100%' height='4em'/>
               <Skeleton width='100%' height='4em'/>
@@ -218,9 +218,9 @@ export function Trust() {
             </VStack>
             :
             <VStack spacing='2em' pb='2em' pt='2em'>
-              { trustArns.data.map((arn, x) => (
+              { trustArns.map((arn, x) => (
                 <TrustArn trustId={id} rootKeyId={trustInfo.data.rootKeyId} 
-                  key={arn} arn={arn} balance={trustArnBalances.data[x]}
+                  key={arn} arn={arn} balance={trustArnBalances[x]}
                   trustKeys={trustKeys}/>
               ))}
             </VStack>}
