@@ -3,14 +3,19 @@
 //////////////////////////////////////
 import {
   Box,
+  Button,
+  Collapse,
   Heading,
   HStack,
+  List,
+  ListItem,
   Skeleton,
   Stack,
   Spacer,
   Text,
   VStack,
-  useColorModeValue
+  useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { RiSafeLine } from 'react-icons/ri';
 import { HiOutlineKey } from 'react-icons/hi';
@@ -72,20 +77,21 @@ const WalletBalanceSheet = ({keys, position, balanceSheet, ...rest}) => {
 const WalletArnList = ({arns, keys, balanceSheet, ...rest}) => {
   return <VStack spacing='2em' pb='2em'>
       {Object.keys(balanceSheet||{}).map((a) => <WalletArn key={'wallet-arn-' + a} 
-        arn={a} arnBalanceSheet={balanceSheet[a]}/> 
+        arn={a} arnBalanceSheet={balanceSheet[a]} keys={keys}/> 
       )}
   </VStack>
 }
 
-const WalletArn = ({arn, arnBalanceSheet, ...rest}) => {
-  var asset = AssetResource.getMetadata(arn);
-  var boxColor = useColorModeValue('white', 'gray.800');
-  var total = ethers.utils.formatEther(
+const WalletArn = ({arn, arnBalanceSheet, keys, ...rest}) => {
+  const asset = AssetResource.getMetadata(arn);
+  const boxColor = useColorModeValue('white', 'gray.800');
+  const total = ethers.utils.formatEther(
     Object.values(arnBalanceSheet||[]).reduce((p, n) =>
       p.add(n), BigNumber.from(0)))
-  var assetPrice = useCoinCapPrice([asset.coinCapId]);
-  var assetValue = assetPrice.isSuccess ?
+  const assetPrice = useCoinCapPrice([asset.coinCapId]);
+  const assetValue = assetPrice.isSuccess ?
     USDFormatter.format(assetPrice.data * total) : null;
+  const providerDisclosure = useDisclosure();
 
   return <Box p='1em' width='90%'
     borderRadius='lg'
@@ -107,10 +113,19 @@ const WalletArn = ({arn, arnBalanceSheet, ...rest}) => {
           </HStack>
           <HStack>
             <Spacer/>
+            <Button onClick={providerDisclosure.onToggle} 
+              size='sm' variant='ghost' borderRadius='full' p={0}>
+                <RiSafeLine size={20}/>
+              </Button>
             <Text><font color='gray'>{total} {asset.symbol}</font></Text>
           </HStack>
         </VStack>
       </HStack>
+      <List width='100%'>
+        <Collapse in={providerDisclosure.isOpen} width='100%'>
+          Hello
+        </Collapse>
+      </List>
   </Box>
 }
 
