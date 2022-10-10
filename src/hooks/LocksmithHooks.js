@@ -411,6 +411,10 @@ export function useTrustInfo(trustId) {
   const locksmith = useContract(Locksmith.getContract('locksmith', provider));
 
   const trustInfo = useQuery('trust for ' + trustId, async function() {
+    if( null === trustId ) {
+      return {};
+    }
+
     // grab the trust information
     let trust = await locksmith.trustRegistry(trustId);
 

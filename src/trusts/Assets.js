@@ -61,7 +61,7 @@ export function TrustArn({rootKeyId, trustId, arn, balance, trustKeys, ...rest})
         transform: 'scale(1.1)',
       }}
       transition='all 0.2s ease-in-out'>
-        <HStack spacing='1em'>
+        <HStack spacing='1em' cursor='pointer' onClick={providerDisclosure.onToggle}>
           {asset.icon()}
           <Text><b>{asset.name}</b>&nbsp;
             <font color='gray'>({asset.symbol})</font>

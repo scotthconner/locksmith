@@ -4,20 +4,22 @@
 import {
   Box,
   Button,
+  Center,
   Collapse,
   Heading,
   HStack,
-  List,
-  ListItem,
   Skeleton,
   Stack,
   Spacer,
   Text,
   VStack,
+  Wrap,
+  WrapItem,
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import { RiHandCoinLine } from 'react-icons/ri';
+import { BsShieldLock } from 'react-icons/bs';
+import { RiHandCoinLine, RiSafeLine } from 'react-icons/ri';
 import { HiOutlineKey } from 'react-icons/hi';
 import { KeyInfoIcon } from './components/KeyInfo.js';
 
@@ -27,13 +29,19 @@ import { KeyInfoIcon } from './components/KeyInfo.js';
 import { ethers, BigNumber } from 'ethers';
 import { AssetResource } from './services/AssetResource.js';
 import {
-  useWalletKeys
+  useWalletKeys,
+  useInspectKey,
+  useTrustInfo,
 } from './hooks/LocksmithHooks.js';
 import {
   KEY_CONTEXT_ID,
   useContextBalanceSheet,
   useContextArnAllocations,
 } from './hooks/LedgerHooks.js';
+import {
+  COLLATERAL_PROVIDER,
+  useTrustedActorAlias
+} from './hooks/NotaryHooks.js';
 import {
   useCoinCapPrice,
   USDFormatter,
@@ -101,7 +109,7 @@ const WalletArn = ({arn, arnBalanceSheet, keys, ...rest}) => {
       transform: 'scale(1.1)',
     }}
     transition='all 0.2s ease-in-out'>
-      <HStack spacing='1em'>
+      <HStack spacing='1em' cursor='pointer' onClick={withdrawalDisclosure.onToggle}>
         {asset.icon()}
         <Text><b>{asset.name}</b>&nbsp;
           <font color='gray'>({asset.symbol})</font>
@@ -122,35 +130,78 @@ const WalletArn = ({arn, arnBalanceSheet, keys, ...rest}) => {
           </HStack>
         </VStack>
       </HStack>
-      <List width='100%'>
-        <Collapse in={withdrawalDisclosure.isOpen} width='100%'>
+      <Collapse in={withdrawalDisclosure.isOpen}>
+        <Wrap width='100%' spacing='1em' padding='1em'>
           <WithdrawalOpportunities keys={keys} arn={arn}/>
-        </Collapse>
-      </List>
+        </Wrap>
+      </Collapse>
   </Box>
 }
 
 const WithdrawalOpportunities = ({arn, keys, ...rest}) => {
-  return (<List>
+  return (<>
     {keys.map((k) => <KeyWithdrawalOpportunities key={arn + '-' + k}
-      keyId={k} arn={arn}/>)}</List>)
+      keyId={k} arn={arn}/>)}</>)
 }
 
 const KeyWithdrawalOpportunities = ({arn, keyId, ...rest}) => {
   const keyArnAllocations = useContextArnAllocations(KEY_CONTEXT_ID, keyId, arn);
-
-  if ( keyArnAllocations.isSuccess ) {
-    console.log(keyArnAllocations.data);
-  }
-
   return keyArnAllocations.isSuccess && 
-    keyArnAllocations.data[0].map((p, b) => 
-      <ListItem key={'withdrawal-op' + arn + keyId + p}>
-        <HStack align='stretch'>
-          <Text>{p.toString()}</Text>
-          <Text>{ethers.utils.formatEther(keyArnAllocations.data[1][b].toString())}</Text>
-        </HStack>
-      </ListItem>)
+    keyArnAllocations.data[0].map((p, b) =>
+      <KeyWithdrawalSlot arn={arn} keyId={keyId} provider={p}
+        balance={keyArnAllocations.data[1][b]}
+        key={'withdrawal-op' + arn + keyId + p}/>) 
+}
+
+const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
+  const asset = AssetResource.getMetadata(arn);
+  const keyInfo = useInspectKey(keyId); 
+  const trustInfo = useTrustInfo(keyInfo.isSuccess ? keyInfo.data.trustId : null); 
+  const alias = useTrustedActorAlias(keyInfo.isSuccess ? keyInfo.data.trustId : null,
+    COLLATERAL_PROVIDER, provider);
+  const assetPrice = useCoinCapPrice(asset.coinCapId);
+  const boxColor = useColorModeValue('gray.100', 'gray.700');
+  const ethAmount = ethers.utils.formatEther(balance);
+
+  return <WrapItem key={'key-withdrawal-slot' + arn + keyId + provider}
+    _hover= {{
+      transform: 'scale(1.1)',
+    }}
+    cursor='pointer'
+    bg={boxColor} padding='1em'
+    borderRadius='2xl' boxShadow='lg'>
+    <VStack align='left'>
+      <Center>
+        <VStack mt='1em' mb='1em' spacing='0.1em'>
+          {!assetPrice.isSuccess ? 
+            <Skeleton width='4em' height='1em'/> :
+            <Text><b>{USDFormatter.format(assetPrice.data * ethAmount)}</b></Text> } 
+          <Text color='gray' fontSize='sm'>
+            <i>{ethAmount} {asset.symbol}</i>
+          </Text>
+        </VStack>
+      </Center>
+      <HStack>
+        <BsShieldLock/>
+        {!(keyInfo.isSuccess && trustInfo.isSuccess) ?
+          <Skeleton width='5em' height='1em'/> :
+          <Text>{trustInfo.data.name}</Text>}
+      </HStack>
+      <HStack>
+        <RiSafeLine/>
+        {!(keyInfo.isSuccess && alias.isSuccess) ?
+          <Skeleton width='6em' height='1em'/> :
+          <Text>{alias.data.toString()}</Text>}
+      </HStack>
+      <HStack>
+        {!keyInfo.isSuccess ? 
+          <Skeleton width='4em' height='1em'/> : <>
+            {KeyInfoIcon(keyInfo)} 
+            <Text>{keyInfo.data.alias}</Text>
+          </>}
+      </HStack>
+    </VStack>
+  </WrapItem>
 }
 
 export default Assets;

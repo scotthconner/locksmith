@@ -36,13 +36,13 @@ export function useTrustedActors(trustId, role) {
  * Given a trust, role, and actor, provides the given alias.
  */
 export function useTrustedActorAlias(trustId, role, address) {
- const provider = useProvider();
+  const provider = useProvider();
   const ledgerAddress = Locksmith.getContractAddress('ledger');
   const notary = useContract(Locksmith.getContract('notary', provider));
   return useQuery('getTrustedActorAlias for ' + trustId + " " + role + " " + address, async function() {
-    return ethers.utils.parseBytes32String(
-      await notary.actorAliases(ledgerAddress, trustId, role, address)
-    );
+    return (null !== trustId && null !== role && null !== address) ? ethers.utils.parseBytes32String(
+        await notary.actorAliases(ledgerAddress, trustId, role, address) 
+    ) : '';
   });
 }
 
