@@ -20,7 +20,6 @@ import {
 } from '@chakra-ui/react';
 import { BsShieldLock } from 'react-icons/bs';
 import { RiHandCoinLine, RiSafeLine } from 'react-icons/ri';
-import { HiOutlineKey } from 'react-icons/hi';
 import { KeyInfoIcon } from './components/KeyInfo.js';
 
 //////////////////////////////////////
@@ -40,7 +39,8 @@ import {
 } from './hooks/LedgerHooks.js';
 import {
   COLLATERAL_PROVIDER,
-  useTrustedActorAlias
+  useTrustedActorAlias,
+  useWithdrawalAllowance,
 } from './hooks/NotaryHooks.js';
 import {
   useCoinCapPrice,
@@ -159,6 +159,7 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
   const trustInfo = useTrustInfo(keyInfo.isSuccess ? keyInfo.data.trustId : null); 
   const alias = useTrustedActorAlias(keyInfo.isSuccess ? keyInfo.data.trustId : null,
     COLLATERAL_PROVIDER, provider);
+  const allowance = useWithdrawalAllowance(provider, keyId, arn);
   const assetPrice = useCoinCapPrice(asset.coinCapId);
   const boxColor = useColorModeValue('gray.100', 'gray.700');
   const ethAmount = ethers.utils.formatEther(balance);
@@ -176,9 +177,11 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
           {!assetPrice.isSuccess ? 
             <Skeleton width='4em' height='1em'/> :
             <Text><b>{USDFormatter.format(assetPrice.data * ethAmount)}</b></Text> } 
-          <Text color='gray' fontSize='sm'>
-            <i>{ethAmount} {asset.symbol}</i>
-          </Text>
+          <HStack fontStyle='italic' color='gray' fontSize='sm'>
+            {!allowance.isSuccess ? <Skeleton width='2em' height='1em'/> :
+              <Text>{ethers.utils.formatEther(allowance.data)}</Text>}
+            <Text> / {ethAmount} {asset.symbol}</Text>
+          </HStack>
         </VStack>
       </Center>
       <HStack>

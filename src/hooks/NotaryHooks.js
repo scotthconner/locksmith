@@ -69,3 +69,22 @@ export function useSetTrustedLedgerRole(rootKeyId, trustId, role, address, trust
 
   return call;
 }
+
+/**
+ * useWithdrawalAllowance
+ *
+ * This call assumes the internal ledger, and will determine
+ * how much wei of allowance is enabled for a given provider, key,
+ * and asset.
+ */
+export function useWithdrawalAllowance(ledgerProvider, key, arn) {
+  const provider = useProvider();
+  const ledgerAddress = Locksmith.getContractAddress('ledger');
+  const notary = useContract(Locksmith.getContract('notary', provider));
+  return useQuery('useWithdrawalAllowance for ' + ledgerProvider + " " + key + " " + arn, async function() {
+    if(ledgerProvider === null || key === null || arn === null) {
+      return 0;
+    }
+    return await notary.withdrawalAllowances(ledgerAddress, key, ledgerProvider, arn);
+  });
+}
