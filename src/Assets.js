@@ -17,7 +17,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import { RiSafeLine } from 'react-icons/ri';
+import { RiHandCoinLine } from 'react-icons/ri';
 import { HiOutlineKey } from 'react-icons/hi';
 import { KeyInfoIcon } from './components/KeyInfo.js';
 
@@ -32,6 +32,7 @@ import {
 import {
   KEY_CONTEXT_ID,
   useContextBalanceSheet,
+  useContextArnAllocations,
 } from './hooks/LedgerHooks.js';
 import {
   useCoinCapPrice,
@@ -91,7 +92,7 @@ const WalletArn = ({arn, arnBalanceSheet, keys, ...rest}) => {
   const assetPrice = useCoinCapPrice([asset.coinCapId]);
   const assetValue = assetPrice.isSuccess ?
     USDFormatter.format(assetPrice.data * total) : null;
-  const providerDisclosure = useDisclosure();
+  const withdrawalDisclosure = useDisclosure();
 
   return <Box p='1em' width='90%'
     borderRadius='lg'
@@ -106,27 +107,50 @@ const WalletArn = ({arn, arnBalanceSheet, keys, ...rest}) => {
           <font color='gray'>({asset.symbol})</font>
         </Text>
         <Spacer/>
-        <VStack>
-          <HStack>
+        <VStack align='stretch'>
+          <HStack> 
             <Spacer/>
             {assetValue ? <Text>{assetValue}</Text> : <Skeleton width='4em' height='1em'/>}
           </HStack>
           <HStack>
             <Spacer/>
-            <Button onClick={providerDisclosure.onToggle} 
+            <Button onClick={withdrawalDisclosure.onToggle} 
               size='sm' variant='ghost' borderRadius='full' p={0}>
-                <RiSafeLine size={20}/>
+                <RiHandCoinLine size={20}/>
               </Button>
             <Text><font color='gray'>{total} {asset.symbol}</font></Text>
           </HStack>
         </VStack>
       </HStack>
       <List width='100%'>
-        <Collapse in={providerDisclosure.isOpen} width='100%'>
-          Hello
+        <Collapse in={withdrawalDisclosure.isOpen} width='100%'>
+          <WithdrawalOpportunities keys={keys} arn={arn}/>
         </Collapse>
       </List>
   </Box>
+}
+
+const WithdrawalOpportunities = ({arn, keys, ...rest}) => {
+  return (<List>
+    {keys.map((k) => <KeyWithdrawalOpportunities key={arn + '-' + k}
+      keyId={k} arn={arn}/>)}</List>)
+}
+
+const KeyWithdrawalOpportunities = ({arn, keyId, ...rest}) => {
+  const keyArnAllocations = useContextArnAllocations(KEY_CONTEXT_ID, keyId, arn);
+
+  if ( keyArnAllocations.isSuccess ) {
+    console.log(keyArnAllocations.data);
+  }
+
+  return keyArnAllocations.isSuccess && 
+    keyArnAllocations.data[0].map((p, b) => 
+      <ListItem key={'withdrawal-op' + arn + keyId + p}>
+        <HStack align='stretch'>
+          <Text>{p.toString()}</Text>
+          <Text>{ethers.utils.formatEther(keyArnAllocations.data[1][b].toString())}</Text>
+        </HStack>
+      </ListItem>)
 }
 
 export default Assets;
