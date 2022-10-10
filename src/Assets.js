@@ -8,7 +8,18 @@ import {
   Collapse,
   Heading,
   HStack,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
   Skeleton,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
   Stack,
   Spacer,
   Text,
@@ -17,8 +28,12 @@ import {
   WrapItem,
   useColorModeValue,
   useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
+import { useState, useRef } from 'react';
+import { BiCoinStack } from 'react-icons/bi';
 import { BsShieldLock } from 'react-icons/bs';
+import { FiUnlock } from 'react-icons/fi';
 import { RiHandCoinLine, RiSafeLine } from 'react-icons/ri';
 import { KeyInfoIcon } from './components/KeyInfo.js';
 
@@ -41,6 +56,7 @@ import {
   COLLATERAL_PROVIDER,
   useTrustedActorAlias,
   useWithdrawalAllowance,
+  useSetWithdrawalAllowance,
 } from './hooks/NotaryHooks.js';
 import {
   useCoinCapPrice,
@@ -163,6 +179,7 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
   const assetPrice = useCoinCapPrice(asset.coinCapId);
   const boxColor = useColorModeValue('gray.100', 'gray.700');
   const ethAmount = ethers.utils.formatEther(balance);
+  const withdrawalDisclosure = useDisclosure();
 
   return <WrapItem key={'key-withdrawal-slot' + arn + keyId + provider}
     _hover= {{
@@ -170,7 +187,8 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
     }}
     cursor='pointer'
     bg={boxColor} padding='1em'
-    borderRadius='2xl' boxShadow='lg'>
+    borderRadius='2xl' boxShadow='lg'
+    onClick={withdrawalDisclosure.onOpen}>
     <VStack align='left'>
       <Center>
         <VStack mt='1em' mb='1em' spacing='0.1em'>
@@ -204,7 +222,75 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
           </>}
       </HStack>
     </VStack>
+    {allowance.isSuccess &&  
+      <SlotWithdrawalDialog provider={provider} keyId={keyId}
+        arn={arn} onClose={withdrawalDisclosure.onClose}
+        isOpen={withdrawalDisclosure.isOpen}
+        allowance={allowance.data}
+        balance={balance}/>}
   </WrapItem>
 }
 
+const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose, isOpen, ...rest}) => {
+  const toast = useToast();
+  const asset = AssetResource.getMetadata(arn);
+  const [slideAllowance, setAllowance]  = useState(allowance);
+  const withdrawalConfig = useSetWithdrawalAllowance(provider, keyId, arn, slideAllowance,
+    function(error) {
+      // error
+      toast({
+        title: 'Transaction Error!',
+        description: error.toString(),
+        status: 'error',
+        duration: 9000,
+        isClosable: true
+      });
+    }, function(data) {
+      // success
+      toast({
+        title: 'Allowance Set!',
+        description: 'The provider can withdrawal ' + ethers.utils.formatEther(slideAllowance) + ' ' + asset.symbol + '.',
+        status: 'success',
+        duration: 9000,
+        isClosable: true
+      });
+    });
+
+  var allowButtonProps = withdrawalConfig.isLoading ? {isLoading: true} : {};
+
+  return <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'>
+    <ModalOverlay backdropFilter='blur(10px)'/>
+    <ModalContent>
+      <ModalHeader>Withdrawal {asset.symbol}</ModalHeader>
+      <ModalCloseButton />
+      <ModalBody>
+        <Text>You'll need to set the <b>withdrawal allowance</b> to enable the collateral provider 
+          to withdrawal funds on your behalf. This is for your security.</Text>
+        <HStack spacing='1em'>
+          <Box width='55%'>
+            <Slider width='90%' m='1em' mt='2em' defaultValue={allowance} min={0}
+              max={balance} step={ethers.utils.parseEther("1") / 4}
+              onChangeEnd={(e) => setAllowance(BigNumber.from(e.toString()))}>
+              <SliderTrack bg='blue.200'>
+                <Box position='relative' right={10} />
+                <SliderFilledTrack bg='blue.600'/>
+              </SliderTrack>
+              <SliderThumb boxSize={10}>
+                <Box color='blue'><BiCoinStack size='30px'/></Box>
+              </SliderThumb>
+            </Slider>
+          </Box>
+          <Text fontSize='lg' fontWeight='bold'>
+            {ethers.utils.formatEther(slideAllowance)}&nbsp;/&nbsp;{ethers.utils.formatEther(balance)}
+          </Text>
+          <Spacer/>
+          <Button {... allowButtonProps} onClick={() => {withdrawalConfig.write?.()}} 
+            leftIcon={<FiUnlock/>} colorScheme='blue'>Allow</Button>
+    </HStack>
+      </ModalBody>
+      <ModalFooter>
+      </ModalFooter>
+    </ModalContent>
+  </Modal>
+}
 export default Assets;

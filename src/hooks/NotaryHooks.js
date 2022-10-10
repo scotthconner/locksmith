@@ -88,3 +88,29 @@ export function useWithdrawalAllowance(ledgerProvider, key, arn) {
     return await notary.withdrawalAllowances(ledgerAddress, key, ledgerProvider, arn);
   });
 }
+
+/**
+ * useSetWithdrawalAllowance
+ *
+ * This write call assumes the internal ledger, and will set
+ * the allowance for a given provider arn and key. This will
+ * fail if the signer doesn't hold the key.
+ */
+export function useSetWithdrawalAllowance(ledgerProvider, key, arn, amount, errorFunc, successFunc) {
+  const ledgerAddress = Locksmith.getContractAddress('ledger');
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('notary', 'setWithdrawalAllowance',
+      [ledgerAddress, ledgerProvider, key, arn, amount], 
+      amount !== null
+    )
+  );
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}
