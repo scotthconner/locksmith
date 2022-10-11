@@ -30,12 +30,13 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { BiCoinStack } from 'react-icons/bi';
 import { BsShieldLock } from 'react-icons/bs';
 import { FiUnlock } from 'react-icons/fi';
 import { RiHandCoinLine, RiSafeLine } from 'react-icons/ri';
 import { KeyInfoIcon } from './components/KeyInfo.js';
+import { CollateralProviderWithdrawalAdapter } from './components/withdrawal/Provider.js';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
@@ -235,7 +236,7 @@ const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose
   const toast = useToast();
   const asset = AssetResource.getMetadata(arn);
   const [slideAllowance, setAllowance]  = useState(allowance);
-  const withdrawalConfig = useSetWithdrawalAllowance(provider, keyId, arn, slideAllowance,
+  const allowanceConfig = useSetWithdrawalAllowance(provider, keyId, arn, slideAllowance,
     function(error) {
       // error
       toast({
@@ -256,7 +257,7 @@ const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose
       });
     });
 
-  var allowButtonProps = withdrawalConfig.isLoading ? {isLoading: true} : {};
+  var allowButtonProps = allowanceConfig.isLoading ? {isLoading: true} : {};
 
   return <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'>
     <ModalOverlay backdropFilter='blur(10px)'/>
@@ -284,9 +285,12 @@ const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose
             {ethers.utils.formatEther(slideAllowance)}&nbsp;/&nbsp;{ethers.utils.formatEther(balance)}
           </Text>
           <Spacer/>
-          <Button {... allowButtonProps} onClick={() => {withdrawalConfig.write?.()}} 
+          <Button {... allowButtonProps} onClick={() => {allowanceConfig.write?.()}} 
             leftIcon={<FiUnlock/>} colorScheme='blue'>Allow</Button>
-    </HStack>
+        </HStack>
+        <CollateralProviderWithdrawalAdapter provider={provider}
+          keyId={keyId} arn={arn} allowance={allowance} balance={balance}
+          onClose={onClose}/>
       </ModalBody>
       <ModalFooter>
       </ModalFooter>
