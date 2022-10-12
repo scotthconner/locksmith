@@ -34,7 +34,10 @@ import {
   TrustedLedgerActors, 
   AddTrustedLedgerActorModal
 } from './trusts/LedgerActors.js';
-import { TrustArn } from './trusts/Assets.js';
+import { 
+  TrustArn,
+  DepositFundsModal,
+} from './trusts/Assets.js';
 import { useNavigate } from 'react-router-dom';
 
 //////////////////////////////////////
@@ -171,6 +174,7 @@ export function Trust() {
   const providerDisclosure = useDisclosure();
   const scribeDisclosure = useDisclosure();
   const createKeyDisclosure = useDisclosure();
+  const depositDisclosure = useDisclosure();
   var account = useAccount();
   var userKeyBalance = useKeyBalance(trustInfo.isSuccess ? trustInfo.data.rootKeyId : null, account.address);
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false;
@@ -205,10 +209,23 @@ export function Trust() {
       <TabPanels>
         <TabPanel>
           {!trustBalanceSheet.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
-            <Text mt='1.5em' fontSize='lg'>
-              This trust has <b>{trustArns.length}</b> asset&nbsp;
-              {trustArns.length > 1 || trustArns.length === 0 ? 'types' : 'type'}.
-            </Text>}
+            <HStack mt='1.5em'>
+              <Text fontSize='lg'>
+                This trust has <b>{trustArns.length}</b> asset&nbsp;
+                {trustArns.length > 1 || trustArns.length === 0 ? 'types' : 'type'}.
+              </Text>
+              <Spacer/>
+               {hasRoot && trustInfo.isSuccess && <Button
+                  colorScheme='blue'
+                  leftIcon={<IoIosAdd/>}
+                  onClick={depositDisclosure.onOpen}>
+                    Deposit</Button>}
+              {hasRoot && trustInfo.isSuccess && 
+                <DepositFundsModal rootKeyId={trustInfo.data.rootKeyId}
+                  trustId={id} onClose={depositDisclosure.onClose}
+                  isOpen={depositDisclosure.isOpen}/>}
+            </HStack>
+          }
           {!trustBalanceSheet.isSuccess ?
             <VStack mt='1.5em'>
               <Skeleton width='100%' height='4em'/>

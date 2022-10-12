@@ -43,9 +43,10 @@ export const AssetResource = (function() {
     name: 'Ethereum',
     symbol: 'ETH',
     decimals: 18,
+    contractAddress: null,
     coinCapId: 'ethereum',
-    icon: function(props = {color: '#716b94'}) {
-      return <ETH {...props}/>;
+    icon: function(props = {}) {
+      return <ETH {...props} color='#716b94'/>;
     }
   };
   
@@ -54,27 +55,30 @@ export const AssetResource = (function() {
     name: 'Chainlink',
     symbol: 'LINK',
     decimals: 18,
+    contractAddress: Locksmith.getContractAddress('coin'),
     coinCapId: 'chainlink',
-    icon: function(props = {color: '#375BD2'}) {
-      return <LINK {...props}/>;
+    icon: function(props = {}) {
+      return <LINK {...props} color='#375BD2'/>;
     }
   };
   metadata[getArn(Locksmith.getContractAddress('matic'), 20, 0)] = {
     name: 'Polygon',
     symbol: 'MATIC',
     decimals: 18,
+    contractAddress: Locksmith.getContractAddress('matic'),
     coinCapId: 'polygon',
-    icon: function(props = {color: '#8247e5'}) {
-      return <MATIC {...props}/>;
+    icon: function(props = {}) {
+      return <MATIC {...props} color='#8247e5'/>;
     }
   };
   metadata[getArn(Locksmith.getContractAddress('avax'), 20, 0)] = {
     name: 'Wormhole',
     symbol: 'WAVAX',
     decimals: 18,
+    contractAddress: Locksmith.getContractAddress('avax'),
     coinCapId: 'avalanche',
-    icon: function(props = {color: '#e84142'}) {
-      return <AVAX {...props}/>;
+    icon: function(props = {}) {
+      return <AVAX color='#e84142' {...props}/>;
     }
   };
   metadata[getArn(Locksmith.getContractAddress('grt'), 20, 0)] = {
@@ -82,17 +86,19 @@ export const AssetResource = (function() {
     symbol: 'GRT',
     decimals: 18,
     coinCapId: 'the-graph',
-    icon: function(props = {color: '#6f4cff'}) {
-      return <GRT {...props}/>;
+    contractAddress: Locksmith.getContractAddress('grt'),
+    icon: function(props = {}) {
+      return <GRT color='#6f4cff' {...props}/>;
     }
   };
   metadata[getArn(Locksmith.getContractAddress('usdc'), 20, 0)] = {
     name: 'USDC',
     symbol: 'USDC',
     decimals: 18,
+    contractAddress: Locksmith.getContractAddress('usdc'),
     coinCapId: 'usd-coin',
-    icon: function(props = {color: '#2775ca'}) {
-      return <USDC {...props}/>;
+    icon: function(props = {}) {
+      return <USDC color='#2775ca' {...props}/>;
     }
   };
   metadata[getArn(Locksmith.getContractAddress('dai'), 20, 0)] = {
@@ -100,8 +106,9 @@ export const AssetResource = (function() {
     symbol: 'DAI',
     decimals: 18,
     coinCapId: 'multi-collateral-dai',
-    icon: function(props = {color: '#febe44'}) {
-      return <DAI {...props}/>;
+    contractAddress: Locksmith.getContractAddress('dai'),
+    icon: function(props = {}) {
+      return <DAI color='#febe44' {...props}/>;
     }
   };
 
@@ -124,8 +131,8 @@ export const AssetResource = (function() {
     // that is useful for a number of scenarios.
     // This is obivously network dependent.
     /////////////////////////////////////////////
-    getMetadata: function(arn) {
-      return metadata[arn]; 
+    getMetadata: function(arn = null) {
+      return arn ? metadata[arn] : metadata; 
     }
   };
 })();

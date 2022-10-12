@@ -6,8 +6,16 @@ import {
   Button,
   Collapse,
   HStack,
+  Flex,
   List,
   ListItem,
+  Modal,
+  ModalOverlay,
+  ModalBody,
+  ModalHeader,
+  ModalCloseButton,
+  ModalFooter,
+  ModalContent,
   Skeleton,
   Spacer,
   Text,
@@ -15,17 +23,21 @@ import {
   useDisclosure,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { BsWallet } from 'react-icons/bs';
 import { RiSafeLine } from 'react-icons/ri';
 import { HiOutlineKey } from 'react-icons/hi';
+import { FcKey } from 'react-icons/fc';
 import { KeyInfoIcon } from '../components/KeyInfo.js';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
 import { ethers } from 'ethers';
+import { useAccount, useBalance } from 'wagmi';
 import { AssetResource } from '../services/AssetResource.js';
 import {
-  useInspectKey
+  useInspectKey,
+  useTrustInfo,
 } from '../hooks/LocksmithHooks.js';
 import {
   COLLATERAL_PROVIDER,
@@ -164,4 +176,68 @@ export function TrustArnKeyBalance({rootKeyId, trustId, arn, provider, keyId, as
         <Text><i>{ethers.utils.formatEther(keyBalance.data.toString())} {asset.symbol}</i></Text>
       </HStack>
     </ListItem>
+}
+
+export function DepositFundsModal({rootKeyId, trustId, onClose, isOpen, ...rest}) {
+  const rootInspectKey = useInspectKey(rootKeyId);
+  const trustInfo = useTrustInfo(trustId);
+  const boxColor = useColorModeValue('gray.100','gray.800');
+
+  return <Modal size='xl' onClose={onClose} isOpen={isOpen} isCentered> 
+    <ModalOverlay backdropFilter='blur(10px)'/>
+    <ModalContent>
+      <ModalHeader>Deposit Funds</ModalHeader>
+      <ModalCloseButton />
+      <ModalBody>
+        <Flex>
+          <VStack pl='1em' pr='2em'>
+            <FcKey size='60px'/>
+            {!rootInspectKey.isSuccess ? <Skeleton width='5em' height='1.5em'/> :
+              <Text><b>{rootInspectKey.data.alias}</b></Text>}
+          </VStack>
+          <VStack>
+            {!trustInfo.isSuccess ? <Skeleton width='15em' height='1.5em'/> :
+              <Text mb='1.2em'>Deposit funds to <b>{trustInfo.data.name}</b> by choosing an asset.</Text>}
+              <List width='100%' spacing='1em'>
+                {Object.entries(AssetResource.getMetadata()).map((asset) =>
+                  <ListItem key={'deposit-' + asset[0]} borderRadius='full'
+                    bg={boxColor} cursor='pointer' _hover={{
+                      transform: 'scale(1.1)'
+                    }} boxShadow='md'>
+                    <HStack pr='2em'>
+                      {asset[1].icon({size:'50px'})}
+                      <Text>{asset[1].name}</Text>
+                      <Text fontSize='xs' fontStyle='italic' color='gray'>({asset[1].symbol})</Text>
+                      <Spacer/>
+                      <BsWallet color='gray'/>
+                      <Text><WalletArnBalanceLabel address={asset[1].contractAddress}/></Text>
+                    </HStack>
+                  </ListItem>
+                )}
+              </List>
+          </VStack>
+        </Flex>
+      </ModalBody>
+      <ModalFooter>
+      </ModalFooter>
+    </ModalContent>
+  </Modal>
+}
+
+const TrustArnBalanceLabel = ({trustId, arn, ...rest}) => {
+  const trustArnBalance = useContextArnBalances(TRUST_CONTEXT_ID, trustId, [arn]);
+
+  return !trustArnBalance.isSuccess ? <Skeleton width='4em' height='1.2em'/> :
+    <>{ethers.utils.formatEther(trustArnBalance.data[0])}</>
+}
+
+const WalletArnBalanceLabel = ({address, ...rest}) => {
+  const account = useAccount();
+  const balance = useBalance({
+    addressOrName: account.address,
+    token: address
+  });
+
+  return !balance.isSuccess ? <Skeleton width='3em' height='1em'/> :
+    <>{balance.data.formatted.match(/.*\.[0-9][0-9]?/)}</>;
 }
