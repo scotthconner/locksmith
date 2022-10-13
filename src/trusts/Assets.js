@@ -59,6 +59,9 @@ import {
 import {
   useEtherDeposit
 } from '../hooks/EtherVaultHooks.js';
+import {
+  useTokenDeposit
+} from '../hooks/TokenVaultHooks.js';
 import { 
   useCoinCapPrice,
   USDFormatter,
@@ -288,7 +291,11 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) 
   const etherDeposit = useEtherDeposit(rootKeyId, 
     address === null ? ethers.utils.parseEther(depositAmount.toString()) : BigNumber.from(0),
     errorFunc, successFunc); 
-  var buttonProps = (etherDeposit.isLoading) ? {isLoading: true} : {};
+  const tokenDeposit = useTokenDeposit(rootKeyId, address,
+    address === null ? BigNumber.from(0) : ethers.utils.parseEther(depositAmount.toString()),
+    errorFunc, successFunc);
+  var buttonProps = (etherDeposit.isLoading || tokenDeposit.isLoading) ? {isLoading: true} : 
+    (depositAmount === 0 ? {isDisabled: true} : {});
 
 
   return  !balance.isSuccess ? <Skeleton height='1.2em' width='10em'/> : 
@@ -308,14 +315,14 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) 
             </Slider>
           </Box>
           <VStack spacing='0'>
-            <Text fontSize='xxs' maxWidth='4em' noOfLines={1}>{depositAmount}</Text>
-            <Text fontSize='xxs'>{symbol}</Text>
+            <Text fontSize='xs' maxWidth='5em' noOfLines={1}>{depositAmount}</Text>
+            <Text fontSize='xs'>{symbol}</Text>
           </VStack>
           <Spacer/>
           <Button {...buttonProps} 
           onClick={address === null ? 
           () => {etherDeposit.write?.();} :
-          () => {alert('hiya');}}
+          () => {tokenDeposit.write?.();}}
             size='sm' 
             colorScheme='blue' borderRadius='full' leftIcon={<RiSafeLine/>}>Deposit</Button>
         </HStack>

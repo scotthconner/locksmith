@@ -25,3 +25,25 @@ export function useTokenWithdrawal(keyId, arn, amount, errorFunc, successFunc) {
     }
   });
 }
+
+/**
+ * useTokenDeposit
+ *
+ * This uses a key to deposit tokens into the
+ * local token vault. If the token allowance isn't sufficient,
+ * this transaction will fail.
+ */
+export function useTokenDeposit(keyId, token, amount, errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('tokenVault', 'deposit',
+      [keyId, token, amount], amount > 0));
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}
