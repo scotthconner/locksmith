@@ -17,22 +17,29 @@ import {
   ModalFooter,
   ModalContent,
   Skeleton,
+  Slider,
+  SliderTrack,
+  SliderThumb,
+  SliderFilledTrack,
   Spacer,
   Text,
   VStack,
   useDisclosure,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
 import { BsWallet } from 'react-icons/bs';
 import { RiSafeLine } from 'react-icons/ri';
 import { HiOutlineKey } from 'react-icons/hi';
+import { FiUploadCloud} from 'react-icons/fi';
 import { FcKey } from 'react-icons/fc';
 import { KeyInfoIcon } from '../components/KeyInfo.js';
+import { useState } from 'react';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
-import { ethers } from 'ethers';
+import { ethers, BigNumber } from 'ethers';
 import { useAccount, useBalance } from 'wagmi';
 import { AssetResource } from '../services/AssetResource.js';
 import {
@@ -49,6 +56,9 @@ import {
   useContextProviderRegistry,
   useContextArnBalances,
 } from '../hooks/LedgerHooks.js';
+import {
+  useEtherDeposit
+} from '../hooks/EtherVaultHooks.js';
 import { 
   useCoinCapPrice,
   USDFormatter,
@@ -181,6 +191,7 @@ export function TrustArnKeyBalance({rootKeyId, trustId, arn, provider, keyId, as
 export function DepositFundsModal({rootKeyId, trustId, onClose, isOpen, ...rest}) {
   const rootInspectKey = useInspectKey(rootKeyId);
   const trustInfo = useTrustInfo(trustId);
+  const [selectedArn, setSelectedArn] = useState(null);
   const boxColor = useColorModeValue('gray.100','gray.800');
 
   return <Modal size='xl' onClose={onClose} isOpen={isOpen} isCentered> 
@@ -203,14 +214,18 @@ export function DepositFundsModal({rootKeyId, trustId, onClose, isOpen, ...rest}
                   <ListItem key={'deposit-' + asset[0]} borderRadius='full'
                     bg={boxColor} cursor='pointer' _hover={{
                       transform: 'scale(1.1)'
-                    }} boxShadow='md'>
+                    }} boxShadow='md'
+                    onClick={() => setSelectedArn(asset[0])}> 
                     <HStack pr='2em'>
                       {asset[1].icon({size:'50px'})}
-                      <Text>{asset[1].name}</Text>
+                      {selectedArn !== asset[0] && <><Text>{asset[1].name}</Text>
                       <Text fontSize='xs' fontStyle='italic' color='gray'>({asset[1].symbol})</Text>
                       <Spacer/>
                       <BsWallet color='gray'/>
-                      <Text><WalletArnBalanceLabel address={asset[1].contractAddress}/></Text>
+                      <Text><WalletArnBalanceLabel address={asset[1].contractAddress}/></Text></>}
+                      {selectedArn === asset[0] && 
+                        <WalletArnBalanceSlider rootKeyId={rootKeyId} onClose={onClose} 
+                          address={asset[1].contractAddress} symbol={asset[1].symbol}/>}
                     </HStack>
                   </ListItem>
                 )}
@@ -226,7 +241,6 @@ export function DepositFundsModal({rootKeyId, trustId, onClose, isOpen, ...rest}
 
 const TrustArnBalanceLabel = ({trustId, arn, ...rest}) => {
   const trustArnBalance = useContextArnBalances(TRUST_CONTEXT_ID, trustId, [arn]);
-
   return !trustArnBalance.isSuccess ? <Skeleton width='4em' height='1.2em'/> :
     <>{ethers.utils.formatEther(trustArnBalance.data[0])}</>
 }
@@ -237,7 +251,72 @@ const WalletArnBalanceLabel = ({address, ...rest}) => {
     addressOrName: account.address,
     token: address
   });
-
   return !balance.isSuccess ? <Skeleton width='3em' height='1em'/> :
-    <>{balance.data.formatted.match(/.*\.[0-9][0-9]?/)}</>;
+    <>{ethers.utils.commify(balance.data.formatted.match(/.*\.[0-9][0-9]?/))}</>;
+}
+
+const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) => {
+  const toast = useToast();
+  const account = useAccount();
+  const balance = useBalance({
+    addressOrName: account.address,
+    token: address
+  });
+  const [depositAmount, setDepositAmount] = useState(0);
+
+  const errorFunc = function(error) {
+    toast({
+      title: 'Transaction Error!',
+      description: error.toString(),
+      status: 'error',
+      duration: 9000,
+      isClosable: true
+    });
+  };
+
+  const successFunc = function(data) {
+    toast({
+      title: 'Funds Deposited!',
+      description: 'You\'ve added ' + depositAmount + ' ' + symbol + '.',
+      status: 'success',
+      duration: 9000,
+      isClosable: true
+    });
+    onClose();
+  };
+
+  const etherDeposit = useEtherDeposit(rootKeyId, 
+    address === null ? ethers.utils.parseEther(depositAmount.toString()) : BigNumber.from(0),
+    errorFunc, successFunc); 
+  var buttonProps = (etherDeposit.isLoading) ? {isLoading: true} : {};
+
+
+  return  !balance.isSuccess ? <Skeleton height='1.2em' width='10em'/> : 
+        <HStack spacing='1em' width='100%'>
+          <Box width='50%'>
+            <Slider width='90%' defaultValue={depositAmount} min={0}
+              ml='1em' mt='0.3em'
+              max={balance.data.formatted} step={0.01}
+              onChangeEnd={(e) => setDepositAmount(e)}>
+              <SliderTrack bg='blue.200'>
+                <Box position='relative' right={10} />
+                <SliderFilledTrack bg='blue.600'/>
+              </SliderTrack>
+              <SliderThumb boxSize={7}>
+                <Box color='blue'><FiUploadCloud size='20px'/></Box>
+              </SliderThumb>
+            </Slider>
+          </Box>
+          <VStack spacing='0'>
+            <Text fontSize='xxs' maxWidth='4em' noOfLines={1}>{depositAmount}</Text>
+            <Text fontSize='xxs'>{symbol}</Text>
+          </VStack>
+          <Spacer/>
+          <Button {...buttonProps} 
+          onClick={address === null ? 
+          () => {etherDeposit.write?.();} :
+          () => {alert('hiya');}}
+            size='sm' 
+            colorScheme='blue' borderRadius='full' leftIcon={<RiSafeLine/>}>Deposit</Button>
+        </HStack>
 }

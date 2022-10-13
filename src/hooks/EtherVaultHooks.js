@@ -25,3 +25,24 @@ export function useEtherWithdrawal(keyId, amount, errorFunc, successFunc) {
     }
   });
 }
+
+/**
+ * useEtherDeposit
+ *
+ * This uses a key to deposit ether into the
+ * local ether vault.
+ */
+export function useEtherDeposit(keyId, amount, errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('vault', 'deposit',
+      [keyId, {value: amount}], amount > 0));
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}

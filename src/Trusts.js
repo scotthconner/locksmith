@@ -220,13 +220,13 @@ export function Trust() {
                   leftIcon={<IoIosAdd/>}
                   onClick={depositDisclosure.onOpen}>
                     Deposit</Button>}
-              {hasRoot && trustInfo.isSuccess && 
+              {(hasRoot && trustInfo.isSuccess) && 
                 <DepositFundsModal rootKeyId={trustInfo.data.rootKeyId}
                   trustId={id} onClose={depositDisclosure.onClose}
                   isOpen={depositDisclosure.isOpen}/>}
             </HStack>
           }
-          {!trustBalanceSheet.isSuccess ?
+          {!(trustBalanceSheet.isSuccess && trustInfo.isSuccess) ?
             <VStack mt='1.5em'>
               <Skeleton width='100%' height='4em'/>
               <Skeleton width='100%' height='4em'/>
