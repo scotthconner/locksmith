@@ -30,6 +30,9 @@ import {
   TrustKey,
   CreateKeyModal
 } from './trusts/TrustKeys.js';
+import {
+  TrustEvent
+} from './trusts/Events.js';
 import { 
   TrustedLedgerActors, 
   AddTrustedLedgerActorModal
@@ -60,6 +63,9 @@ import {
   useContextArnRegistry,
   useContextBalanceSheet
 } from './hooks/LedgerHooks.js';
+import {
+  useTrustEventRegistry,
+} from './hooks/TrustEventLogHooks.js';
 import {
   TrustBalanceUSD
 } from './components/Trust.js';
@@ -170,6 +176,7 @@ export function Trust() {
   const trustArnBalances = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[1] : [];
   const trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
   const trustedProviders = useTrustedActors(id, COLLATERAL_PROVIDER);
+  const registeredEvents = useTrustEventRegistry(id);
   const trustedScribes = useTrustedActors(id, SCRIBE);
   const providerDisclosure = useDisclosure();
   const scribeDisclosure = useDisclosure();
@@ -192,7 +199,10 @@ export function Trust() {
   let scribeCount = trustedScribes.isSuccess ?  
     <Tag mr='1em'><TagLabel>{trustedScribes.data.length}</TagLabel></Tag> : 
     <Skeleton mr='1em' width='1em' height='1em'/>;
-
+  let eventCount = registeredEvents.isSuccess ?
+    <Tag mr='1em'><TagLabel>{registeredEvents.data.length}</TagLabel></Tag> :
+    <Skeleton mr='1em' width='1em' height='1em'/>;
+  
   return (<>
     {!trustInfo.isSuccess ? <Skeleton width='20em' height='3em'/> :
       <Heading>
@@ -203,6 +213,7 @@ export function Trust() {
       <TabList>
         <Tab>{trustArnCount}Assets</Tab>
         <Tab>{trustKeyCount}Keys</Tab>
+        <Tab>{eventCount}Events</Tab>
         <Tab>{providerCount}Collateral Providers</Tab>
         <Tab>{scribeCount}Scribes</Tab>
       </TabList>
@@ -274,6 +285,36 @@ export function Trust() {
                 <TrustKey rootKeyId={trustInfo.data.rootKeyId} key={k} keyId={k}/>
               ))}
             </VStack>}
+        </TabPanel>
+        <TabPanel>
+          {!registeredEvents.isSuccess && <>
+            <Skeleton width='14em' height='1.1em' mt='1.5em'/>
+            <VStack mt='1.5em'>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+            </VStack></>}
+          {registeredEvents.isSuccess && <>
+              <HStack mt='1.5em'>
+                <Text fontSize='lg'>
+                  This trust has <b>{registeredEvents.data.length}</b>&nbsp;
+                  {registeredEvents.data.legnth > 1 || 
+                    registeredEvents.data.length === 0 ? 'events' : 'event'}.
+                </Text>
+                <Spacer/>
+                {hasRoot && <Button
+                  colorScheme='blue'
+                  leftIcon={<IoIosAdd/>}
+                  onClick={() => {}}>
+                    Add Event</Button>}
+              </HStack>
+              <VStack spacing='2em' pb='2em' pt='2em'>
+              { registeredEvents.data.map((event) => (
+                <TrustEvent trustId={id} key={event} eventHash={event}/> 
+              ))}
+              </VStack></>
+          }
         </TabPanel>
         <TabPanel>
           {!(trustedProviders.isSuccess && trustInfo.isSuccess) ? <> 

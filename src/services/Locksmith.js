@@ -11,7 +11,8 @@ const Locksmith = (function() {
     notary: require("../contracts/Notary.sol/Notary.json"),
     ledger: require("../contracts/Ledger.sol/Ledger.json"),
     vault: require("../contracts/providers/EtherVault.sol/EtherVault.json"),
-    tokenVault: require("../contracts/providers/TokenVault.sol/TokenVault.json")
+    tokenVault: require("../contracts/providers/TokenVault.sol/TokenVault.json"),
+    events: require("../contracts/TrustEventLog.sol/TrustEventLog.json"),
   };
 
   return {
