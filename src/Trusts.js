@@ -31,7 +31,8 @@ import {
   CreateKeyModal
 } from './trusts/TrustKeys.js';
 import {
-  TrustEvent
+  TrustEvent,
+  AddEventDialog,
 } from './trusts/Events.js';
 import { 
   TrustedLedgerActors, 
@@ -182,6 +183,7 @@ export function Trust() {
   const scribeDisclosure = useDisclosure();
   const createKeyDisclosure = useDisclosure();
   const depositDisclosure = useDisclosure();
+  const createEventDisclosure = useDisclosure();
   var account = useAccount();
   var userKeyBalance = useKeyBalance(trustInfo.isSuccess ? trustInfo.data.rootKeyId : null, account.address);
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false;
@@ -299,15 +301,17 @@ export function Trust() {
               <HStack mt='1.5em'>
                 <Text fontSize='lg'>
                   This trust has <b>{registeredEvents.data.length}</b>&nbsp;
-                  {registeredEvents.data.legnth > 1 || 
+                  {registeredEvents.data.length > 1 || 
                     registeredEvents.data.length === 0 ? 'events' : 'event'}.
                 </Text>
                 <Spacer/>
                 {hasRoot && <Button
                   colorScheme='blue'
                   leftIcon={<IoIosAdd/>}
-                  onClick={() => {}}>
+                  onClick={createEventDisclosure.onOpen}>
                     Add Event</Button>}
+                {hasRoot && <AddEventDialog trustId={id} isOpen={createEventDisclosure.isOpen}
+                  onClose={createEventDisclosure.onClose} rootKeyId={trustInfo.data.rootKeyId}/>}
               </HStack>
               <VStack spacing='2em' pb='2em' pt='2em'>
               { registeredEvents.data.map((event) => (

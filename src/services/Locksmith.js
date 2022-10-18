@@ -13,6 +13,7 @@ const Locksmith = (function() {
     vault: require("../contracts/providers/EtherVault.sol/EtherVault.json"),
     tokenVault: require("../contracts/providers/TokenVault.sol/TokenVault.json"),
     events: require("../contracts/TrustEventLog.sol/TrustEventLog.json"),
+    keyOracle: require("../contracts/dispatchers/KeyOracle.sol/KeyOracle.json"),
   };
 
   return {
