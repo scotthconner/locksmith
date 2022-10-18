@@ -131,7 +131,8 @@ export const AddEventDialog = ({trustId, rootKeyId, isOpen, onClose}) => {
           </List>
           </Collapse>
           <Collapse in={keyOracleDisclosure.isOpen} width='100%'>
-            <KeyOracleForm trustId={trustId} rootKeyId={rootKeyId} onClose={onClose}/>
+            <KeyOracleForm trustId={trustId} rootKeyId={rootKeyId} onClose={onClose}
+              onToggle={() => {keyOracleDisclosure.onToggle(); choicesDisclosure.onToggle();}}/>
           </Collapse>
         </ModalBody>
         <ModalFooter>
@@ -140,7 +141,7 @@ export const AddEventDialog = ({trustId, rootKeyId, isOpen, onClose}) => {
   </Modal>
 }
 
-const KeyOracleForm = ({trustId, rootKeyId, onClose}) => {
+const KeyOracleForm = ({trustId, rootKeyId, onClose, onToggle}) => {
   const keys = useTrustKeys(trustId);
   const toast = useToast();
 
@@ -170,6 +171,7 @@ const KeyOracleForm = ({trustId, rootKeyId, onClose}) => {
         isClosable: true
       });
       onClose();
+      onToggle();
     }
   );
 
@@ -197,6 +199,7 @@ const KeyOracleForm = ({trustId, rootKeyId, onClose}) => {
       </FormControl>
     <HStack width='100%'>
       <Spacer/>
+      <Button onClick={onToggle}>Cancel</Button>
       <Button {...buttonProps} leftIcon={<HiOutlineLightningBolt/>} colorScheme='yellow'
         onClick={
           () => { createKeyOracle.write?.(); }
