@@ -53,6 +53,11 @@ export function TrustEvent({trustId, eventHash, ...rest}) {
     const eventDispatcher = useEventDispatcher(eventHash);
     const keyOracleAddress = Locksmith.getContractAddress('keyOracle');
 
+    const eventTypes = {}
+    eventTypes[keyOracleAddress] = 'KEY_ORACLE';
+    const eventType = !eventDispatcher.isSuccess ? null : 
+      eventTypes[eventDispatcher.data] || 'UNKNOWN';
+
 	return  <Box p='1em' width='90%' 
       borderRadius='lg' bg={boxColor} boxShadow='dark-lg'
       _hover= {{
@@ -67,8 +72,11 @@ export function TrustEvent({trustId, eventHash, ...rest}) {
           { !eventDescription.isSuccess && <Skeleton width='10em' height='1em'/> }
           { eventDescription.isSuccess && <Text><b>{eventDescription.data}</b></Text> }
           { !eventDispatcher.isSuccess && <Skeleton width='15em' height='1em'/> }
-          { eventDispatcher.isSuccess && keyOracleAddress === eventDispatcher.data && 
+          { eventType === 'KEY_ORACLE' && 
             <KeyOracleEventDescription eventHash={eventHash}/> 
+          }
+          { eventType === 'UNKNOWN' &&
+            <Text color='gray'>We don't recognize the event dispatcher.</Text>
           }
         </VStack>
         <Spacer/>
