@@ -27,6 +27,20 @@ export function useEventKey(eventHash) {
 }
 
 /**
+ * useOracleKeyEvents
+ *
+ * With a given keyID, will return all of the event hashes that are associated
+ * with that key in the KeyOracle event dispatcher.
+ */
+export function useOracleKeyEvents(keyId) {
+  const provider = useProvider();
+  const keyOracle = useContract(Locksmith.getContract('keyOracle', provider));
+  return useQuery('getOracleKeyEvents for ' + keyId, async function() {
+    return await keyOracle.getOracleKeyEvents(keyId);
+  });
+}
+
+/**
  * useCreateKeyOracle
  * 
  * Assuming the caller is root, create a key oracle event.
@@ -36,6 +50,32 @@ export function useCreateKeyOracle(rootKeyId, keyId, description, errorFunc, suc
     Locksmith.getContractWrite('keyOracle', 'createKeyOracle',
       [rootKeyId, keyId, ethers.utils.formatBytes32String(description||'')],
       rootKeyId && keyId && description 
+    )
+  );
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}
+
+/**
+ * useFireKeyOracleEvent
+ *
+ * This will call the contract and attempt to fire the event.
+ * All the pre-reqs must be met or this will fail. The caller must
+ * own the key, the key must be an oracle for the event hash, the event
+ * hash must be registered, and it need not already be fired.
+ */
+export function useFireKeyOracleEvent(keyId, eventHash, errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('keyOracle', 'fireKeyOracleEvent',
+      [keyId, eventHash], 
+      keyId && eventHash 
     )
   );
 

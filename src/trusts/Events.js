@@ -84,7 +84,7 @@ export function TrustEvent({trustId, eventHash, ...rest}) {
 	</Box>
 }
 
-const KeyOracleEventDescription = ({eventHash, ... rest}) => {
+const KeyOracleEventDescription = ({eventHash, ...rest}) => {
   const eventKey = useEventKey(eventHash);
   return !eventKey.isSuccess ? <Skeleton width='12em' height='1em'/> :
     <KeyOracleKeyLabel keyId={eventKey.data}/> 

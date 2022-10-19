@@ -242,12 +242,6 @@ export function DepositFundsModal({rootKeyId, trustId, onClose, isOpen, ...rest}
   </Modal>
 }
 
-const TrustArnBalanceLabel = ({trustId, arn, ...rest}) => {
-  const trustArnBalance = useContextArnBalances(TRUST_CONTEXT_ID, trustId, [arn]);
-  return !trustArnBalance.isSuccess ? <Skeleton width='4em' height='1.2em'/> :
-    <>{ethers.utils.formatEther(trustArnBalance.data[0])}</>
-}
-
 const WalletArnBalanceLabel = ({address, ...rest}) => {
   const account = useAccount();
   const balance = useBalance({
