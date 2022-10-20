@@ -42,6 +42,9 @@ import {
   TrustArn,
   DepositFundsModal,
 } from './trusts/Assets.js';
+import {
+  TrustPolicy
+} from './trusts/Policies.js';
 import { useNavigate } from 'react-router-dom';
 
 //////////////////////////////////////
@@ -67,6 +70,9 @@ import {
 import {
   useTrustEventRegistry,
 } from './hooks/TrustEventLogHooks.js';
+import {
+  useTrustPolicyKeys,
+} from './hooks/TrusteeHooks.js';
 import {
   TrustBalanceUSD
 } from './components/Trust.js';
@@ -176,6 +182,7 @@ export function Trust() {
   const trustArns = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[0] : []; 
   const trustArnBalances = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[1] : [];
   const trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
+  const trustPolicyKeys = useTrustPolicyKeys(id);
   const trustedProviders = useTrustedActors(id, COLLATERAL_PROVIDER);
   const registeredEvents = useTrustEventRegistry(id);
   const trustedScribes = useTrustedActors(id, SCRIBE);
@@ -184,6 +191,7 @@ export function Trust() {
   const createKeyDisclosure = useDisclosure();
   const depositDisclosure = useDisclosure();
   const createEventDisclosure = useDisclosure();
+  const trusteeDisclosure = useDisclosure();
   var account = useAccount();
   var userKeyBalance = useKeyBalance(trustInfo.isSuccess ? trustInfo.data.rootKeyId : null, account.address);
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false;
@@ -204,6 +212,9 @@ export function Trust() {
   let eventCount = registeredEvents.isSuccess ?
     <Tag mr='1em'><TagLabel>{registeredEvents.data.length}</TagLabel></Tag> :
     <Skeleton mr='1em' width='1em' height='1em'/>;
+  let trusteeCount = trustPolicyKeys.isSuccess ?
+    <Tag mr='1em'><TagLabel>{trustPolicyKeys.data.length}</TagLabel></Tag> :
+    <Skeleton mr='1em' width='1em' height='1em'/>;
   
   return (<>
     {!trustInfo.isSuccess ? <Skeleton width='20em' height='3em'/> :
@@ -211,12 +222,13 @@ export function Trust() {
         {trustInfo.data.trustKeyCount < 1 ? 'Invalid Trust' : trustInfo.data.name}
       </Heading>
     }
-    <Tabs isLazy isFitted mt='1.5em' defaultIndex={['assets','keys','providers','scribes'].indexOf(tab)}>
+    <Tabs isLazy isFitted mt='1.5em' defaultIndex={['assets','keys','events','policies','providers','scribes'].indexOf(tab)}>
       <TabList>
         <Tab>{trustArnCount}Assets</Tab>
         <Tab>{trustKeyCount}Keys</Tab>
         <Tab>{eventCount}Events</Tab>
-        <Tab>{providerCount}Collateral Providers</Tab>
+        <Tab>{trusteeCount}Policies</Tab>
+        <Tab>{providerCount}Providers</Tab>
         <Tab>{scribeCount}Scribes</Tab>
       </TabList>
       <TabPanels>
@@ -318,6 +330,34 @@ export function Trust() {
                 <TrustEvent trustId={id} key={event} eventHash={event}/> 
               ))}
               </VStack></>
+          }
+        </TabPanel>
+        <TabPanel>
+          { !trustPolicyKeys.isSuccess && <>
+            <Skeleton width='14em' height='1.1em' mt='1.5em'/>
+            <VStack mt='1.5em'>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+            </VStack></>
+          }{ trustPolicyKeys.isSuccess && 
+            <><HStack mt='1.5em'>
+                <Text fontSize='lg'>
+                  This trust has <b>{trustPolicyKeys.data.length}</b> &nbsp;
+                  {trustPolicyKeys.data.length === 1 ? 'policy' : 'policies'}.
+                </Text>
+                <Spacer/>
+                {hasRoot && <Button
+                  colorScheme='blue'
+                  leftIcon={<IoIosAdd/>}
+                  onClick={trusteeDisclosure.onOpen}>
+                    Add Trustee</Button>}
+              </HStack>
+              <VStack spacing='2em' pb='2em' pt='2em'>
+              { trustPolicyKeys.data.map((k) => (
+                <TrustPolicy trustId={id} keyId={k} key={'policy-' + k.toString()}/>
+              ))}</VStack></>
           }
         </TabPanel>
         <TabPanel>

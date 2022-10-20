@@ -14,6 +14,7 @@ const Locksmith = (function() {
     tokenVault: require("../contracts/providers/TokenVault.sol/TokenVault.json"),
     events: require("../contracts/TrustEventLog.sol/TrustEventLog.json"),
     keyOracle: require("../contracts/dispatchers/KeyOracle.sol/KeyOracle.json"),
+    trustee: require("../contracts/scribes/Trustee.sol/Trustee.json"),
   };
 
   return {
