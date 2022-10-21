@@ -36,9 +36,33 @@ export function useTrustPolicyKeys(trustId) {
  * [EventHash:Bytes32]: a list of event hashes that are required for the policy to be enabled
  */
 export function usePolicy(keyId) {
-const provider = useProvider();
+  const provider = useProvider();
   const trustee = useContract(Locksmith.getContract('trustee', provider));
   return useQuery('usePolicy for ' + keyId, async function() {
     return await trustee.getPolicy(keyId);
+  });
+}
+
+/**
+ * useRemovePolicy
+ *
+ * Given a held root key Id, and a key policy id, remove the key trustee
+ * from the trust, regardless of state.
+ */
+export function useRemovePolicy(rootKeyId, keyId, errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('trustee', 'removePolicy',
+      [rootKeyId, keyId],
+      rootKeyId && keyId 
+    )
+  );
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
   });
 }

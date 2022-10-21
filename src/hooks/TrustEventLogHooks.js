@@ -56,6 +56,6 @@ export function useEventState(eventHash) {
   const provider = useProvider();
   const events = useContract(Locksmith.getContract('events', provider));
   return useQuery('firedEvents for ' + eventHash, async function() {
-    return await events.firedEvents(eventHash);
+    return eventHash ? await events.firedEvents(eventHash) : null;
   });
 }

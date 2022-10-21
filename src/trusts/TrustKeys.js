@@ -32,6 +32,7 @@ import {
   Tag,
   TagLabel,
   TagLeftIcon,
+  Tooltip,
   VStack,
   useColorModeValue,
   useDisclosure,
@@ -110,9 +111,11 @@ export function TrustKey({keyId, rootKeyId, ...rest}) {
             <HStack>
               {!keyInventory.isSuccess || !keyInfo.isSuccess ? 
               <Skeleton width='2.2em' height='1.3em'/> : 
-              <Button {... !(hasRoot) ? {isDisabled: true} : {}}
-                onClick={copyKeyDisclosure.onOpen}
-                size='sm' leftIcon={KeyInfoIcon(keyInfo)}>{keyInventory.data.toString()}</Button>}
+              <Tooltip label='Copy Key'>
+                <Button {... !(hasRoot) ? {isDisabled: true} : {}}
+                  onClick={copyKeyDisclosure.onOpen}
+                  size='sm' leftIcon={KeyInfoIcon(keyInfo)}>{keyInventory.data.toString()}</Button>
+              </Tooltip> }
               <KeyActionModal
                 rootKeyId={rootKeyId} keyId={keyId}
                 isOpen={copyKeyDisclosure.isOpen} onOpen={copyKeyDisclosure.onOpen} 
@@ -121,7 +124,9 @@ export function TrustKey({keyId, rootKeyId, ...rest}) {
             <HStack>
               {!keyHolders.isSuccess ? 
               <Skeleton width='2.2em' height='1.3em'/> : 
-              <Button {... buttonProps} size='sm' leftIcon={<AiOutlineUser/>}>{keyHolders.data.length}</Button>}
+              <Tooltip label='Key Holders'>
+                <Button {... buttonProps} size='sm' leftIcon={<AiOutlineUser/>}>{keyHolders.data.length}</Button>
+              </Tooltip> }
             </HStack>
           </HStack> }
         </HStack>

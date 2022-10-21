@@ -333,7 +333,7 @@ export function Trust() {
           }
         </TabPanel>
         <TabPanel>
-          { !trustPolicyKeys.isSuccess && <>
+          { !(trustPolicyKeys.isSuccess || trustInfo.isSuccess) && <>
             <Skeleton width='14em' height='1.1em' mt='1.5em'/>
             <VStack mt='1.5em'>
               <Skeleton width='100%' height='4em'/>
@@ -341,7 +341,7 @@ export function Trust() {
               <Skeleton width='100%' height='4em'/>
               <Skeleton width='100%' height='4em'/>
             </VStack></>
-          }{ trustPolicyKeys.isSuccess && 
+          }{ trustPolicyKeys.isSuccess && trustInfo.isSuccess &&
             <><HStack mt='1.5em'>
                 <Text fontSize='lg'>
                   This trust has <b>{trustPolicyKeys.data.length}</b> &nbsp;
@@ -352,11 +352,12 @@ export function Trust() {
                   colorScheme='blue'
                   leftIcon={<IoIosAdd/>}
                   onClick={trusteeDisclosure.onOpen}>
-                    Add Trustee</Button>}
+                    Add Policy</Button>}
               </HStack>
               <VStack spacing='2em' pb='2em' pt='2em'>
               { trustPolicyKeys.data.map((k) => (
-                <TrustPolicy trustId={id} keyId={k} key={'policy-' + k.toString()}/>
+                <TrustPolicy rootKeyId={trustInfo.data.rootKeyId} 
+                  trustId={id} keyId={k} key={'policy-' + k.toString()}/>
               ))}</VStack></>
           }
         </TabPanel>
