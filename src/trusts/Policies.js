@@ -233,7 +233,7 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
   const isKeyError = !trusteeKey || trusteeKey === 'Choose Key';
 
   const buttonProps = isKeyError ? {isDisabled: true} : {};
-  const keyButtonProps = {};
+  const keyButtonProps = beneficiaries.length < 1 ? {isDisabled: true}: {};
 
   return <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'>
       <ModalOverlay backdropFilter='blur(10px)'/>
