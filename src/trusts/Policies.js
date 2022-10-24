@@ -46,15 +46,22 @@ import Locksmith from '../services/Locksmith.js';
 import { 
   useInspectKey,
   useKeyHolders,
+  useTrustKeys,
 } from '../hooks/LocksmithHooks.js';
 import { 
   useEventState,
-  useEventDescription
+  useEventDescription,
+  useTrustEventRegistry,
 } from '../hooks/TrustEventLogHooks.js';
 import { 
   usePolicy, 
   useRemovePolicy 
 } from '../hooks/TrusteeHooks.js';
+
+// hook components
+import {
+  TrustKeyOption
+} from './Events.js';
 
 export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
 	var boxColor = useColorModeValue('white', 'gray.800');
@@ -212,4 +219,170 @@ export function PolicyActivationTag({events, position, total, ...rest}) {
       ) : 
     <PolicyActivationTag events={events} position={position+1}
       total={total+doesCount}/>
+}
+
+export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) {
+  const keys = useTrustKeys(trustId);
+  const eventsDisclosure = useDisclosure();
+  const keyDisclosure = useDisclosure();
+  const events = useTrustEventRegistry(trustId);
+  const [trusteeKey, setTrusteeKey] = useState(null);
+  const [eventHashes, setEventHashes] = useState([]);
+  const [beneficiaries, setBeneficiaries] = useState([]);
+  const trusteeKeyInfo = useInspectKey(trusteeKey);
+  const isKeyError = !trusteeKey || trusteeKey === 'Choose Key';
+
+  const buttonProps = isKeyError ? {isDisabled: true} : {};
+  const keyButtonProps = {};
+
+  return <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'>
+      <ModalOverlay backdropFilter='blur(10px)'/>
+      <ModalContent>
+        <ModalHeader>Create Trustee Policy</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Text>You can allow a <b>trustee</b> to distribute funds in the trust to certain <b>beneficiaries.</b> You can restrict the ability to distribute assets until certain <b>event conditions</b> are met.</Text> 
+          <Collapse in={!eventsDisclosure.isOpen && !keyDisclosure.isOpen}>
+            <Text mt='1em'>First, pick a <b>trustee</b> by choosing which key to give distribution rights.</Text>
+            <FormControl mt='1em' isInvalid={isKeyError}>
+              <FormLabel>Trustee Key</FormLabel>
+              <Select placeholder='Choose Key' variant='filled'
+                onChange={(e) => { setTrusteeKey(e.target.value) }}>
+                {keys.isSuccess &&
+                  keys.data.map((k) => <TrustKeyOption key={'select-option-key' + k} keyId={k}/>)}
+              </Select>
+              { isKeyError && <FormErrorMessage>Which key do you want to give distribution rights to?</FormErrorMessage>}
+            </FormControl>
+          </Collapse>
+          <Collapse in={eventsDisclosure.isOpen}>
+            <HStack mt='1em'>
+              <Text>You've chosen to trust</Text> 
+              {(!trusteeKeyInfo.isSuccess || !trusteeKeyInfo.data) && <Skeleton height='1.2em' width='8em'/>}
+              {trusteeKeyInfo.isSuccess && trusteeKeyInfo.data && KeyInfoIcon(trusteeKeyInfo)}
+              {trusteeKeyInfo.isSuccess && trusteeKeyInfo.data && <Text><b>{trusteeKeyInfo.data.alias}</b> with distribution rights.</Text>}
+            </HStack>
+            <FormControl mt='1em'>
+              <FormLabel>Add Event Conditions</FormLabel>
+              <Select placeholder='Choose Event' variant='filled'
+                onChange={(e) => {
+                  setEventHashes([eventHashes, e.target.value].flat()); 
+                }}>
+                  {events.isSuccess &&
+                    events.data.map((e) => !eventHashes.includes(e) && 
+                      <TrustEventOption key={'select-event-hash-' + e} eventHash={e}/>)}
+              </Select>
+            </FormControl>
+            <VStack mt='1em' align='stretch' spacing='1em'>
+            { eventHashes.map((h) => 
+              <SelectedTrustEvent eventHash={h} key={'selected-trust-event-' + h}
+                removeMe={() => {
+                  setEventHashes(eventHashes.filter(function(eh) {
+                    return eh !== h;
+                  }));
+                }}/> ) }
+            </VStack>
+          </Collapse>
+          <Collapse in={keyDisclosure.isOpen}>
+            <HStack mt='1em'>
+              <Text>You've chosen to trust </Text>
+              {(!trusteeKeyInfo.isSuccess || !trusteeKeyInfo.data) && <Skeleton height='1.2em' width='8em'/>}
+              {trusteeKeyInfo.isSuccess && trusteeKeyInfo.data && KeyInfoIcon(trusteeKeyInfo)}
+              {trusteeKeyInfo.isSuccess && trusteeKeyInfo.data && <Text><b>{trusteeKeyInfo.data.alias}</b> with distribution rights.</Text>}
+            </HStack>
+            <VStack mt='1em' align='stretch' spacing='1em'>
+              { eventHashes.length > 0 && <Text>But only after:</Text> }
+              { eventHashes.map((h) =>
+                <SelectedTrustEvent hideRemove={true} eventHash={h} 
+                  key={'selected-trust-event-' + h}/>)}
+            </VStack>
+            <FormControl mt='1em'>
+              <FormLabel>Add Beneficiaries</FormLabel>
+              <Select placeholder='Choose Key' variant='filled'
+                onChange={(e) => {
+                  setBeneficiaries([beneficiaries, e.target.value].flat());
+                }}>
+                  { keys.isSuccess &&
+                      keys.data.map((k) => !k.eq(rootKeyId) && !beneficiaries.includes(k.toString()) && 
+                      <TrustKeyOption key={'select-option-key' + k} keyId={k}/>)}
+              </Select>
+            </FormControl>
+            <VStack align='stretch' mt='1em' spacing='1em'>
+            { beneficiaries.map((b) => 
+              <SelectedBeneficiaryKey keyId={b} key={'selected-beneficiary-key-' + b}
+                removeMe={() => {
+                  setBeneficiaries(beneficiaries.filter(function(bk) {
+                    return bk !== b.toString();
+                  }));
+                }}/>
+            ) }
+            </VStack>
+          </Collapse>
+        </ModalBody>
+        <ModalFooter>
+          {!eventsDisclosure.isOpen && !keyDisclosure.isOpen &&
+            <Button {... buttonProps} colorScheme='blue'
+              onClick={eventsDisclosure.onOpen}>
+              Trust {trusteeKeyInfo.isSuccess && trusteeKeyInfo.data && 
+                ("'" + trusteeKeyInfo.data.alias + "'") }
+            </Button> }
+          {eventsDisclosure.isOpen && 
+            <HStack spacing='1em'>
+              <Button onClick={eventsDisclosure.onClose} colorScheme='gray'>Back</Button>
+              <Button onClick={() => {keyDisclosure.onOpen(); eventsDisclosure.onClose(); }}
+                colorScheme='blue'>
+                Require {eventHashes.length} Events
+              </Button>
+            </HStack> }
+          {keyDisclosure.isOpen && 
+            <HStack spacing='1em'>
+              <Button onClick={() => {
+                  keyDisclosure.onClose();
+                  eventsDisclosure.onOpen(); 
+                }} colorScheme='gray'>Back</Button>
+              <Button onClick={() => {}}
+                {... keyButtonProps} colorScheme='blue'>
+                Create {beneficiaries.length} Beneficiaries 
+              </Button>
+            </HStack> }
+        </ModalFooter>
+      </ModalContent>
+   </Modal>
+}
+
+export function TrustEventOption({eventHash, ...rest}) {
+  const description = useEventDescription(eventHash);
+  return description.isSuccess && 
+    <option value={eventHash}>{description.data}</option>
+}
+
+export function SelectedTrustEvent({eventHash, removeMe, hideRemove, ...rest}) {
+  const description = useEventDescription(eventHash);
+  const state = useEventState(eventHash);
+
+  return <HStack>
+    { !state.isSuccess && <Skeleton width='2em' height='2em'/> }
+    { state.isSuccess && state.data && <FcCheckmark/> }
+    { state.isSuccess && !state.data && <IoIosHourglass/> }
+    { !description.isSuccess && <Skeleton width='5em' height='1em'/> }
+    { description.isSuccess && <Text>{description.data}</Text> }
+    <Spacer/>
+    { !hideRemove && <Button size='sm' colorScheme='red' onClick={() => {
+      removeMe();
+    }}><BsTrash/></Button> }
+  </HStack>
+}
+
+export function SelectedBeneficiaryKey({keyId, removeMe, hideRemove, ...rest}) {
+  const key = useInspectKey(keyId);
+
+  return <HStack>
+    { !key.isSuccess && <Skeleton width='2em' height='2em'/> }
+    { key.isSuccess && KeyInfoIcon(key) }
+    { !key.isSuccess && <Skeleton width='6em' height='1em'/> }
+    { key.isSuccess && <Text>{key.data.alias}</Text> }
+    <Spacer/>
+    { !hideRemove && <Button size='sm' colorScheme='red' onClick={() => {
+      removeMe();
+    }}><BsTrash/></Button> }
+  </HStack>
 }

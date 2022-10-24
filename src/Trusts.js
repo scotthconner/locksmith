@@ -43,7 +43,8 @@ import {
   DepositFundsModal,
 } from './trusts/Assets.js';
 import {
-  TrustPolicy
+  TrustPolicy,
+  AddPolicyDialog,
 } from './trusts/Policies.js';
 import { useNavigate } from 'react-router-dom';
 
@@ -353,6 +354,8 @@ export function Trust() {
                   leftIcon={<IoIosAdd/>}
                   onClick={trusteeDisclosure.onOpen}>
                     Add Policy</Button>}
+                {hasRoot && <AddPolicyDialog trustId={id} rootKeyId={trustInfo.data.rootKeyId} 
+                  onClose={trusteeDisclosure.onClose} isOpen={trusteeDisclosure.isOpen}/> }
               </HStack>
               <VStack spacing='2em' pb='2em' pt='2em'>
               { trustPolicyKeys.data.map((k) => (

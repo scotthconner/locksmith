@@ -129,6 +129,8 @@ export function useInspectKey(keyId) {
   const provider   = useProvider();
   const locksmith = useContract(Locksmith.getContract('locksmith', provider));
   return useQuery('inspectKey for ' + keyId, async function() {
+    if(null === keyId || keyId === '') { return null; }
+
     let response = await locksmith.inspectKey(keyId);
 
     return {

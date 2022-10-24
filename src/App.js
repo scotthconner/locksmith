@@ -31,13 +31,12 @@ import Events from './Events.js';
 
 // We are using alchemy for now
 // Choose which chains you'd like to show
-const chains = [chain.hardhat, chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum];
+const chains = [chain.hardhat, chain.mainnet]; // chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum];
 
 const alchemyId = process.env.ALCHEMY_ID;
 const client = createClient(
   getDefaultClient({
     appName: "Locksmith",
-    alchemyId,
     chains
   })
 );

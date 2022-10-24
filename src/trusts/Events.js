@@ -208,7 +208,7 @@ const KeyOracleForm = ({trustId, rootKeyId, onClose, onToggle}) => {
   </VStack>
 }
 
-const TrustKeyOption = ({keyId, ...rest}) => {
+export function TrustKeyOption({keyId, ...rest}) {
   const key = useInspectKey(keyId);
   return <option value={keyId.toString()}>{keyId.toString()}:&nbsp; 
     {key.isSuccess && key.data.alias}</option>
