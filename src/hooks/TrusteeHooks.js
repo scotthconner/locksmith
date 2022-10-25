@@ -44,6 +44,30 @@ export function usePolicy(keyId) {
 }
 
 /**
+ * useSetPolicy
+ *
+ * Given a root key, will create a Trustee Policy for a given set of events
+ * and associated beneficiary keys.
+ */
+export function useSetPolicy(rootKeyId, trusteeKeyId, beneficiaries, events, errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('trustee', 'setPolicy',
+      [rootKeyId, trusteeKeyId, beneficiaries, events],
+      rootKeyId && trusteeKeyId && beneficiaries.length > 0 && events
+    )
+  );
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}
+
+/**
  * useRemovePolicy
  *
  * Given a held root key Id, and a key policy id, remove the key trustee

@@ -228,7 +228,7 @@ export function Trust() {
         <Tab>{trustArnCount}Assets</Tab>
         <Tab>{trustKeyCount}Keys</Tab>
         <Tab>{eventCount}Events</Tab>
-        <Tab>{trusteeCount}Policies</Tab>
+        <Tab>{trusteeCount}Trustees</Tab>
         <Tab>{providerCount}Providers</Tab>
         <Tab>{scribeCount}Scribes</Tab>
       </TabList>
@@ -345,7 +345,7 @@ export function Trust() {
           }{ trustPolicyKeys.isSuccess && trustInfo.isSuccess &&
             <><HStack mt='1.5em'>
                 <Text fontSize='lg'>
-                  This trust has <b>{trustPolicyKeys.data.length}</b> &nbsp;
+                  This trust has <b>{trustPolicyKeys.data.length}</b> trustee&nbsp;
                   {trustPolicyKeys.data.length === 1 ? 'policy' : 'policies'}.
                 </Text>
                 <Spacer/>
@@ -353,7 +353,7 @@ export function Trust() {
                   colorScheme='blue'
                   leftIcon={<IoIosAdd/>}
                   onClick={trusteeDisclosure.onOpen}>
-                    Add Policy</Button>}
+                    Add Trustee</Button>}
                 {hasRoot && <AddPolicyDialog trustId={id} rootKeyId={trustInfo.data.rootKeyId} 
                   onClose={trusteeDisclosure.onClose} isOpen={trusteeDisclosure.isOpen}/> }
               </HStack>
