@@ -6,7 +6,6 @@ import {
   ListItem,
   FormControl,
   FormLabel,
-  Input,
   FormErrorMessage,
   HStack,
   Modal,
@@ -34,19 +33,15 @@ import { useState } from 'react';
 // icons
 import { KeyInfoIcon } from '../components/KeyInfo.js';
 import { AiOutlineUser } from 'react-icons/ai';
-import { BiCheckCircle } from 'react-icons/bi';
 import { BsTrash } from 'react-icons/bs';
 import { HiOutlineLightningBolt } from 'react-icons/hi';
 import { FaRegHandshake } from 'react-icons/fa';
-import { FiPower } from 'react-icons/fi';
 import { FcCheckmark } from 'react-icons/fc';
 import { IoIosHourglass } from 'react-icons/io';
-import Locksmith from '../services/Locksmith.js';
 
 // Hooks
 import { 
   useInspectKey,
-  useKeyHolders,
   useTrustKeys,
 } from '../hooks/LocksmithHooks.js';
 import { 
@@ -73,7 +68,6 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
     const eventsDisclosure = useDisclosure();
     const key = useInspectKey(keyId);
     const policy = usePolicy(keyId);
-    const keyHolders = useKeyHolders(keyId);
     const removePolicy = useRemovePolicy(rootKeyId, keyId, 
       function(error) {
         toast({
@@ -109,7 +103,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
         { !key.isSuccess && <Skeleton width='5em' height='1em'/> }
         { !key.isSuccess && <Skeleton width='8em' height='1em'/> }
         { key.isSuccess && <b>{key.data.alias}</b> }
-        { policy.isSuccess && <PolicyActivationTag events={policy.data[2]} position={0} total={0}/> }
+        { policy.isSuccess && <PolicyActivationTag events={policy.data[3]} position={0} total={0}/> }
         { !policy.isSuccess && <Skeleton width='5em' height='1em'/> }
         <Spacer/>
         { !policy.isSuccess && <Skeleton width='2.2em' height='1.3em'/> }
@@ -119,7 +113,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
                 beneficiariesDisclosure.onToggle();
                 eventsDisclosure.onClose();
               }}>
-              {policy.data[1].length}
+              {policy.data[2].length}
             </Button> 
           </Tooltip> }
         { !policy.isSuccess && <Skeleton width='2.2em' height='1.3em'/> }
@@ -127,7 +121,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
           <Tooltip label='Required Events'>
             <Button size='sm' leftIcon={<HiOutlineLightningBolt/>}
               onClick={() => { eventsDisclosure.onToggle(); beneficiariesDisclosure.onClose();}}>
-                <PolicyFiredEventCount events={policy.data[2]} position={0} total={0}/> / {policy.data[2].length}
+                <PolicyFiredEventCount events={policy.data[3]} position={0} total={0}/> / {policy.data[3].length}
             </Button>
           </Tooltip>}
         <Tooltip label='Remove Policy'>
@@ -137,12 +131,12 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
       </HStack>
       <List width='100%' spacing='1em' mt={eventsDisclosure.isOpen ? '1em' : '0'}>
         <Collapse width='100%' in={eventsDisclosure.isOpen}>
-          { policy.isSuccess && <PolicyEventList keyId={keyId} events={policy.data[2]}/> }
+          { policy.isSuccess && <PolicyEventList keyId={keyId} events={policy.data[3]}/> }
         </Collapse>
       </List>
       <List width='100%' spacing='1em' mt={beneficiariesDisclosure.isOpen ? '1em' : '0'}>
         <Collapse width='100%' in={beneficiariesDisclosure.isOpen}>
-          { policy.isSuccess && <PolicyBeneficiaryList keyId={keyId} beneficiaries={policy.data[1]}/> }
+          { policy.isSuccess && <PolicyBeneficiaryList keyId={keyId} beneficiaries={policy.data[2]}/> }
         </Collapse>
       </List>
     </Box>

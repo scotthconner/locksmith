@@ -7,7 +7,6 @@ import {
   USDFormatter,
 } from '../hooks/PriceHooks.js';
 import {
-  TRUST_CONTEXT_ID,
   useContextBalanceSheet
 } from '../hooks/LedgerHooks.js';
 import {
@@ -15,8 +14,8 @@ import {
 } from '../services/AssetResource.js';
 import { ethers } from 'ethers';
 
-export function TrustBalanceUSD({trustId, skeletonProps, textProps, ...rest}) {
-  const trustBalanceSheet = useContextBalanceSheet(TRUST_CONTEXT_ID, trustId);
+export function ContextBalanceUSD({contextId, identifier, skeletonProps, textProps, ...rest}) {
+  const trustBalanceSheet = useContextBalanceSheet(contextId, identifier);
 
   // get the trust context arn registry for the given trust ID
   const arns = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[0] : [];

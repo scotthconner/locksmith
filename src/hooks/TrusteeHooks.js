@@ -1,14 +1,11 @@
-import useDebounce from './UseDebounce.js';
 import Locksmith from '../services/Locksmith.js';
 import {useQuery} from 'react-query';
 import {
-  useAccount,
   useProvider,
   useContract,
   usePrepareContractWrite,
   useContractWrite
 } from 'wagmi';
-import {ethers} from 'ethers';
 
 /**
  * useTrustPolicyKeys
@@ -32,6 +29,7 @@ export function useTrustPolicyKeys(trustId) {
  * policy:
  *
  * boolean : is the policy currently enabled
+ * BigNumber: the root key Id that the funds are withdrawn from
  * [KeyId:BigNumber]: a list of key ids that can get distributions from the trustee key
  * [EventHash:Bytes32]: a list of event hashes that are required for the policy to be enabled
  */

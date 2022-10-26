@@ -75,7 +75,7 @@ import {
   useTrustPolicyKeys,
 } from './hooks/TrusteeHooks.js';
 import {
-  TrustBalanceUSD
+  ContextBalanceUSD
 } from './components/Trust.js';
 import { useAccount } from 'wagmi';
 
@@ -135,7 +135,7 @@ export function TrustSummary({trustId, ...rest}) {
             {!trustInfo.isSuccess && <Skeleton width='8em' height='1em'/>}
             {trustInfo.isSuccess && <Text fontSize='lg'><b>{trustInfo.data.name}</b></Text>}
             <VStack spacing='0em'>
-              <TrustBalanceUSD mt='2em' trustId={trustId} textProps={{
+              <ContextBalanceUSD mt='2em' contextId={TRUST_CONTEXT_ID} identifier={trustId} textProps={{
                 fontSize: '2xl',
                 cursor: 'pointer',
                 onClick: () => { navigate('/trust/' + trustId + '/assets/')}
