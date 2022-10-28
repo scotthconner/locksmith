@@ -103,7 +103,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
         { !key.isSuccess && <Skeleton width='5em' height='1em'/> }
         { !key.isSuccess && <Skeleton width='8em' height='1em'/> }
         { key.isSuccess && <b>{key.data.alias}</b> }
-        { policy.isSuccess && <PolicyActivationTag events={policy.data[3]} position={0} total={0}/> }
+        { policy.isSuccess && <PolicyActivationTag activated={policy.data[0]}/> }
         { !policy.isSuccess && <Skeleton width='5em' height='1em'/> }
         <Spacer/>
         { !policy.isSuccess && <Skeleton width='2.2em' height='1.3em'/> }
@@ -195,27 +195,15 @@ export function PolicyFiredEventCount({events, position, total, ...rest}) {
       total={total+doesCount}/>
 }
 
-export function PolicyActivationTag({events, position, total, ...rest}) {
-  // recursively gets the state of the events array and returns the final number
-  // this number will "grow" when each async hook comes back for each event
-  const eventState = useEventState(events.length === 0 ? null : events[position]);
-  const doesCount = eventState.isSuccess && eventState.data ? 1 : 0;
-  const activated = (total + doesCount) === events.length;
-  
-  return position >= (events.length-1) ?
-      (activated ?
-          <Tag size='sm' variant='subtle' colorScheme='green'>
-            <TagLeftIcon boxSize='12px' as={FcCheckmark} />
-            <TagLabel>Activated</TagLabel>
-          </Tag>
-        :
-          <Tag size='sm' variant='subtle' colorScheme='gray'>
-            <TagLeftIcon boxSize='12px' as={IoIosHourglass} />
-            <TagLabel>Waiting</TagLabel>
-          </Tag>
-      ) : 
-    <PolicyActivationTag events={events} position={position+1}
-      total={total+doesCount}/>
+export function PolicyActivationTag({activated, ...rest}) {
+  const colorScheme = activated ? 'green' : 'gray';
+  const icon = activated ? FcCheckmark : IoIosHourglass;
+  const label = activated ? 'Activated' : 'Waiting';
+
+  return <Tag size='sm' variant='subtle' colorScheme={colorScheme}>
+    <TagLeftIcon boxSize='12px' as={icon} />
+    <TagLabel>{label}</TagLabel>
+  </Tag>
 }
 
 export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) {

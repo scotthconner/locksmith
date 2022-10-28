@@ -1,4 +1,5 @@
 import Locksmith from '../services/Locksmith.js';
+import { BigNumber } from 'ethers';
 import {useQuery} from 'react-query';
 import {
   useProvider,
@@ -76,6 +77,38 @@ export function useRemovePolicy(rootKeyId, keyId, errorFunc, successFunc) {
     Locksmith.getContractWrite('trustee', 'removePolicy',
       [rootKeyId, keyId],
       rootKeyId && keyId 
+    )
+  );
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}
+
+/**
+ * useDistribute
+ *
+ * Given a trustee key Id, provider, arn, beneficiary keys and amounts,
+ * use the trustee contract to make an approved-scribe call to "distribute"
+ * on the ledger. There are many reasons this could fail:
+ * - provider is invalid
+ * - scribe contract (trustee.sol) isn't approved on the ledger for the root key
+ * - invalid arn balance for root key on that provider
+ * - invalid beneficiaries
+ */
+export function useDistribute(trusteeKeyId, provider, arn, beneficiaries, amounts,  errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('trustee', 'distribute',
+      [trusteeKeyId, provider, arn, beneficiaries, amounts],
+      trusteeKeyId && provider && arn && beneficiaries.length > 0 &&
+      amounts.reduce((sum, amount) => {
+        return sum.add(amount)
+      }, BigNumber.from(0)).gt(BigNumber.from(0))
     )
   );
 
