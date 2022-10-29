@@ -37,6 +37,10 @@ import { BiCoinStack } from 'react-icons/bi';
 import { FiShare2 } from 'react-icons/fi';
 import { RiSafeLine } from 'react-icons/ri';
 import { KeyInfoIcon } from './components/KeyInfo.js';
+import { 
+  EventStateIcon, 
+  EventDescription 
+} from './components/Event.js';
 import { ContextBalanceUSD } from './components/Trust.js';
 import { PolicyActivationTag } from './trusts/Policies.js';
 
@@ -64,6 +68,10 @@ import {
   usePolicy,
   useDistribute,
 } from './hooks/TrusteeHooks.js';
+import {
+  useEventState,
+  useEventDescription,
+} from './hooks/TrustEventLogHooks.js';
 import {
   useCoinCapPrice,
   USDFormatter,
@@ -187,6 +195,7 @@ export function KeyArnProviderOption({trustId, keyId, trusteeKey, arn, provider,
   const distributeDisclosure = useDisclosure();
   const asset = AssetResource.getMetadata(arn);
   const assetPrice = useCoinCapPrice(asset.coinCapId);
+  const policy = usePolicy(trusteeKey);
   const providerBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, [arn], provider);
   const providerAlias = useTrustedActorAlias(trustId, COLLATERAL_PROVIDER, provider); 
   const ethAmount = !providerBalance.isSuccess ? 0 : 
@@ -206,10 +215,47 @@ export function KeyArnProviderOption({trustId, keyId, trusteeKey, arn, provider,
         { providerAlias.isSuccess && <Text>{providerAlias.data}</Text> }
       </HStack>
     </VStack>
-    { providerBalance.isSuccess && <DistributeFundsDialog trustId={trustId} keyId={keyId} arn={arn}
-      provider={provider} isOpen={distributeDisclosure.isOpen} trusteeKey={trusteeKey}
-        onClose={distributeDisclosure.onClose} balance={providerBalance.data[0]}/> }
+    { providerBalance.isSuccess && policy.isSuccess && policy.data[0] && 
+      <DistributeFundsDialog trustId={trustId} keyId={keyId} arn={arn}
+        provider={provider} isOpen={distributeDisclosure.isOpen} trusteeKey={trusteeKey}
+          onClose={distributeDisclosure.onClose} balance={providerBalance.data[0]}/> }
+    { policy.isSuccess && !policy.data[0] &&
+      <RequiredEventsDialog trustId={trustId} keyId={keyId} trusteeKey={trusteeKey}
+        isOpen={distributeDisclosure.isOpen} onClose={distributeDisclosure.onClose}/> }
   </WrapItem>
+}
+
+export function RequiredEventsDialog({trustId, keyId, trusteeKey, isOpen, onClose, ...rest}) {
+  const policy = usePolicy(trusteeKey)
+  
+  return <Modal onClose={onClose} isOpen={isOpen} isCentered size='xl'>
+    <ModalOverlay backdropFilter='blur(10px)'/>
+    <ModalContent>
+      <ModalHeader>Awaiting Trustee Policy Activation</ModalHeader>
+      <ModalCloseButton/>
+      <ModalBody>
+        <Text>This trustee policy is still awaiting the following <b>event conditions</b>:</Text>
+        { !policy.isSuccess && [1,2,3].map((k) => 
+          <Skeleton mt='1em' width='100%' height='1em' key={'missing-event-' + k}/>) }
+        <List spacing='1em' mt='1em'>
+        { policy.isSuccess && policy.data[3].map((event) => 
+          <UnfiredEventLabel eventHash={event} key={'ufel-' + event}/>
+        ) }
+        </List>
+      </ModalBody>
+      <ModalFooter>
+      </ModalFooter>
+    </ModalContent>
+  </Modal>
+}
+
+export function UnfiredEventLabel({eventHash, ...rest}) {
+  return <ListItem>
+    <HStack spacing='0.5em'>
+      <EventStateIcon eventHash={eventHash}/>
+      <EventDescription eventHash={eventHash}/>
+    </HStack>
+  </ListItem>
 }
 
 export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider, isOpen, onClose, balance, ...rest}) {
@@ -228,7 +274,8 @@ export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider
   }
 
   const distribution = useDistribute(trusteeKey, provider, arn, 
-    policy.isSuccess ? policy.data[2] : null, policy.data[2].map((k) => keyDistributions[k.toString()] || BigNumber.from(0)),
+    policy.isSuccess ? policy.data[2] : null, policy.data[2].map((k) => 
+      keyDistributions[k.toString()] || BigNumber.from(0)),
     function(error) {
       // error
       toast({
@@ -266,7 +313,7 @@ export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider
   }
 
   const buttonProps = distribution.isLoading ? {isLoading: true} :
-    (balance.eq(balanceLeft) ? {isDisabled: true} : {});
+    (balance.eq(balanceLeft) || !policy.isSuccess || !policy.data[0] ? {isDisabled: true} : {});
 
   return <Modal onClose={resetClose} isOpen={isOpen} isCentered size='xl'>
     <ModalOverlay backdropFilter='blur(10px)'/>

@@ -16,10 +16,8 @@ import {
 } from '@chakra-ui/react';
 import {Link} from 'react-router-dom';
 import {
-  FaRegHandshake
-} from 'react-icons/fa';
-import {
   FiMenu,
+  FiShare2,
 } from 'react-icons/fi';
 import { BiCoinStack } from 'react-icons/bi';
 import {
@@ -45,7 +43,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Trusts', icon: BsShieldLock, href: '/trusts'},
   { name: 'Keys', icon: HiOutlineKey, href: '/keys'},
   { name: 'Assets', icon: BiCoinStack, href: '/assets'},
-  { name: 'Trustees', icon: FaRegHandshake, href: '/trustees'},
+  { name: 'Distribute', icon: FiShare2, href: '/trustees'},
   { name: 'Events', icon: HiOutlineLightningBolt, href: '/events'}
 ];
 
