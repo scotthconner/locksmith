@@ -12,11 +12,11 @@ import {ethers} from 'ethers';
  * For a given trust ID, provides a list of registered 
  * events as byte32 hashes.
  */
-export function useTrustEventRegistry(trustId) {
+export function useTrustEventRegistry(trustId, dispatcher = ethers.constants.AddressZero) {
   const provider = useProvider();
   const events = useContract(Locksmith.getContract('events', provider));
-  return useQuery('getTrustEventRegistry for ' + trustId, async function() {
-    return await events.getRegisteredTrustEvents(trustId);
+  return useQuery('getTrustEventRegistry for ' + trustId + dispatcher, async function() {
+    return await events.getRegisteredTrustEvents(trustId, dispatcher);
   });
 }
 

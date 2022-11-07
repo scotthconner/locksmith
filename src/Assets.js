@@ -101,7 +101,7 @@ const WalletBalanceSheet = ({keys, position, balanceSheet, ...rest}) => {
 }
 
 const WalletArnList = ({arns, keys, balanceSheet, ...rest}) => {
-  return <VStack spacing='2em' pb='2em'>
+  return <VStack spacing='1em' pb='2em'>
       {Object.keys(balanceSheet||{}).map((a) => <WalletArn key={'wallet-arn-' + a} 
         arn={a} arnBalanceSheet={balanceSheet[a]} keys={keys}/> 
       )}

@@ -260,7 +260,7 @@ export function Trust() {
               <Skeleton width='100%' height='4em'/>
             </VStack>
             :
-            <VStack spacing='2em' pb='2em' pt='2em'>
+            <VStack spacing='1em' pb='2em' pt='2em'>
               { trustArns.map((arn, x) => (
                 <TrustArn trustId={id} rootKeyId={trustInfo.data.rootKeyId} 
                   key={arn} arn={arn} balance={trustArnBalances[x]}
@@ -295,7 +295,7 @@ export function Trust() {
               <Skeleton width='100%' height='4em'/>
             </VStack>
             :
-            <VStack  spacing='2em' pb='2em' pt='2em'>
+            <VStack spacing='1em' pb='2em' pt='2em'>
               { trustKeys.data.map((k) => (
                 <TrustKey rootKeyId={trustInfo.data.rootKeyId} key={k} keyId={k}/>
               ))}
@@ -326,7 +326,7 @@ export function Trust() {
                 {hasRoot && <AddEventDialog trustId={id} isOpen={createEventDisclosure.isOpen}
                   onClose={createEventDisclosure.onClose} rootKeyId={trustInfo.data.rootKeyId}/>}
               </HStack>
-              <VStack spacing='2em' pb='2em' pt='2em'>
+              <VStack spacing='1em' pb='2em' pt='2em'>
               { registeredEvents.data.map((event) => (
                 <TrustEvent trustId={id} key={event} eventHash={event}/> 
               ))}
@@ -357,7 +357,7 @@ export function Trust() {
                 {hasRoot && <AddPolicyDialog trustId={id} rootKeyId={trustInfo.data.rootKeyId} 
                   onClose={trusteeDisclosure.onClose} isOpen={trusteeDisclosure.isOpen}/> }
               </HStack>
-              <VStack spacing='2em' pb='2em' pt='2em'>
+              <VStack spacing='1em' pb='2em' pt='2em'>
               { trustPolicyKeys.data.map((k) => (
                 <TrustPolicy rootKeyId={trustInfo.data.rootKeyId} 
                   trustId={id} keyId={k} key={'policy-' + k.toString()}/>
@@ -397,7 +397,7 @@ export function Trust() {
                   </Text>
                 </AddTrustedLedgerActorModal>}
               </HStack>
-            <VStack  spacing='2em' pb='2em' pt='2em'>
+            <VStack spacing='1em' pb='2em' pt='2em'>
               { trustedProviders.data.map((a) => (
                 <TrustedLedgerActors
                   trustId={id}
@@ -442,7 +442,7 @@ export function Trust() {
                   </Text>
                 </AddTrustedLedgerActorModal>}
             </HStack>
-            <VStack  spacing='2em' pb='2em' pt='2em'>
+            <VStack spacing='1em' pb='2em' pt='2em'>
               { trustedScribes.data.map((a) => (
                 <TrustedLedgerActors
                   trustId={id}

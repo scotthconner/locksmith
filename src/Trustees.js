@@ -85,7 +85,7 @@ function Trustees() {
 
   return <Stack m='1em' spacing='1em'>
     <Heading size='md'>Trustee Keys in Your Wallet</Heading>
-    <VStack spacing='2em' pb='2em' pt='2em'>
+    <VStack spacing='1em' pb='2em' pt='2em'>
       { !keys.isSuccess && [1,2,3].map((k) => 
         <Skeleton key={'skeleton-key-' + k} width='100%' height='4em' borderRadius='lg'/>
       ) } 
