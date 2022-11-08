@@ -29,7 +29,8 @@ import { useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import { KeyInfoIcon } from '../components/KeyInfo.js';
+import { KeyIcon, KeyInfoIcon } from '../components/KeyInfo.js';
+import { alarmClockExpirationAgo } from '../components/AlarmClock.js';
 import { BiCheckCircle, BiAlarm } from 'react-icons/bi';
 import { HiOutlineLightningBolt } from 'react-icons/hi';
 import { FiPower } from 'react-icons/fi';
@@ -101,8 +102,23 @@ const KeyOracleEventDescription = ({eventHash, ...rest}) => {
 
 const AlarmClockEventDescription = ({eventHash, ...rest}) => {
   const alarm = useAlarm(eventHash);
+  const key = useInspectKey(alarm.isSuccess ? alarm.data.snoozeKeyId : null);
+  const expired = alarm.isSuccess ? alarm.data.alarmTime*1000 <= (new Date()).getTime() : false;
+  const fired = useEventState(eventHash);
+  const snoozable = alarm.isSuccess && alarm.data.snoozeInterval > 0;
+  const snoozeText = !snoozable ? '' : alarmClockExpirationAgo((new Date()).getTime() + 1000*alarm.data.snoozeInterval.toNumber());
+
   return !alarm.isSuccess ? <Skeleton width='12em' height='1em'/> :
-    <Text color='gray'>This alarm is set to go off by {(new Date(alarm.data.alarmTime.toNumber())).toString()}</Text>
+    <HStack>
+      <Text color='gray'>{ expired ? 'Expired ' : 'Expires in ' }<b>{alarmClockExpirationAgo(1000*alarm.data.alarmTime.toNumber())}</b>
+        {expired && ' ago' }</Text>
+      { fired.isSuccess && fired.data && 
+        <Text color='gray'> and was challenged.</Text> }
+      { fired.isSuccess && !fired.data && snoozable && <Text color='gray'>unless</Text> }
+      { fired.isSuccess && !fired.data && key.isSuccess && snoozable && KeyInfoIcon(key) }
+      { fired.isSuccess && !fired.data && key.isSuccess && snoozable && 
+        <Text color='gray'><b>{key.data.alias}</b> can snooze every <b>{snoozeText}</b></Text> }
+    </HStack>
 }
 
 const KeyOracleKeyLabel = ({keyId, ...rest}) => {
@@ -264,7 +280,8 @@ const AlarmClockForm = ({trustId, rootKeyId, onClose, onToggle}) => {
     && !isSnoozeNumberError && parseInt(snoozeNumber) !== 0 && (snoozeKey === 'Choose Key' || !snoozeKey);
 
   const createAlarmClock = useCreateAlarm(rootKeyId, isDescriptionError ? '' : eventDescription,
-    alarmTime.getTime(), (parseInt(snoozeNumber)||0)*(parseInt(snoozeUnit)||0), isSnoozeKeyError || !snoozeKey ? 0 : snoozeKey,
+    Math.floor(alarmTime.getTime() / 1000), 
+    (parseInt(snoozeNumber)||0)*(parseInt(snoozeUnit)||0), isSnoozeKeyError || !snoozeKey ? 0 : snoozeKey,
     function(error) {
       toast({
         title: 'Transaction Error!',

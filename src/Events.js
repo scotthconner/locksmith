@@ -16,21 +16,29 @@ import {
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react'
-import { BiCheckCircle  } from 'react-icons/bi';
+import { 
+  BiCheckCircle,
+  BiAlarmSnooze,
+} from 'react-icons/bi';
 import { BsShieldLock } from 'react-icons/bs';
 import { IoIosHourglass } from 'react-icons/io';
 import { FiPower } from 'react-icons/fi';
+import { HiOutlineLightningBolt } from 'react-icons/hi';
 import { KeyInfoIcon } from './components/KeyInfo.js';
+import { alarmClockExpirationAgo } from './components/AlarmClock.js';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
+import { BigNumber } from 'ethers';
+import { useAccount } from 'wagmi';
 import Locksmith from './services/Locksmith.js';
 import { 
   useWalletKeys,
   useWalletTrusts,
   useInspectKey,
   useTrustInfo,
+  useKeyBalance,
 } from './hooks/LocksmithHooks.js';
 import { 
   useOracleKeyEvents,
@@ -38,6 +46,8 @@ import {
 } from './hooks/KeyOracleHooks.js';
 import {
   useAlarm,
+  useChallengeAlarm,
+  useSnoozeAlarm,
 } from './hooks/AlarmClockHooks.js';
 import { 
   useTrustEventRegistry,
@@ -87,26 +97,6 @@ const AlarmClockItem = ({trustId, eventHash, ...rest}) => {
   const eventState = useEventState(eventHash);
   const alarmInfo = useAlarm(eventHash);
 
-  const expiryDiscernment = function(time) {
-    var difference = (new Date(time)) - (new Date());
-    var years = Math.floor(difference / (1000 * 60 * 60 * 24 * 365));
-    var weeks = Math.floor(difference / (1000 * 60 * 60 * 24 * 7));
-    var days = Math.floor(difference / (1000 * 60 * 60 * 24 ));
-    var minutes = Math.floor(difference / (1000 * 60 * 60 ));
-    var seconds = Math.floor(difference / (1000 * 60 ));
-    if (years > 1 ) { 
-      return years + ' years';
-    } else if (weeks > 1) {
-      return weeks + ' weeks';
-    } else if (days > 1) {
-      return days + ' days';
-    } else if (minutes > 1) {
-      return minutes + ' minutes';
-    }
-
-    return seconds + ' seconds';
-  };
-
   return <Box p='1em' width='90%'
       borderRadius='lg' bg={boxColor} boxShadow='dark-lg'
       _hover= {{
@@ -123,14 +113,88 @@ const AlarmClockItem = ({trustId, eventHash, ...rest}) => {
         { !alarmInfo.isSuccess && <Skeleton width='8em' height='1em'/> }
         <Text color='gray' fontStyle='italic'>
           { alarmInfo.isSuccess && (
-            alarmInfo.data.alarmTime <= (new Date()) ? 
+            alarmInfo.data.alarmTime*1000 <= (new Date()).getTime() ? 
               'This alarm has expired!' : 
-              'This alarm expires in about ' + expiryDiscernment(alarmInfo.data.alarmTime.toNumber()) 
+              'This alarm expires in about ' + alarmClockExpirationAgo(1000*alarmInfo.data.alarmTime.toNumber()) 
           ) }
         </Text>
       </VStack>
+      <Spacer/>
+      { alarmInfo.isSuccess && <AlarmClockSnoozeButton trustId={trustId} eventHash={eventHash}
+        alarmTime={1000*alarmInfo.data.alarmTime.toNumber()} snoozeInterval={1000*alarmInfo.data.snoozeInterval.toNumber()}
+        snoozeKeyId={alarmInfo.data.snoozeKeyId}/> }
+      { alarmInfo.isSuccess && eventState.isSuccess && !eventState.data &&
+          <AlarmClockChallengeButton trustId={trustId} eventHash={eventHash}
+            alarmTime={1000*alarmInfo.data.alarmTime.toNumber()}/> }
     </HStack>
   </Box>
+}
+
+const AlarmClockSnoozeButton = ({trustId, eventHash, alarmTime, snoozeInterval, snoozeKeyId, ...rest}) => {
+  const alarmDate = new Date(alarmTime);
+  const snoozable = snoozeInterval > 0; 
+  const canSnooze = ((new Date()).getTime() + snoozeInterval) >= alarmDate;
+
+  const account = useAccount();
+  const toast = useToast();
+  const keyBalance = useKeyBalance(snoozeKeyId, account.address);
+
+  const snooze = useSnoozeAlarm(snoozable && canSnooze ? eventHash : null,
+    keyBalance.isSuccess && keyBalance.data.gt(BigNumber.from(0)) ? snoozeKeyId : null,
+    function(error) {
+      toast({
+        title: 'Transaction Error!',
+        description: error.toString(),
+        status: 'error',
+        duration: 9000,
+        isClosable: true
+      });
+    },
+    function(data) {
+      toast({
+        title: 'Alarm successfully snoozed!',
+        description: 'The alarm expiry has been delayed.',
+        status: 'success',
+        duration: 9000,
+        isClosable: true
+      });
+    }
+  );
+
+  return snoozable && keyBalance.isSuccess && keyBalance.data.gt(BigNumber.from(0)) &&  
+    <Button isLoading={snooze.isLoading} isDisabled={!canSnooze} 
+      colorScheme='blue' leftIcon={<BiAlarmSnooze/>}
+        onClick={() => {snooze.write?.();}}>Snooze</Button>
+}
+
+const AlarmClockChallengeButton = ({trustId, eventHash, alarmTime, ...rest}) => {
+  const canChallenge = ((new Date()) >= (new Date(alarmTime)));
+  const toast = useToast();
+  const challenge = useChallengeAlarm(canChallenge ? eventHash : null,
+    function(error) {
+      toast({
+        title: 'Transaction Error!',
+        description: error.toString(),
+        status: 'error',
+        duration: 9000,
+        isClosable: true
+      });
+    },
+    function(data) {
+      toast({
+        title: 'Alarm successfully challenged!',
+        description: 'The event has been enabled.',
+        status: 'success',
+        duration: 9000,
+        isClosable: true
+      });
+    }
+  );
+
+  return <Button isLoading={challenge.isLoading} isDisabled={!canChallenge} colorScheme='red' leftIcon={<HiOutlineLightningBolt/>}
+    onClick={() => {challenge.write?.();}}>
+    Challenge
+  </Button>
 }
 
 const KeyEventListItems = ({keyId, ...rest}) => {

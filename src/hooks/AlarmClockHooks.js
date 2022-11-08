@@ -33,10 +33,56 @@ export function useAlarm(eventHash) {
  * Will call #createAlarm on the contract.
  */
 export function useCreateAlarm(rootKeyId, description, alarmTime, snoozeInterval, snoozeKeyId, errorFunc, successFunc) {
+  console.log(alarmTime);
+
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('alarmClock', 'createAlarm',
       [rootKeyId, ethers.utils.formatBytes32String(description||''), alarmTime, snoozeInterval, snoozeKeyId],
       rootKeyId !== null && description.length > 3 && snoozeInterval !== null && snoozeKeyId !== null && alarmTime !== null
+    )
+  );
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}
+
+/**
+ * useChallengeAlarm
+ *
+ * Will call #challengeAlarm on the contract.
+ */
+export function useChallengeAlarm(eventHash, errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('alarmClock', 'challengeAlarm',
+      [eventHash], eventHash !== null
+    )
+  );
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}
+
+/**
+ * useSnoozeAlarm
+ *
+ * Will call #snoozeAlarm on the contract.
+ */
+export function useSnoozeAlarm(eventHash, snoozeKeyId, errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('alarmClock', 'snoozeAlarm',
+      [eventHash, snoozeKeyId], eventHash !== null && snoozeKeyId !== null
     )
   );
 
