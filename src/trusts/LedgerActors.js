@@ -133,7 +133,9 @@ export function AddTrustedLedgerActorModal({trustId, rootKeyId, role, isOpen, on
   );
 
   var handleAliasChange = function(e) {
-    setAlias(e.target.value);
+    if (e.target.value.length < 32) {
+      setAlias(e.target.value);
+    }
   }
 
   var handleAddressChange = function(e) {
@@ -154,6 +156,7 @@ export function AddTrustedLedgerActorModal({trustId, rootKeyId, role, isOpen, on
           <FormControl id='actor_alias' isInvalid={isInvalidAlias} mt='1.5em'>
             <FormLabel>Actor Alias</FormLabel>
             <Input
+              value={alias}
               ref={initialRef}
               placeholder="Aave Staking Platform"
               _placeholder={{ color: 'gray.500' }}

@@ -33,8 +33,6 @@ export function useAlarm(eventHash) {
  * Will call #createAlarm on the contract.
  */
 export function useCreateAlarm(rootKeyId, description, alarmTime, snoozeInterval, snoozeKeyId, errorFunc, successFunc) {
-  console.log(alarmTime);
-
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('alarmClock', 'createAlarm',
       [rootKeyId, ethers.utils.formatBytes32String(description||''), alarmTime, snoozeInterval, snoozeKeyId],

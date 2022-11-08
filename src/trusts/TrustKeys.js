@@ -446,7 +446,11 @@ export function CreateKeyModal({trustId, rootKeyId, isOpen, onClose, ...rest}) {
   const [bind, setBind] = useState('');
   var isInvalidAlias   = alias.length < 3;
   var isInvalidAddress = !ethers.utils.isAddress(address);
-
+  var handleAliasChange = (e) => {
+    if (e.target.value.length < 32) {
+      setAlias(e.target.value);
+    }
+  }
   var createKey = useCreateKey(rootKeyId, alias, address, bind, 
     function(error) {
       toast({
@@ -484,9 +488,10 @@ export function CreateKeyModal({trustId, rootKeyId, isOpen, onClose, ...rest}) {
             <FormLabel>Key Name</FormLabel>
             <Input
               ref={initialRef}
+              value={alias}
               placeholder="Beneficiary #1"
               _placeholder={{ color: 'gray.500' }}
-              onChange={(e) => { setAlias(e.target.value); }}/>
+              onChange={handleAliasChange}/>
             { isInvalidAlias ?
               <FormErrorMessage>Key name must be at least three characters.</FormErrorMessage> :
               <FormHelperText>Name the key for its designed purpose.</FormHelperText>

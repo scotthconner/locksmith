@@ -39,7 +39,11 @@ export default function NewTrustDialog({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isConnected } = useAccount();
   const [input, setInput] = useState('');
-  const handleInputChange = (e) => setInput(e.target.value);
+  const handleInputChange = (e) => { 
+    if (e.target.value.length < 32) {
+      setInput(e.target.value);
+    }
+  };
   const isError = input.trim().length === 0;
   const toast = useToast();
   const writeConfig = useCreateTrustAndRootKey(input, function(error) {
@@ -96,6 +100,7 @@ export default function NewTrustDialog({
             <FormLabel>Trust Name</FormLabel>
             <Input
               ref={initialRef}
+              value={input}
               placeholder="My Living Trust"
               _placeholder={{ color: 'gray.500' }}
               onChange={handleInputChange}

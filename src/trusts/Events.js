@@ -197,6 +197,11 @@ const KeyOracleForm = ({trustId, rootKeyId, onClose, onToggle}) => {
 
   const [eventDescription, setEventDescription] = useState('');
   const isDescriptionError = eventDescription.length < 5;
+  var handleDescriptionChange = (e) => {
+    if (e.target.value.length < 32) {
+      setEventDescription(e.target.value);
+    }
+  }
 
   const [eventKey, setEventKey] = useState(null);
   const isKeyError = !eventKey || eventKey === 'Choose Key';
@@ -233,9 +238,10 @@ const KeyOracleForm = ({trustId, rootKeyId, onClose, onToggle}) => {
      <FormControl id="Event Label" isInvalid={isDescriptionError}>
       <FormLabel>Event Label</FormLabel>
         <Input
+          value={eventDescription}
           placeholder="My ephemeral emersion."
           _placeholder={{ color: 'gray.500' }}
-          onChange={(e) => { setEventDescription(e.target.value)}}/>
+          onChange={handleDescriptionChange}/>
           { isDescriptionError && <FormErrorMessage>Please provide a short description.</FormErrorMessage>}
       </FormControl>
       <FormControl isInvalid={isKeyError}>
@@ -270,6 +276,11 @@ const AlarmClockForm = ({trustId, rootKeyId, onClose, onToggle}) => {
 
   const [eventDescription, setEventDescription] = useState('');
   const isDescriptionError = eventDescription.length < 5;
+  var handleDescriptionChange = (e) => {
+    if (e.target.value.length < 32) {
+      setEventDescription(e.target.value);
+    }
+  }
   
   const [snoozeKey, setSnoozeKey] = useState(null);
   const [alarmTime, setAlarmTime] = useState(new Date((new Date().getTime()) + 86400000)); // 1 day future
@@ -311,9 +322,10 @@ const AlarmClockForm = ({trustId, rootKeyId, onClose, onToggle}) => {
     <FormControl id="Event Label" isInvalid={isDescriptionError}>
       <FormLabel>Event Label</FormLabel>
       <Input
+        value={eventDescription}
         placeholder="My ephemeral emersion."
         _placeholder={{ color: 'gray.500' }}
-        onChange={(e) => { setEventDescription(e.target.value)}}/>
+        onChange={handleDescriptionChange}/>
       { isDescriptionError && <FormErrorMessage>Please provide a short description.</FormErrorMessage>}
     </FormControl>
     <FormControl id="Alarm Time">
@@ -324,7 +336,7 @@ const AlarmClockForm = ({trustId, rootKeyId, onClose, onToggle}) => {
           options: {
             altAxis: true,
           }  
-        }]}/> 
+        }]}/>
     </FormControl>
     <FormControl id="Snooze Interval" isInvalid={isSnoozeNumberError||isSnoozeKeyError}>
       <FormLabel>Snooze Interval and Key <i>(Optional)</i></FormLabel>
