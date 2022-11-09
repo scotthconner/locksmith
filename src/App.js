@@ -10,9 +10,12 @@ import SidebarWithHeader from './layout/SidebarWithHeader'
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
-import { WagmiConfig, createClient, chain } from "wagmi";
+import { WagmiConfig, createClient, configureChains, chain } from "wagmi";
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { publicProvider } from 'wagmi/providers/public'
+import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { getDefaultClient } from "connectkit";
-
 
 //////////////////////////////////////
 // Pages and Navigation
@@ -31,15 +34,25 @@ import Events from './Events.js';
 
 // We are using alchemy for now
 // Choose which chains you'd like to show
-const chains = [chain.hardhat, chain.mainnet]; // chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum];
+const {chains, provider, webSocketProvider} = configureChains([chain.hardhat], [
+  alchemyProvider({apiKey:'8TN4uRz1cIbyDUgHZ80u0tKdQA2Qsc8j'}),
+  publicProvider(),
+]);
 
-const alchemyId = process.env.ALCHEMY_ID;
-const client = createClient(
-  getDefaultClient({
-    appName: "Locksmith",
-    chains
-  })
-);
+const client = createClient({
+  autoConnect: true,
+  connectors: [
+    new MetaMaskConnector({chains}),
+    new CoinbaseWalletConnector({
+      chains,
+      options: {
+        appName: 'Locksmith',
+      }
+    })
+  ],
+  provider,
+  webSocketProvider,
+});
 
 function App() {
   return (

@@ -469,6 +469,7 @@ export function CreateKeyModal({trustId, rootKeyId, isOpen, onClose, ...rest}) {
         duration: 9000,
         isClosable: true
       });
+      setAlias('');
       onClose();
     }
   );

@@ -128,6 +128,7 @@ export function AddTrustedLedgerActorModal({trustId, rootKeyId, role, isOpen, on
         duration: 9000,
         isClosable: true
       });
+      setAlias('');
       onClose();
     }
   );
