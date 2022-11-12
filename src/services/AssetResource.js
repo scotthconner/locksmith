@@ -51,11 +51,11 @@ export const AssetResource = (function() {
   };
   
   // Shadow ERC20s
-  metadata[getArn(Locksmith.getAssetAddress('coin'), 20, 0)] = {
+  metadata[getArn(Locksmith.getAssetAddress('link'), 20, 0)] = {
     name: 'Chainlink',
     symbol: 'LINK',
     decimals: 18,
-    contractAddress: Locksmith.getAssetAddress('coin'),
+    contractAddress: Locksmith.getAssetAddress('link'),
     coinCapId: 'chainlink',
     icon: function(props = {}) {
       return <LINK {...props} color='#375BD2'/>;
