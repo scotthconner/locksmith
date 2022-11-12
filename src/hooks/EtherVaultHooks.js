@@ -7,13 +7,13 @@ import {
 /**
  * useEtherWithdrawal
  *
- * Essentially, will call withdrawal on the ether vault for a given
+ * Essentially, will call withdrawal on the ether EtherVault for a given
  * key. The caller must be holding the key, and have the actual
- * amount on their key via the vault's ledger.
+ * amount on their key via the EtherVault's ledger.
  */
 export function useEtherWithdrawal(keyId, amount, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('vault', 'withdrawal',
+    Locksmith.getContractWrite('EtherVault', 'withdrawal',
       [keyId, amount], amount > 0)); 
 
   return useContractWrite({...preparation.config,
@@ -30,11 +30,11 @@ export function useEtherWithdrawal(keyId, amount, errorFunc, successFunc) {
  * useEtherDeposit
  *
  * This uses a key to deposit ether into the
- * local ether vault.
+ * local ether EtherVault.
  */
 export function useEtherDeposit(keyId, amount, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('vault', 'deposit',
+    Locksmith.getContractWrite('EtherVault', 'deposit',
       [keyId, {value: amount}], amount > 0));
 
   return useContractWrite({...preparation.config,

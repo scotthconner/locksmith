@@ -82,7 +82,7 @@ function Events() {
 }
 
 const TrustAlarmList = ({trustId, ...rest}) => {
-  const alarmClockAddress = Locksmith.getContractAddress('alarmClock');
+  const alarmClockAddress = Locksmith.getContractAddress('AlarmClock');
   const alarms = useTrustEventRegistry(trustId, alarmClockAddress);
 
   return !alarms.isSuccess ? 

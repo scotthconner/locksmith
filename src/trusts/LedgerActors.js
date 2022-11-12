@@ -121,6 +121,7 @@ export function AddTrustedLedgerActorModal({trustId, rootKeyId, role, isOpen, on
       });
     },
     function(data) {
+      setAlias('');
       toast({
         title: alias + ' entrusted!',
         description: 'They can now act on your ledger accordingly.',
@@ -128,7 +129,6 @@ export function AddTrustedLedgerActorModal({trustId, rootKeyId, role, isOpen, on
         duration: 9000,
         isClosable: true
       });
-      setAlias('');
       onClose();
     }
   );

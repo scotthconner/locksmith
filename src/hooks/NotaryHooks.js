@@ -23,10 +23,10 @@ export const SCRIBE = 1;
  */
 export function useTrustedActors(trustId, role) {
   const provider = useProvider();
-  const ledgerAddress = Locksmith.getContractAddress('ledger'); 
-  const notary = useContract(Locksmith.getContract('notary', provider));
+  const ledgerAddress = Locksmith.getContractAddress('Ledger'); 
+  const Notary = useContract(Locksmith.getContract('Notary', provider));
   return useQuery('getTrustedActors for ' + trustId + " " + role, async function() {
-    return await notary.getTrustedActors(ledgerAddress, trustId, role);
+    return await Notary.getTrustedActors(ledgerAddress, trustId, role);
   });
 }
 
@@ -37,11 +37,11 @@ export function useTrustedActors(trustId, role) {
  */
 export function useTrustedActorAlias(trustId, role, address) {
   const provider = useProvider();
-  const ledgerAddress = Locksmith.getContractAddress('ledger');
-  const notary = useContract(Locksmith.getContract('notary', provider));
+  const ledgerAddress = Locksmith.getContractAddress('Ledger');
+  const Notary = useContract(Locksmith.getContract('Notary', provider));
   return useQuery('getTrustedActorAlias for ' + trustId + " " + role + " " + address, async function() {
     return (null !== trustId && null !== role && null !== address) ? ethers.utils.parseBytes32String(
-        await notary.actorAliases(ledgerAddress, trustId, role, address) 
+        await Notary.actorAliases(ledgerAddress, trustId, role, address) 
     ) : '';
   });
 }
@@ -52,9 +52,9 @@ export function useTrustedActorAlias(trustId, role, address) {
  * Calls contract write for setting a trusted ledger role.
  */
 export function useSetTrustedLedgerRole(rootKeyId, trustId, role, address, trusted, alias, errorFunc, successFunc) {
-  const ledgerAddress = Locksmith.getContractAddress('ledger');
+  const ledgerAddress = Locksmith.getContractAddress('Ledger');
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('notary', 'setTrustedLedgerRole',
+    Locksmith.getContractWrite('Notary', 'setTrustedLedgerRole',
       [rootKeyId, role, ledgerAddress, address, trusted, ethers.utils.formatBytes32String(alias)],
       ethers.utils.isAddress(address) && rootKeyId));
 
@@ -79,13 +79,13 @@ export function useSetTrustedLedgerRole(rootKeyId, trustId, role, address, trust
  */
 export function useWithdrawalAllowance(ledgerProvider, key, arn) {
   const provider = useProvider();
-  const ledgerAddress = Locksmith.getContractAddress('ledger');
-  const notary = useContract(Locksmith.getContract('notary', provider));
+  const ledgerAddress = Locksmith.getContractAddress('Ledger');
+  const Notary = useContract(Locksmith.getContract('Notary', provider));
   return useQuery('useWithdrawalAllowance for ' + ledgerProvider + " " + key + " " + arn, async function() {
     if(ledgerProvider === null || key === null || arn === null) {
       return 0;
     }
-    return await notary.withdrawalAllowances(ledgerAddress, key, ledgerProvider, arn);
+    return await Notary.withdrawalAllowances(ledgerAddress, key, ledgerProvider, arn);
   });
 }
 
@@ -97,9 +97,9 @@ export function useWithdrawalAllowance(ledgerProvider, key, arn) {
  * fail if the signer doesn't hold the key.
  */
 export function useSetWithdrawalAllowance(ledgerProvider, key, arn, amount, errorFunc, successFunc) {
-  const ledgerAddress = Locksmith.getContractAddress('ledger');
+  const ledgerAddress = Locksmith.getContractAddress('Ledger');
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('notary', 'setWithdrawalAllowance',
+    Locksmith.getContractWrite('Notary', 'setWithdrawalAllowance',
       [ledgerAddress, ledgerProvider, key, arn, amount], 
       amount !== null
     )

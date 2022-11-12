@@ -20,9 +20,9 @@ import {ethers} from 'ethers';
  */
 export function useEventKey(eventHash) {
   const provider = useProvider();
-  const keyOracle = useContract(Locksmith.getContract('keyOracle', provider));
+  const KeyOracle = useContract(Locksmith.getContract('KeyOracle', provider));
   return useQuery('getOracleKey for ' + eventHash, async function() {
-    return await keyOracle.eventKeys(eventHash);
+    return await KeyOracle.eventKeys(eventHash);
   });
 }
 
@@ -34,9 +34,9 @@ export function useEventKey(eventHash) {
  */
 export function useOracleKeyEvents(keyId) {
   const provider = useProvider();
-  const keyOracle = useContract(Locksmith.getContract('keyOracle', provider));
+  const KeyOracle = useContract(Locksmith.getContract('KeyOracle', provider));
   return useQuery('getOracleKeyEvents for ' + keyId, async function() {
-    return await keyOracle.getOracleKeyEvents(keyId);
+    return await KeyOracle.getOracleKeyEvents(keyId);
   });
 }
 
@@ -47,7 +47,7 @@ export function useOracleKeyEvents(keyId) {
  */
 export function useCreateKeyOracle(rootKeyId, keyId, description, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('keyOracle', 'createKeyOracle',
+    Locksmith.getContractWrite('KeyOracle', 'createKeyOracle',
       [rootKeyId, keyId, ethers.utils.formatBytes32String(description||'')],
       rootKeyId && keyId && description 
     )
@@ -73,7 +73,7 @@ export function useCreateKeyOracle(rootKeyId, keyId, description, errorFunc, suc
  */
 export function useFireKeyOracleEvent(keyId, eventHash, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('keyOracle', 'fireKeyOracleEvent',
+    Locksmith.getContractWrite('KeyOracle', 'fireKeyOracleEvent',
       [keyId, eventHash], 
       keyId && eventHash 
     )

@@ -4,26 +4,44 @@
  * Service provides an interface to the locksmith contracts.
  **/
 const Locksmith = (function() {
-  const contractAddresses = require("../hardhat-contracts.json")
+  var contractAddresses = require("../registries/network-contracts-31337.json")
+  var assetAddresses = require("../registries/network-assets-31337.json");
+
   const interfaces = {
-    keyVault: require("../contracts/KeyVault.sol/KeyVault.json"),
-    locksmith: require("../contracts/Locksmith.sol/Locksmith.json"),
-    notary: require("../contracts/Notary.sol/Notary.json"),
-    ledger: require("../contracts/Ledger.sol/Ledger.json"),
-    vault: require("../contracts/providers/EtherVault.sol/EtherVault.json"),
-    tokenVault: require("../contracts/providers/TokenVault.sol/TokenVault.json"),
-    events: require("../contracts/TrustEventLog.sol/TrustEventLog.json"),
-    keyOracle: require("../contracts/dispatchers/KeyOracle.sol/KeyOracle.json"),
-    alarmClock: require("../contracts/dispatchers/AlarmClock.sol/AlarmClock.json"),
-    trustee: require("../contracts/scribes/Trustee.sol/Trustee.json"),
+    KeyVault: require("../contracts/KeyVault.sol/KeyVault.json"),
+    Locksmith: require("../contracts/Locksmith.sol/Locksmith.json"),
+    Notary: require("../contracts/Notary.sol/Notary.json"),
+    Ledger: require("../contracts/Ledger.sol/Ledger.json"),
+    EtherVault: require("../contracts/providers/EtherVault.sol/EtherVault.json"),
+    TokenVault: require("../contracts/providers/TokenVault.sol/TokenVault.json"),
+    TrustEventLog: require("../contracts/TrustEventLog.sol/TrustEventLog.json"),
+    KeyOracle: require("../contracts/dispatchers/KeyOracle.sol/KeyOracle.json"),
+    AlarmClock: require("../contracts/dispatchers/AlarmClock.sol/AlarmClock.json"),
+    Trustee: require("../contracts/scribes/Trustee.sol/Trustee.json"),
   };
 
   return {
+    ////////////////////////////////////////////
+    // setChainId
+    //
+    // Will reload all of the addresses based
+    // on the new chain ID.
+    ////////////////////////////////////////////
+    setChainId: function(chainId) {
+      contractAddresses = require("../registries/network-contracts-" + chainId + ".json")
+      assetAddresses = require("../registries/network-assets-" + chainId + ".json");
+    },
     ////////////////////////////////////////////
     // getContractAddress
     ////////////////////////////////////////////
     getContractAddress: function(contract) {
       return contractAddresses[contract];
+    },
+    ////////////////////////////////////////////
+    // getContractAddress
+    ////////////////////////////////////////////
+    getAssetAddress: function(asset) {
+      return assetAddresses[asset];
     },
     ////////////////////////////////////////////
     // getContract

@@ -15,9 +15,9 @@ import {ethers} from 'ethers';
  */
 export function useAlarm(eventHash) {
   const provider = useProvider();
-  const alarmClock = useContract(Locksmith.getContract('alarmClock', provider));
+  const AlarmClock = useContract(Locksmith.getContract('AlarmClock', provider));
   return useQuery('alarms for ' + eventHash, async function() {
-    var response = await alarmClock.alarms(eventHash);
+    var response = await AlarmClock.alarms(eventHash);
     return {
       eventHash: response[0],
       alarmTime: response[1],
@@ -34,7 +34,7 @@ export function useAlarm(eventHash) {
  */
 export function useCreateAlarm(rootKeyId, description, alarmTime, snoozeInterval, snoozeKeyId, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('alarmClock', 'createAlarm',
+    Locksmith.getContractWrite('AlarmClock', 'createAlarm',
       [rootKeyId, ethers.utils.formatBytes32String(description||''), alarmTime, snoozeInterval, snoozeKeyId],
       rootKeyId !== null && description.length > 3 && snoozeInterval !== null && snoozeKeyId !== null && alarmTime !== null
     )
@@ -57,7 +57,7 @@ export function useCreateAlarm(rootKeyId, description, alarmTime, snoozeInterval
  */
 export function useChallengeAlarm(eventHash, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('alarmClock', 'challengeAlarm',
+    Locksmith.getContractWrite('AlarmClock', 'challengeAlarm',
       [eventHash], eventHash !== null
     )
   );
@@ -79,7 +79,7 @@ export function useChallengeAlarm(eventHash, errorFunc, successFunc) {
  */
 export function useSnoozeAlarm(eventHash, snoozeKeyId, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('alarmClock', 'snoozeAlarm',
+    Locksmith.getContractWrite('AlarmClock', 'snoozeAlarm',
       [eventHash, snoozeKeyId], eventHash !== null && snoozeKeyId !== null
     )
   );

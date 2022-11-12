@@ -13,7 +13,7 @@ import {
  */
 export function useTokenWithdrawal(keyId, arn, amount, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('tokenVault', 'arnWithdrawal',
+    Locksmith.getContractWrite('TokenVault', 'arnWithdrawal',
       [keyId, arn, amount], amount > 0)); 
 
   return useContractWrite({...preparation.config,
@@ -35,7 +35,7 @@ export function useTokenWithdrawal(keyId, arn, amount, errorFunc, successFunc) {
  */
 export function useTokenDeposit(keyId, token, amount, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('tokenVault', 'deposit',
+    Locksmith.getContractWrite('TokenVault', 'deposit',
       [keyId, token, amount], amount > 0));
 
   return useContractWrite({...preparation.config,

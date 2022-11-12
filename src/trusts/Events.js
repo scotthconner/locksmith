@@ -59,8 +59,8 @@ export function TrustEvent({trustId, eventHash, ...rest}) {
     const eventDescription = useEventDescription(eventHash);
     const eventState = useEventState(eventHash);
     const eventDispatcher = useEventDispatcher(eventHash);
-    const keyOracleAddress = Locksmith.getContractAddress('keyOracle');
-    const alarmClockAddress = Locksmith.getContractAddress('alarmClock');
+    const keyOracleAddress = Locksmith.getContractAddress('KeyOracle');
+    const alarmClockAddress = Locksmith.getContractAddress('AlarmClock');
 
     const eventTypes = {}
     eventTypes[keyOracleAddress] = 'KEY_ORACLE';

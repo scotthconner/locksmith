@@ -27,9 +27,9 @@ import { useEtherWithdrawal } from '../../hooks/EtherVaultHooks.js';
 import { useTokenWithdrawal } from '../../hooks/TokenVaultHooks.js';
 
 export function CollateralProviderWithdrawalAdapter({provider, keyId, arn, allowance, balance, onClose, ...rest}) {
-  if (provider === Locksmith.getContractAddress('vault')) {
+  if (provider === Locksmith.getContractAddress('EtherVault')) {
     return <VaultWithdrawal keyId={keyId} arn={arn} allowance={allowance} balance={balance} onClose={onClose}/>
-  } else if (provider === Locksmith.getContractAddress('tokenVault')) {
+  } else if (provider === Locksmith.getContractAddress('TokenVault')) {
     return <TokenWithdrawal keyId={keyId} arn={arn} allowance={allowance} balance={balance} onClose={onClose}/> 
   } else {
     return <Text>It doesn't look like withdrawaling from this provider is supported yet.</Text> 

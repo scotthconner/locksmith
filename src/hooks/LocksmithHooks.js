@@ -16,7 +16,7 @@ import {ethers} from 'ethers';
  * This hook takes a wallet address, and uses
  * either the attached account or the given address
  * to produce a list of key IDs held by the address
- * using the keyVault.
+ * using the KeyVault.
  *
  * @param address an optional address to get the keys from
  * @return an query that returns the key Ids
@@ -25,9 +25,9 @@ export function useWalletKeys(address) {
   const account    = useAccount(); 
   const wallet     = address || account.address;
   const provider   = useProvider();
-  const keyVault   = useContract(Locksmith.getContract('keyVault', provider));
+  const KeyVault   = useContract(Locksmith.getContract('KeyVault', provider));
   const walletKeys = useQuery('walletKeys for ' + wallet, async function() {
-    return await keyVault.getKeys(wallet);
+    return await KeyVault.getKeys(wallet);
   });
 
   return walletKeys;
@@ -47,8 +47,8 @@ export function useWalletTrusts(address) {
   const account    = useAccount();
   const wallet     = address || account.address;
   const provider   = useProvider();
-  const keyVault   = useContract(Locksmith.getContract('keyVault', provider));
-  const locksmith  = useContract(Locksmith.getContract('locksmith', provider));
+  const KeyVault   = useContract(Locksmith.getContract('KeyVault', provider));
+  const locksmith  = useContract(Locksmith.getContract('Locksmith', provider));
   return useQuery('wallet trusts for ' + wallet, async function() {
     // here are the trust IDs we want to ultimately return
     let walletTrusts = [];
@@ -59,7 +59,7 @@ export function useWalletTrusts(address) {
 
     // grab the keys first. We don't keep track of 
     // trusts per wallet address, but via keys.
-    let keys = await keyVault.getKeys(wallet);
+    let keys = await KeyVault.getKeys(wallet);
 
     // then, for each key go in and determine the trustID by inspecting
     // the key. Skip any keys we've already witnessed. 
@@ -88,9 +88,9 @@ export function useWalletTrusts(address) {
  **/
 export function useKeyBalance(keyId, address) {
   const provider   = useProvider();
-  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
   return useQuery('keyBalance for ' + keyId + ' with holder ' + address, async function() {
-    return keyId ? await keyVault.balanceOf(address, keyId) : 0;
+    return keyId ? await KeyVault.balanceOf(address, keyId) : 0;
   });
 }
 
@@ -101,9 +101,9 @@ export function useKeyBalance(keyId, address) {
  **/
 export function useSoulboundKeyAmounts(keyId, address) {
   const provider   = useProvider();
-  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
   return useQuery('soulbound count for ' + keyId + ' with holder ' + address, async function() {
-    return await keyVault.soulboundKeyAmounts(address, keyId);
+    return await KeyVault.soulboundKeyAmounts(address, keyId);
   });
 }
 
@@ -114,9 +114,9 @@ export function useSoulboundKeyAmounts(keyId, address) {
  */
 export function useKeySupply(keyId) {
   const provider   = useProvider();
-  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
   return useQuery('key count for ' + keyId, async function() { 
-    return await keyVault.keySupply(keyId);
+    return await KeyVault.keySupply(keyId);
   });
 }
 
@@ -127,7 +127,7 @@ export function useKeySupply(keyId) {
  */
 export function useInspectKey(keyId) {
   const provider   = useProvider();
-  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
+  const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
   return useQuery('inspectKey for ' + keyId, async function() {
     if(null === keyId || keyId === '') { return null; }
 
@@ -157,8 +157,8 @@ export function useInspectKey(keyId) {
  */
 export function useKeyInfo(keyId, address = null) {
   const provider   = useProvider();
-  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
-  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
+  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
   const keyInfo = useQuery('keyInfo for ' + keyId + ' with holder ' + address, async function() {
     let trust = null;
     let held = null;
@@ -174,10 +174,10 @@ export function useKeyInfo(keyId, address = null) {
 
       // get the user's inventory
       if(address) {
-        held = await keyVault.balanceOf(address, keyId);
+        held = await KeyVault.balanceOf(address, keyId);
         
         // determine how many of them are soulbound
-        soulboundCount = await keyVault.soulboundKeyAmounts(address, keyId); 
+        soulboundCount = await KeyVault.soulboundKeyAmounts(address, keyId); 
       }
     }
 
@@ -207,9 +207,9 @@ export function useKeyInfo(keyId, address = null) {
  */
 export function useKeyHolders(keyId) {
   const provider = useProvider();
-  const keyVault = useContract(Locksmith.getContract('keyVault', provider));
+  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
   const keyHolders = useQuery('keyHolders for ' + keyId, async function() {
-    return await keyVault.getHolders(keyId);
+    return await KeyVault.getHolders(keyId);
   });
   return keyHolders;
 }
@@ -231,7 +231,7 @@ export function useKeyHolders(keyId) {
 export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
   const debouncedTrustName = useDebounce(trustName.trim(), 500);
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('locksmith', 'createTrustAndRootKey', 
+    Locksmith.getContractWrite('Locksmith', 'createTrustAndRootKey', 
       [ethers.utils.formatBytes32String(debouncedTrustName)], 
       debouncedTrustName.length > 0));
 
@@ -261,7 +261,7 @@ export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
 export function useBurnKey(rootKeyId, keyId, address, burnAmount, errorFunc, successFunc) {
   const debouncedBurn = useDebounce(burnAmount, 500);
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('locksmith', 'burnKey',
+    Locksmith.getContractWrite('Locksmith', 'burnKey',
       [rootKeyId, keyId, address, debouncedBurn],
       debouncedBurn > 0));
 
@@ -291,7 +291,7 @@ export function useBurnKey(rootKeyId, keyId, address, burnAmount, errorFunc, suc
 export function useCopyKey(rootKeyId, keyId, address, soulbind, errorFunc, successFunc) {
   const debouncedAddress = useDebounce(address.trim(), 500);
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('locksmith', 'copyKey',
+    Locksmith.getContractWrite('Locksmith', 'copyKey',
       [rootKeyId, keyId, debouncedAddress, soulbind],
       debouncedAddress.length > 0));
 
@@ -321,7 +321,7 @@ export function useCopyKey(rootKeyId, keyId, address, soulbind, errorFunc, succe
 export function useSoulbindKey(rootKeyId, keyId, address, soulbindAmount, errorFunc, successFunc) {
   const debouncedAmount = useDebounce(soulbindAmount, 500);
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('locksmith', 'soulbindKey',
+    Locksmith.getContractWrite('Locksmith', 'soulbindKey',
       [rootKeyId, address, keyId, debouncedAmount], true));
 
   const call = useContractWrite({...preparation.config,
@@ -347,7 +347,7 @@ export function useSendKey(keyId, address, amount, errorFunc, successFunc) {
   const account = useAccount();
   const debouncedAmount = useDebounce(amount, 500);
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('keyVault', 'safeTransferFrom',
+    Locksmith.getContractWrite('KeyVault', 'safeTransferFrom',
       [account.address, address, 
         keyId, debouncedAmount, 
         ethers.utils.formatBytes32String('')], 
@@ -376,7 +376,7 @@ export function useCreateKey(rootKeyId, keyName, receiver, bind, errorFunc, succ
   const debouncedName = useDebounce(keyName, 500);
   const debouncedAddress = useDebounce(receiver, 500);
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('locksmith', 'createKey',
+    Locksmith.getContractWrite('Locksmith', 'createKey',
       [rootKeyId, ethers.utils.formatBytes32String(debouncedName), debouncedAddress, bind],
       debouncedName.length > 0 && ethers.utils.isAddress(debouncedAddress))
   );
@@ -410,7 +410,7 @@ export function useCreateKey(rootKeyId, keyName, receiver, bind, errorFunc, succ
  */
 export function useTrustInfo(trustId) {
   const provider  = useProvider();
-  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
+  const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
 
   const trustInfo = useQuery('trust for ' + trustId, async function() {
     if( null === trustId ) {
@@ -440,7 +440,7 @@ export function useTrustInfo(trustId) {
  */
 export function useTrustKeys(trustId) {
   const provider  = useProvider();
-  const locksmith = useContract(Locksmith.getContract('locksmith', provider));
+  const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
 
   const trustKeys = useQuery('getKeys for trust ' + trustId, async function() {
     // if the input is invalid just forget it  

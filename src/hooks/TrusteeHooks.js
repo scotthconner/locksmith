@@ -17,28 +17,28 @@ import {
  */
 export function useTrustPolicyKeys(trustId) {
   const provider = useProvider();
-  const trustee = useContract(Locksmith.getContract('trustee', provider));
+  const Trustee = useContract(Locksmith.getContract('Trustee', provider));
   return useQuery('getTrustPolicyKeys for ' + trustId, async function() {
-    return await trustee.getTrustPolicyKeys(trustId);
+    return await Trustee.getTrustPolicyKeys(trustId);
   });
 }
 
 /**
  * usePolicy
  * 
- * Provides all of the metadata for a given trustee distribution
+ * Provides all of the metadata for a given Trustee distribution
  * policy:
  *
  * boolean : is the policy currently enabled
  * BigNumber: the root key Id that the funds are withdrawn from
- * [KeyId:BigNumber]: a list of key ids that can get distributions from the trustee key
+ * [KeyId:BigNumber]: a list of key ids that can get distributions from the Trustee key
  * [EventHash:Bytes32]: a list of event hashes that are required for the policy to be enabled
  */
 export function usePolicy(keyId) {
   const provider = useProvider();
-  const trustee = useContract(Locksmith.getContract('trustee', provider));
+  const Trustee = useContract(Locksmith.getContract('Trustee', provider));
   return useQuery('usePolicy for ' + keyId, async function() {
-    return await trustee.getPolicy(keyId);
+    return await Trustee.getPolicy(keyId);
   });
 }
 
@@ -50,7 +50,7 @@ export function usePolicy(keyId) {
  */
 export function useSetPolicy(rootKeyId, trusteeKeyId, beneficiaries, events, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('trustee', 'setPolicy',
+    Locksmith.getContractWrite('Trustee', 'setPolicy',
       [rootKeyId, trusteeKeyId, beneficiaries, events],
       rootKeyId && trusteeKeyId && beneficiaries.length > 0 && events
     )
@@ -69,12 +69,12 @@ export function useSetPolicy(rootKeyId, trusteeKeyId, beneficiaries, events, err
 /**
  * useRemovePolicy
  *
- * Given a held root key Id, and a key policy id, remove the key trustee
+ * Given a held root key Id, and a key policy id, remove the key Trustee
  * from the trust, regardless of state.
  */
 export function useRemovePolicy(rootKeyId, keyId, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('trustee', 'removePolicy',
+    Locksmith.getContractWrite('Trustee', 'removePolicy',
       [rootKeyId, keyId],
       rootKeyId && keyId 
     )
@@ -93,17 +93,17 @@ export function useRemovePolicy(rootKeyId, keyId, errorFunc, successFunc) {
 /**
  * useDistribute
  *
- * Given a trustee key Id, provider, arn, beneficiary keys and amounts,
- * use the trustee contract to make an approved-scribe call to "distribute"
+ * Given a Trustee key Id, provider, arn, beneficiary keys and amounts,
+ * use the Trustee contract to make an approved-scribe call to "distribute"
  * on the ledger. There are many reasons this could fail:
  * - provider is invalid
- * - scribe contract (trustee.sol) isn't approved on the ledger for the root key
+ * - scribe contract (Trustee.sol) isn't approved on the ledger for the root key
  * - invalid arn balance for root key on that provider
  * - invalid beneficiaries
  */
 export function useDistribute(trusteeKeyId, provider, arn, beneficiaries, amounts,  errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
-    Locksmith.getContractWrite('trustee', 'distribute',
+    Locksmith.getContractWrite('Trustee', 'distribute',
       [trusteeKeyId, provider, arn, beneficiaries, amounts],
       trusteeKeyId && provider && arn && beneficiaries.length > 0 &&
       amounts.reduce((sum, amount) => {

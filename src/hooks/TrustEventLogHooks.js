@@ -10,13 +10,13 @@ import {ethers} from 'ethers';
  * useTrustEventRegistry
  *
  * For a given trust ID, provides a list of registered 
- * events as byte32 hashes.
+ * TrustEventLog as byte32 hashes.
  */
 export function useTrustEventRegistry(trustId, dispatcher = ethers.constants.AddressZero) {
   const provider = useProvider();
-  const events = useContract(Locksmith.getContract('events', provider));
+  const TrustEventLog = useContract(Locksmith.getContract('TrustEventLog', provider));
   return useQuery('getTrustEventRegistry for ' + trustId + dispatcher, async function() {
-    return await events.getRegisteredTrustEvents(trustId, dispatcher);
+    return await TrustEventLog.getRegisteredTrustEvents(trustId, dispatcher);
   });
 }
 
@@ -27,9 +27,9 @@ export function useTrustEventRegistry(trustId, dispatcher = ethers.constants.Add
  */
 export function useEventDescription(eventHash) {
   const provider = useProvider();
-  const events = useContract(Locksmith.getContract('events', provider));
+  const TrustEventLog = useContract(Locksmith.getContract('TrustEventLog', provider));
   return useQuery('eventDescription for ' + eventHash, async function() {
-    return ethers.utils.parseBytes32String(await events.eventDescriptions(eventHash));
+    return ethers.utils.parseBytes32String(await TrustEventLog.eventDescriptions(eventHash));
   });
 }
 
@@ -40,9 +40,9 @@ export function useEventDescription(eventHash) {
  */
 export function useEventDispatcher(eventHash) {
   const provider = useProvider();
-  const events = useContract(Locksmith.getContract('events', provider));
+  const TrustEventLog = useContract(Locksmith.getContract('TrustEventLog', provider));
   return useQuery('eventDispatcher for ' + eventHash, async function() {
-    return await events.eventDispatchers(eventHash);
+    return await TrustEventLog.eventDispatchers(eventHash);
   });
 }
 
@@ -54,8 +54,8 @@ export function useEventDispatcher(eventHash) {
  */
 export function useEventState(eventHash) {
   const provider = useProvider();
-  const events = useContract(Locksmith.getContract('events', provider));
+  const TrustEventLog = useContract(Locksmith.getContract('TrustEventLog', provider));
   return useQuery('firedEvents for ' + eventHash, async function() {
-    return eventHash ? await events.firedEvents(eventHash) : null;
+    return eventHash ? await TrustEventLog.firedEvents(eventHash) : null;
   });
 }
