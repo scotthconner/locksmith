@@ -31,6 +31,7 @@ import {
 import { BsWallet } from 'react-icons/bs';
 import { RiSafeLine } from 'react-icons/ri';
 import { HiOutlineKey } from 'react-icons/hi';
+import { FaHandHoldingUsd } from 'react-icons/fa';
 import { FiUploadCloud} from 'react-icons/fi';
 import { FcKey } from 'react-icons/fc';
 import { KeyInfoIcon } from '../components/KeyInfo.js';
@@ -60,6 +61,8 @@ import {
   useEtherDeposit
 } from '../hooks/EtherVaultHooks.js';
 import {
+  useTokenAllowance,
+  useApprove,
   useTokenDeposit
 } from '../hooks/TokenVaultHooks.js';
 import { 
@@ -259,7 +262,11 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) 
     addressOrName: account.address,
     token: address
   });
+  const tokenAllowance = useTokenAllowance(address, account.address);
   const [depositAmount, setDepositAmount] = useState(0);
+
+  const isOverAllowance = tokenAllowance.isSuccess && 
+    ethers.utils.parseEther(depositAmount.toString()).gt(tokenAllowance.data);
 
   const errorFunc = function(error) {
     toast({
@@ -286,11 +293,25 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) 
     address === null ? ethers.utils.parseEther(depositAmount.toString()) : BigNumber.from(0),
     errorFunc, successFunc); 
   const tokenDeposit = useTokenDeposit(rootKeyId, address,
-    address === null ? BigNumber.from(0) : ethers.utils.parseEther(depositAmount.toString()),
+    address === null ? BigNumber.from(0) : isOverAllowance ? 0 : ethers.utils.parseEther(depositAmount.toString()),
     errorFunc, successFunc);
   var buttonProps = (etherDeposit.isLoading || tokenDeposit.isLoading) ? {isLoading: true} : 
     (depositAmount === 0 ? {isDisabled: true} : {});
-
+  
+  const approve = useApprove(address, account.address, ethers.utils.parseEther(depositAmount.toString()), errorFunc,
+    function(data) {
+      toast({
+        title: 'Funds Approved!',
+        description: 'You\'ve approved ' + depositAmount + ' ' + symbol + ' for deposit.',
+        status: 'success',
+        duration: 9000,
+        isClosable: true
+      });
+      onClose();
+    }
+  );
+  
+  var approveButtonProps = approve.isLoading ? { isLoading: true } : {};
 
   return  !balance.isSuccess ? <Skeleton height='1.2em' width='10em'/> : 
         <HStack spacing='1em' width='100%'>
@@ -313,11 +334,16 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) 
             <Text fontSize='xs'>{symbol}</Text>
           </VStack>
           <Spacer/>
-          <Button {...buttonProps} 
+          {isOverAllowance ? '' : <Button {...buttonProps} 
           onClick={address === null ? 
           () => {etherDeposit.write?.();} :
           () => {tokenDeposit.write?.();}}
             size='sm' 
-            colorScheme='blue' borderRadius='full' leftIcon={<RiSafeLine/>}>Deposit</Button>
+            colorScheme='blue' borderRadius='full' leftIcon={<RiSafeLine/>}>Deposit</Button> }
+          {isOverAllowance && 
+            <Button {...approveButtonProps}
+              onClick={() => {approve.write?.();}}
+              size='sm' borderRadius='full' leftIcon={<FaHandHoldingUsd/>}>Allow</Button> 
+          }
         </HStack>
 }

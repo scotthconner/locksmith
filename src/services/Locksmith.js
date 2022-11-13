@@ -8,6 +8,7 @@ const Locksmith = (function() {
   var assetAddresses = require("../registries/network-assets-31337.json");
 
   const interfaces = {
+    ShadowERC: require("../contracts/stubs/ShadowERC.sol/ShadowERC.json"),
     KeyVault: require("../contracts/KeyVault.sol/KeyVault.json"),
     Locksmith: require("../contracts/Locksmith.sol/Locksmith.json"),
     Notary: require("../contracts/Notary.sol/Notary.json"),
@@ -51,7 +52,7 @@ const Locksmith = (function() {
     ////////////////////////////////////////////
     getContract: function(contract, provider) {
       return {
-        addressOrName: contractAddresses[contract],
+        addressOrName: contractAddresses[contract] || assetAddresses[contract],
         contractInterface: interfaces[contract].abi,
         signerOrProvider: provider
       }
@@ -64,7 +65,7 @@ const Locksmith = (function() {
     ////////////////////////////////////////////
     getContractWrite: function(contract, method, args, enabled) {
       return {
-        addressOrName: contractAddresses[contract],
+        addressOrName: contractAddresses[contract] || assetAddresses[contract],
         contractInterface: interfaces[contract].abi,
         functionName: method,
         args: args,
