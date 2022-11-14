@@ -38,81 +38,92 @@ export const AssetResource = (function() {
   // to reconstitute this each time.
   var metadata = {};
 
-  // Gas Token
-  metadata[getArn(ethers.constants.AddressZero, 0, 0)] = {
-    name: 'Ethereum',
-    symbol: 'ETH',
-    decimals: 18,
-    contractAddress: null,
-    coinCapId: 'ethereum',
-    icon: function(props = {}) {
-      return <ETH {...props} color='#716b94'/>;
-    }
-  };
+  var freshenUp = function() {
+    metadata = {}
+    // Gas Token
+    metadata[getArn(ethers.constants.AddressZero, 0, 0)] = {
+      name: 'Ethereum',
+      symbol: 'ETH',
+      decimals: 18,
+      contractAddress: null,
+      coinCapId: 'ethereum',
+      icon: function(props = {}) {
+        return <ETH {...props} color='#716b94'/>;
+      }
+    };
   
-  // Shadow ERC20s
-  metadata[getArn(Locksmith.getAssetAddress('link'), 20, 0)] = {
-    name: 'Chainlink',
-    symbol: 'LINK',
-    decimals: 18,
-    contractAddress: Locksmith.getAssetAddress('link'),
-    coinCapId: 'chainlink',
-    icon: function(props = {}) {
-      return <LINK {...props} color='#375BD2'/>;
-    }
+    // Shadow ERC20s
+    metadata[getArn(Locksmith.getAssetAddress('link'), 20, 0)] = {
+      name: 'Chainlink',
+      symbol: 'LINK',
+      decimals: 18,
+      contractAddress: Locksmith.getAssetAddress('link'),
+      coinCapId: 'chainlink',
+      icon: function(props = {}) {
+        return <LINK {...props} color='#375BD2'/>;
+      }
+    };
+    metadata[getArn(Locksmith.getAssetAddress('matic'), 20, 0)] = {
+      name: 'Polygon',
+      symbol: 'MATIC',
+      decimals: 18,
+      contractAddress: Locksmith.getAssetAddress('matic'),
+      coinCapId: 'polygon',
+      icon: function(props = {}) {
+        return <MATIC {...props} color='#8247e5'/>;
+      }
+    };
+    metadata[getArn(Locksmith.getAssetAddress('avax'), 20, 0)] = {
+      name: 'Wormhole',
+      symbol: 'WAVAX',
+      decimals: 18,
+      contractAddress: Locksmith.getAssetAddress('avax'),
+      coinCapId: 'avalanche',
+      icon: function(props = {}) {
+        return <AVAX color='#e84142' {...props}/>;
+      }
+    };
+    metadata[getArn(Locksmith.getAssetAddress('grt'), 20, 0)] = {
+      name: 'The Graph',
+      symbol: 'GRT',
+      decimals: 18,
+      coinCapId: 'the-graph',
+      contractAddress: Locksmith.getAssetAddress('grt'),
+      icon: function(props = {}) {
+        return <GRT color='#6f4cff' {...props}/>;
+      }
+    };
+    metadata[getArn(Locksmith.getAssetAddress('usdc'), 20, 0)] = {
+      name: 'USDC',
+      symbol: 'USDC',
+      decimals: 18,
+      contractAddress: Locksmith.getAssetAddress('usdc'),
+      coinCapId: 'usd-coin',
+      icon: function(props = {}) {
+        return <USDC color='#2775ca' {...props}/>;
+      }
+    };
+    metadata[getArn(Locksmith.getAssetAddress('dai'), 20, 0)] = {
+      name: 'Dai',
+      symbol: 'DAI',
+      decimals: 18,
+      coinCapId: 'multi-collateral-dai',
+      contractAddress: Locksmith.getAssetAddress('dai'),
+      icon: function(props = {}) {
+        return <DAI color='#febe44' {...props}/>;
+      }
+    };
   };
-  metadata[getArn(Locksmith.getAssetAddress('matic'), 20, 0)] = {
-    name: 'Polygon',
-    symbol: 'MATIC',
-    decimals: 18,
-    contractAddress: Locksmith.getAssetAddress('matic'),
-    coinCapId: 'polygon',
-    icon: function(props = {}) {
-      return <MATIC {...props} color='#8247e5'/>;
-    }
-  };
-  metadata[getArn(Locksmith.getAssetAddress('avax'), 20, 0)] = {
-    name: 'Wormhole',
-    symbol: 'WAVAX',
-    decimals: 18,
-    contractAddress: Locksmith.getAssetAddress('avax'),
-    coinCapId: 'avalanche',
-    icon: function(props = {}) {
-      return <AVAX color='#e84142' {...props}/>;
-    }
-  };
-  metadata[getArn(Locksmith.getAssetAddress('grt'), 20, 0)] = {
-    name: 'The Graph',
-    symbol: 'GRT',
-    decimals: 18,
-    coinCapId: 'the-graph',
-    contractAddress: Locksmith.getAssetAddress('grt'),
-    icon: function(props = {}) {
-      return <GRT color='#6f4cff' {...props}/>;
-    }
-  };
-  metadata[getArn(Locksmith.getAssetAddress('usdc'), 20, 0)] = {
-    name: 'USDC',
-    symbol: 'USDC',
-    decimals: 18,
-    contractAddress: Locksmith.getAssetAddress('usdc'),
-    coinCapId: 'usd-coin',
-    icon: function(props = {}) {
-      return <USDC color='#2775ca' {...props}/>;
-    }
-  };
-  metadata[getArn(Locksmith.getAssetAddress('dai'), 20, 0)] = {
-    name: 'Dai',
-    symbol: 'DAI',
-    decimals: 18,
-    coinCapId: 'multi-collateral-dai',
-    contractAddress: Locksmith.getAssetAddress('dai'),
-    icon: function(props = {}) {
-      return <DAI color='#febe44' {...props}/>;
-    }
-  };
+  freshenUp();
 
   return {
+    /////////////////////////////////////////////
+    // refreshMetadata
+    //
+    // If a network changes, you'll want to re-cache
+    // the addresses.
+    /////////////////////////////////////////////
+    refreshMetadata: function() { freshenUp(); },
     /////////////////////////////////////////////
     // getTokenArn
     //

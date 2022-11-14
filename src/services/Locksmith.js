@@ -31,6 +31,8 @@ const Locksmith = (function() {
     setChainId: function(chainId) {
       contractAddresses = require("../registries/network-contracts-" + chainId + ".json")
       assetAddresses = require("../registries/network-assets-" + chainId + ".json");
+      console.log("loaded chain id: " + chainId);
+      console.log(assetAddresses);
     },
     ////////////////////////////////////////////
     // getContractAddress

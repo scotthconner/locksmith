@@ -32,7 +32,11 @@ import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
 import { ConnectKitProvider, ConnectKitButton } from "connectkit";
+import { useNetwork } from 'wagmi';
+import { useState } from 'react';
 import NewTrustDialog from '../NewTrustDialog';
+import Locksmith from '../services/Locksmith.js';
+import { AssetResource } from '../services/AssetResource.js';
 
 interface LinkItemProps {
   name: string;
@@ -53,6 +57,17 @@ export default function SidebarWithHeader({
   children: ReactNode;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const network = useNetwork();
+  const [chain, setChain] = useState(null);
+
+  // if it looks like we've switched, reload
+  // the contract addresses
+  if(network.chain && network.chain.id !== chain) {
+    Locksmith.setChainId(network.chain.id); 
+    AssetResource.refreshMetadata(); 
+    setChain(network.chain.id);
+  }
 
   return (
     <ConnectKitProvider theme='auto' mode={useColorModeValue('light', 'dark')}>
