@@ -27,12 +27,14 @@ export function ContextBalanceUSD({contextId, identifier, skeletonProps, textPro
 }
 
 const RecursiveTrustBalanceUSD = ({arns, arnBalances, position, total, textProps, ...rest}) => {
+  const asset = AssetResource.getMetadata(arns[position]);
+
   // grab the coin cap price for the position we are at.
-  const assetPrice = useCoinCapPrice(AssetResource.getMetadata(arns[position]).coinCapId);
+  const assetPrice = useCoinCapPrice(asset.coinCapId);
 
   // once we have the asset price, determine the total arn value
   const arnValue = !assetPrice.isSuccess ? 0 : assetPrice.data * 
-    ethers.utils.formatEther(arnBalances[position]);
+    ethers.utils.formatUnits(arnBalances[position], asset.decimals);
 
   // this becomes an interesting trick where we 'trickle down' loaded asset
   // prices recursively until we reach the end node where we simply display

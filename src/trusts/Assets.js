@@ -77,7 +77,7 @@ export function TrustArn({rootKeyId, trustId, arn, balance, trustKeys, ...rest})
   var asset = AssetResource.getMetadata(arn);
   var assetPrice = useCoinCapPrice([asset.coinCapId]);
   var assetValue = assetPrice.isSuccess ?
-    USDFormatter.format(assetPrice.data * ethers.utils.formatEther(balance)) : null;
+    USDFormatter.format(assetPrice.data * ethers.utils.formatUnits(balance, asset.decimals)) : null;
   var boxColor = useColorModeValue('white', 'gray.800');
   var providerDisclosure = useDisclosure();
 
@@ -105,7 +105,7 @@ export function TrustArn({rootKeyId, trustId, arn, balance, trustKeys, ...rest})
               <Button onClick={providerDisclosure.onToggle} size='sm' variant='ghost' borderRadius='full' p={0}>
                 <RiSafeLine size={20}/>
               </Button>
-              <Text><font color='gray'>{ethers.utils.formatEther(balance)} {asset.symbol}</font></Text>
+              <Text><font color='gray'>{ethers.utils.formatUnits(balance, asset.decimals)} {asset.symbol}</font></Text>
             </HStack>
           </VStack>
         </HStack>
@@ -231,7 +231,7 @@ export function DepositFundsModal({rootKeyId, trustId, onClose, isOpen, ...rest}
                       <Text><WalletArnBalanceLabel address={asset[1].contractAddress}/></Text></>}
                       {selectedArn === asset[0] && 
                         <WalletArnBalanceSlider rootKeyId={rootKeyId} onClose={onClose} 
-                          address={asset[1].contractAddress} symbol={asset[1].symbol}/>}
+                          address={asset[1].contractAddress} symbol={asset[1].symbol} precision={asset[1].decimals}/>}
                     </HStack>
                   </ListItem>
                 )}
@@ -251,11 +251,14 @@ const WalletArnBalanceLabel = ({address, ...rest}) => {
     addressOrName: account.address,
     token: address
   });
+  if (balance.isSuccess) {
+    console.log(address + ": " + balance.data.value);
+  }
   return !balance.isSuccess ? <Skeleton width='3em' height='1em'/> :
     <>{ethers.utils.commify(balance.data.formatted.match(/.*\.[0-9][0-9]?/))}</>;
 }
 
-const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) => {
+const WalletArnBalanceSlider = ({rootKeyId, address, symbol, precision, onClose, ...rest}) => {
   const toast = useToast();
   const account = useAccount();
   const balance = useBalance({
@@ -266,7 +269,7 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) 
   const [depositAmount, setDepositAmount] = useState(0);
 
   const isOverAllowance = tokenAllowance.isSuccess && 
-    ethers.utils.parseEther(depositAmount.toString()).gt(tokenAllowance.data);
+    ethers.utils.parseUnits(depositAmount.toString(), precision).gt(tokenAllowance.data);
 
   const errorFunc = function(error) {
     toast({
@@ -293,12 +296,12 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, onClose, ...rest}) 
     address === null ? ethers.utils.parseEther(depositAmount.toString()) : BigNumber.from(0),
     errorFunc, successFunc); 
   const tokenDeposit = useTokenDeposit(rootKeyId, address,
-    address === null ? BigNumber.from(0) : isOverAllowance ? 0 : ethers.utils.parseEther(depositAmount.toString()),
+    address === null ? BigNumber.from(0) : isOverAllowance ? 0 : ethers.utils.parseUnits(depositAmount.toString(), precision),
     errorFunc, successFunc);
   var buttonProps = (etherDeposit.isLoading || tokenDeposit.isLoading) ? {isLoading: true} : 
     (depositAmount === 0 ? {isDisabled: true} : {});
   
-  const approve = useApprove(address, account.address, ethers.utils.parseEther(depositAmount.toString()), errorFunc,
+  const approve = useApprove(address, account.address, ethers.utils.parseUnits(depositAmount.toString(), precision), errorFunc,
     function(data) {
       toast({
         title: 'Funds Approved!',

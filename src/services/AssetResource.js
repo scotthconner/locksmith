@@ -63,16 +63,6 @@ export const AssetResource = (function() {
         return <LINK {...props} color='#375BD2'/>;
       }
     };
-    metadata[getArn(Locksmith.getAssetAddress('matic'), 20, 0)] = {
-      name: 'Polygon',
-      symbol: 'MATIC',
-      decimals: 18,
-      contractAddress: Locksmith.getAssetAddress('matic'),
-      coinCapId: 'polygon',
-      icon: function(props = {}) {
-        return <MATIC {...props} color='#8247e5'/>;
-      }
-    };
     metadata[getArn(Locksmith.getAssetAddress('avax'), 20, 0)] = {
       name: 'Wormhole',
       symbol: 'WAVAX',
@@ -96,7 +86,7 @@ export const AssetResource = (function() {
     metadata[getArn(Locksmith.getAssetAddress('usdc'), 20, 0)] = {
       name: 'USDC',
       symbol: 'USDC',
-      decimals: 18,
+      decimals: 6,
       contractAddress: Locksmith.getAssetAddress('usdc'),
       coinCapId: 'usd-coin',
       icon: function(props = {}) {
