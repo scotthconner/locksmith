@@ -10,7 +10,6 @@ import {
 import { AVAX } from '../components/icons/AVAX.js';
 import { ETH } from '../components/icons/ETH.js';
 import { GRT } from '../components/icons/GRT.js';
-import { MATIC } from '../components/icons/MATIC.js';
 
 /**
  * AssetResource 

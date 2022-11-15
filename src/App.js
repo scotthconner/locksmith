@@ -15,7 +15,6 @@ import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { publicProvider } from 'wagmi/providers/public'
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
-import { getDefaultClient } from "connectkit";
 
 //////////////////////////////////////
 // Pages and Navigation

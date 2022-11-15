@@ -69,10 +69,6 @@ import {
   useDistribute,
 } from './hooks/TrusteeHooks.js';
 import {
-  useEventState,
-  useEventDescription,
-} from './hooks/TrustEventLogHooks.js';
-import {
   useCoinCapPrice,
   USDFormatter,
 } from './hooks/PriceHooks.js';

@@ -40,11 +40,6 @@ export function useApprove(tokenAddress, userAddress, amount, errorFunc, success
   const provider   = useProvider();
   const tokenVault = Locksmith.getContractAddress('TokenVault');
 
-  // we are going to cut a corner here. We should have an ERC20 ABI
-  // that we could load, but we have the generic ShadowERC. This
-  // will break for test-net.
-  const token = useContract(Locksmith.getContract('ShadowERC', provider));
-
   const preparation = usePrepareContractWrite({
     addressOrName: tokenAddress, 
     contractInterface: Locksmith.getContract('ShadowERC', provider).contractInterface, 

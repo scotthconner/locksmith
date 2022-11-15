@@ -29,7 +29,7 @@ import { useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import { KeyIcon, KeyInfoIcon } from '../components/KeyInfo.js';
+import { KeyInfoIcon } from '../components/KeyInfo.js';
 import { alarmClockExpirationAgo } from '../components/AlarmClock.js';
 import { BiCheckCircle, BiAlarm } from 'react-icons/bi';
 import { HiOutlineLightningBolt } from 'react-icons/hi';

@@ -52,7 +52,6 @@ import {
 import { 
   useTrustEventRegistry,
   useEventDescription,
-  useEventDispatcher, 
   useEventState
 } from './hooks/TrustEventLogHooks.js';
 
