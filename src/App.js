@@ -33,7 +33,7 @@ import Events from './Events.js';
 
 // We are using alchemy for now
 // Choose which chains you'd like to show
-const {chains, provider, webSocketProvider} = configureChains([chain.hardhat, chain.goerli], [
+const {chains, provider, webSocketProvider} = configureChains([chain.goerli, chain.hardhat], [
   alchemyProvider({apiKey:'8TN4uRz1cIbyDUgHZ80u0tKdQA2Qsc8j'}),
   publicProvider(),
 ]);
