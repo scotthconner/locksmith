@@ -251,9 +251,6 @@ const WalletArnBalanceLabel = ({address, ...rest}) => {
     addressOrName: account.address,
     token: address
   });
-  if (balance.isSuccess) {
-    console.log(address + ": " + balance.data.value);
-  }
   return !balance.isSuccess ? <Skeleton width='3em' height='1em'/> :
     <>{ethers.utils.commify(balance.data.formatted.match(/.*\.[0-9][0-9]?/))}</>;
 }
