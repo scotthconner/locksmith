@@ -37,7 +37,7 @@ export default function NewTrustDialog({
 }) {
   const initialRef = useRef(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const [input, setInput] = useState('');
   const handleInputChange = (e) => { 
     if (e.target.value.length < 32) {
@@ -46,7 +46,7 @@ export default function NewTrustDialog({
   };
   const isError = input.trim().length === 0;
   const toast = useToast();
-  const writeConfig = useCreateTrustAndRootKey(input, function(error) {
+  const writeConfig = useCreateTrustAndRootKey(input, address, function(error) {
     // error
     toast({
       title: 'Transaction Error!',

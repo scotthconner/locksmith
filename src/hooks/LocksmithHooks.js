@@ -190,7 +190,7 @@ export function useKeyInfo(keyId, address = null) {
       isRoot: response[3],
       trust: {
         id: response[2], 
-        name: ethers.utils.parseBytes32String(trust.name),
+        name: ethers.utils.parseBytes32String(trust ? trust.name || '' : ''),
         rootKeyId: trust.rootKeyId,
         keys: response[4]
       }
@@ -224,15 +224,16 @@ export function useKeyHolders(keyId) {
  * the wallet interaction.
  *
  * @param trustName the human readable trustname you want to make
+ * @param recipient the receiving wallet address of the new trust's root key
  * @param errorFunc what to do if this fails at signing or is aborted
  * @param successFunc what to do when the transaction has been signed and broadast
  * @return a query of the contract write
  **/
-export function useCreateTrustAndRootKey(trustName, errorFunc, successFunc) {
+export function useCreateTrustAndRootKey(trustName, recipient, errorFunc, successFunc) {
   const debouncedTrustName = useDebounce(trustName.trim(), 500);
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('Locksmith', 'createTrustAndRootKey', 
-      [ethers.utils.formatBytes32String(debouncedTrustName)], 
+      [ethers.utils.formatBytes32String(debouncedTrustName), recipient], 
       debouncedTrustName.length > 0));
 
   const call = useContractWrite({...preparation.config, 
