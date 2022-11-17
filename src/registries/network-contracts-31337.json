@@ -1,12 +1,42 @@
 {
-  "KeyVault": "0x0355B7B8cb128fA5692729Ab3AAa199C1753f726",
-  "Locksmith": "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9",
-  "Notary": "0x5FeaeBfB4439F3516c74939A9D04e95AFE82C4ae",
-  "TrustEventLog": "0x172076E0166D1F9Cc711C77Adf8488051744980C",
-  "Ledger": "0x19cEcCd6942ad38562Ee10bAfd44776ceB67e923",
-  "EtherVault": "0xfcDB4564c18A9134002b9771816092C9693622e3",
-  "TokenVault": "0x32EEce76C2C2e8758584A83Ee2F522D4788feA0f",
-  "AlarmClock": "0x6C2d83262fF84cBaDb3e416D527403135D757892",
-  "Trustee": "0xa6e99A4ED7498b3cdDCBB61a6A607a4925Faa1B7",
-  "KeyOracle": "0x02b0B4EFd909240FCB2Eb5FAe060dC60D112E3a4"
+  "KeyVault": {
+    "address": "0x0355B7B8cb128fA5692729Ab3AAa199C1753f726",
+    "codeHash": "0xe54f5f3990a6ab929953b4d44298d1969b65e0438dba755c003feb85f8cbf411"
+  },
+  "Locksmith": {
+    "address": "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9",
+    "codeHash": "0xdcc5be38549a222510669f74b735d538da3349930f77759ff2800f6783679cd1"
+  },
+  "Notary": {
+    "address": "0x5FeaeBfB4439F3516c74939A9D04e95AFE82C4ae",
+    "codeHash": "0xe4caebe6259735a5187a652a44ac1d1a33ec1af5cbedab31ff82012ec84f431a"
+  },
+  "TrustEventLog": {
+    "address": "0xddE78e6202518FF4936b5302cC2891ec180E8bFf",
+    "codeHash": "0xc5f28d7e11ececbf22f8fcf1b103a14d83a73857dcf74a67ac7767110e85b11a"
+  },
+  "Ledger": {
+    "address": "0x19cEcCd6942ad38562Ee10bAfd44776ceB67e923",
+    "codeHash": "0x7f1badac5648e058744f3dac777134d1ca3a5797f089ab68a8daf8e849c06115"
+  },
+  "EtherVault": {
+    "address": "0xfcDB4564c18A9134002b9771816092C9693622e3",
+    "codeHash": "0xfdab0c45ccb040b9f319b290ec7ceaae0be3bd660375b32569ea657c7abb28bb"
+  },
+  "TokenVault": {
+    "address": "0x32EEce76C2C2e8758584A83Ee2F522D4788feA0f",
+    "codeHash": "0x22e6a43ec6f3660b01d3584f921b119a3f99bbb049321e6de45cf0fff76527ab"
+  },
+  "AlarmClock": {
+    "address": "0x413b1AfCa96a3df5A686d8BFBF93d30688a7f7D9",
+    "codeHash": "0xfbfb61128fdc6d6f27d927df80a43592465793001445557dd0323f77ba90d09d"
+  },
+  "Trustee": {
+    "address": "0x821f3361D454cc98b7555221A06Be563a7E2E0A6",
+    "codeHash": "0x2b1303ec451e72c97b4e0430b313241856958a8e18b7c68d90af888649524f1e"
+  },
+  "KeyOracle": {
+    "address": "0x2b5A4e5493d4a54E717057B127cf0C000C876f9B",
+    "codeHash": "0xbf8731f562fadbfd429f2fe356dd811e6ba58f58417b4716becb91b64814c6f8"
+  }
 }
