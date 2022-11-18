@@ -1,42 +1,42 @@
 {
   "KeyVault": {
-    "address": "0x0355B7B8cb128fA5692729Ab3AAa199C1753f726",
-    "codeHash": "0xe54f5f3990a6ab929953b4d44298d1969b65e0438dba755c003feb85f8cbf411"
+    "address": "0xccf1769D8713099172642EB55DDFFC0c5A444FE9",
+    "codeHash": "0x3f661f35bb90fe745803870fc72cfa619518660ff26c57ef605ae9a7e2ee4620"
   },
   "Locksmith": {
-    "address": "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9",
-    "codeHash": "0xdcc5be38549a222510669f74b735d538da3349930f77759ff2800f6783679cd1"
-  },
-  "Notary": {
-    "address": "0x5FeaeBfB4439F3516c74939A9D04e95AFE82C4ae",
-    "codeHash": "0xe4caebe6259735a5187a652a44ac1d1a33ec1af5cbedab31ff82012ec84f431a"
+    "address": "0x2625760C4A8e8101801D3a48eE64B2bEA42f1E96",
+    "codeHash": "0x0673db88bde20e486b7121aaff0f15019db17c3be35d88428db40b2d45c4d752"
   },
   "TrustEventLog": {
-    "address": "0xddE78e6202518FF4936b5302cC2891ec180E8bFf",
-    "codeHash": "0xc5f28d7e11ececbf22f8fcf1b103a14d83a73857dcf74a67ac7767110e85b11a"
+    "address": "0xD6b040736e948621c5b6E0a494473c47a6113eA8",
+    "codeHash": "0x911b5e5d4d5bf719a87ba84b38863c91cae64f1f2c10bca017b0f2fc9280451d"
+  },
+  "Notary": {
+    "address": "0xAdE429ba898c34722e722415D722A70a297cE3a2",
+    "codeHash": "0xa48bbadebc640fc0dd9f45a5c47fb9d5bf3e2f164c0ef539bc1d44073a2f365a"
   },
   "Ledger": {
-    "address": "0x19cEcCd6942ad38562Ee10bAfd44776ceB67e923",
-    "codeHash": "0x7f1badac5648e058744f3dac777134d1ca3a5797f089ab68a8daf8e849c06115"
-  },
-  "EtherVault": {
-    "address": "0xfcDB4564c18A9134002b9771816092C9693622e3",
-    "codeHash": "0xfdab0c45ccb040b9f319b290ec7ceaae0be3bd660375b32569ea657c7abb28bb"
-  },
-  "TokenVault": {
-    "address": "0x32EEce76C2C2e8758584A83Ee2F522D4788feA0f",
-    "codeHash": "0x22e6a43ec6f3660b01d3584f921b119a3f99bbb049321e6de45cf0fff76527ab"
-  },
-  "AlarmClock": {
-    "address": "0x413b1AfCa96a3df5A686d8BFBF93d30688a7f7D9",
-    "codeHash": "0xfbfb61128fdc6d6f27d927df80a43592465793001445557dd0323f77ba90d09d"
+    "address": "0xcE0066b1008237625dDDBE4a751827de037E53D2",
+    "codeHash": "0x99c846c527a00c9211c209d8f05bc1e9504f4856cef3d7323e26a3c982564232"
   },
   "Trustee": {
-    "address": "0x821f3361D454cc98b7555221A06Be563a7E2E0A6",
-    "codeHash": "0x2b1303ec451e72c97b4e0430b313241856958a8e18b7c68d90af888649524f1e"
+    "address": "0x87006e75a5B6bE9D1bbF61AC8Cd84f05D9140589",
+    "codeHash": "0x76df7b1587a8548d1223db6e22434f35e1736c915e76148627ec36cbb643c9d8"
+  },
+  "AlarmClock": {
+    "address": "0x8fC8CFB7f7362E44E472c690A6e025B80E406458",
+    "codeHash": "0x57c950f2756e0377ebda4fca57c885760b36f7d4bdb04b606a647c7a0fc50f23"
   },
   "KeyOracle": {
-    "address": "0x2b5A4e5493d4a54E717057B127cf0C000C876f9B",
-    "codeHash": "0xbf8731f562fadbfd429f2fe356dd811e6ba58f58417b4716becb91b64814c6f8"
+    "address": "0x359570B3a0437805D0a71457D61AD26a28cAC9A2",
+    "codeHash": "0x36c0dbe7b019c4a45f8628cb2ec68fb99e0dbaacae9f683b34756f3d2d95f7ef"
+  },
+  "EtherVault": {
+    "address": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+    "codeHash": "0x78fee509a3022247ab013bf8158740c6f6bf83014c21c16a8131b8177e475ee5"
+  },
+  "TokenVault": {
+    "address": "0x70eE76691Bdd9696552AF8d4fd634b3cF79DD529",
+    "codeHash": "0x7f22e692af27c904267190a1d382590fae798f3505b25c8e168f1ca453f9a589"
   }
 }

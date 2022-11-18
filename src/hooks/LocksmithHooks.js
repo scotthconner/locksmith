@@ -103,7 +103,7 @@ export function useSoulboundKeyAmounts(keyId, address) {
   const provider   = useProvider();
   const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
   return useQuery('soulbound count for ' + keyId + ' with holder ' + address, async function() {
-    return await KeyVault.soulboundKeyAmounts(address, keyId);
+    return await KeyVault.keyBalanceOf(address, keyId, true);
   });
 }
 
@@ -177,7 +177,7 @@ export function useKeyInfo(keyId, address = null) {
         held = await KeyVault.balanceOf(address, keyId);
         
         // determine how many of them are soulbound
-        soulboundCount = await KeyVault.soulboundKeyAmounts(address, keyId); 
+        soulboundCount = await KeyVault.keyBalanceOf(address, keyId, true); 
       }
     }
 
