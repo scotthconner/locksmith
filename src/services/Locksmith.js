@@ -59,13 +59,13 @@ const Locksmith = (function() {
     // getContractAddress
     ////////////////////////////////////////////
     getContractAddress: function(contract) {
-      return contractAddresses[myChainId][contract]['address'];
+      return (contractAddresses[myChainId][contract]||{})['address'];
     },
     ////////////////////////////////////////////
     // getContractAddress
     ////////////////////////////////////////////
     getAssetAddress: function(asset) {
-      return assetAddresses[myChainId][asset]['address'];
+      return (assetAddresses[myChainId][asset]||{})['address'];
     },
     ////////////////////////////////////////////
     // getContract
@@ -75,7 +75,7 @@ const Locksmith = (function() {
     ////////////////////////////////////////////
     getContract: function(contract, provider) {
       return {
-        addressOrName: contractAddresses[myChainId][contract]['address'] || assetAddresses[myChainId][contract]['address'],
+        addressOrName: Locksmith.getContractAddress(contract) || Locksmith.getAssetAddress(contract), 
         contractInterface: interfaces[contract].abi,
         signerOrProvider: provider
       }
