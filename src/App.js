@@ -30,6 +30,7 @@ import Keys from './Keys.js';
 import Assets from './Assets.js';
 import Trustees from './Trustees.js';
 import Events from './Events.js';
+import { TrustWizard } from './TrustWizard.js';
 
 // We are using alchemy for now
 // Choose which chains you'd like to show
@@ -67,6 +68,7 @@ function App() {
               <Route path='/assets' element={<Assets/>} />
               <Route path='/trustees' element={<Trustees/>} />
               <Route path='/events' element={<Events/>} />
+              <Route path='/wizard' element={<TrustWizard/>} />
             </Routes>
           </SidebarWithHeader>
         </Router>
