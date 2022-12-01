@@ -30,6 +30,7 @@ import { ethers } from 'ethers';
 
 import { BsTrash } from 'react-icons/bs';
 import { FcKey } from 'react-icons/fc';
+import { HiOutlineKey } from 'react-icons/hi';
 import { IoIosAdd } from 'react-icons/io';
 
 export function TrustWizard({...rest}) {
@@ -45,11 +46,29 @@ export function TrustWizard({...rest}) {
   // Step 1: Setting up Beneficiaries
   const keyDisclosure = useDisclosure();
   const [beneficiaries, setBeneficiaries] = useState([]);
-  
+
+  // Step 2: Setting up a trustee, or creating trust.
+  const trusteeDisclosure = useDisclosure();
+  const [trusteeName, setTrusteeName] = useState('');
+
+  // Step 3: Setting up a deadman switch, or creating a trust. 
+  const deadmanDisclosure = useDisclosure();
+  const [deadmanConfig, setDeadmanConfig] = useState({
+    alarmTime: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // one year
+    snoozeIntervalUnit: 60 * 60 * 24, // day
+    snoozeUnitCount: 1
+  });
+
+  // Step 4: Review Trust Creation
+  const reviewDisclosure = useDisclosure();
+
   // Step Processing
   const stepDisclosures = [
     trustNameDisclosure,
     keyDisclosure,
+    trusteeDisclosure,
+    deadmanDisclosure,
+    reviewDisclosure,
   ];
 
   const changeStep = function(stepNumber) {
@@ -64,19 +83,36 @@ export function TrustWizard({...rest}) {
       <Text fontSize='xl'>Use the Locksmith key system to secure your assets <i>without</i> sharing your private key in just a few quick steps.</Text>
       <Text fontSize='xl'>You will get a set of NFT keys, a vault to store your ether and ERC20s, and an optional trustee and deadman switch. You can re-configure your trust at any time.</Text>
     </Stack>
-    <Center><Progress hasStripe value={25 * (step + 1)} width='60%'/></Center>
+    <Center><Progress hasStripe value={20 * (step + 1)} width='60%'/></Center>
     <Collapse in={(trustName.length === 0) || step === 0 || trustNameDisclosure.isOpen}>
       <SetTrustName trustName={trustName} setTrustName={setTrustName} isError={isError}/>
+    </Collapse>
+    <Collapse in={!trustNameDisclosure.isOpen && step > 0}>
+      <VStack><ReviewTrustName trustName={trustName}/></VStack>
+    </Collapse>
+    <Collapse in={step > 1}>
+      <VStack><ReviewBeneficiaries beneficiaries={beneficiaries} goBack={
+        () => { changeStep(step-1); }
+      }/></VStack>
     </Collapse>
     <Collapse in={keyDisclosure.isOpen}>
       <CreateBeneficiaries trustName={trustName} beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} 
         setButtonLabel={setButtonLabel} setHasError={setHasError}/> 
     </Collapse>
-    <HStack pr='3em'>
+    <Collapse in={trusteeDisclosure.isOpen && beneficiaries.length > 0}>
+      <SetTrusteeName trusteeName={trusteeName} setTrusteeName={setTrusteeName} setHasError={setHasError}/>
+    </Collapse>
+    <Collapse in={deadmanDisclosure.isOpen}>
+      Deadman Disclosure
+    </Collapse>
+    <Collapse in={reviewDisclosure.isOpen}>
+      Review Disclosure
+    </Collapse>
+    { !(step > 1 && beneficiaries.length === 0) && <HStack pr='3em'>
       <Spacer/>
       { step > 0 && <Button size='lg' onClick={() => changeStep(step-1)}>Previous</Button> } 
       <Button colorScheme='blue' {... isError ? {isDisabled: true} : {}} size='lg' onClick={() => changeStep(step+1)}>{buttonLabel}</Button>
-    </HStack>
+    </HStack> }
   </Stack>
 }
 
@@ -103,6 +139,26 @@ const SetTrustName = ({trustName, setTrustName, isError}) => {
       }
     </VStack>
   </FormControl>
+}
+
+const ReviewTrustName = ({trustName}) => {
+  return <HStack mt='3em'>
+    <Text fontSize='xl'>Ok, so you've named your Trust Ring <b>{trustName}</b>. A </Text>
+    <FcKey/>
+    <Text fontSize='xl'><b>root</b> key will be minted into your wallet.</Text>
+  </HStack>
+}
+
+const ReviewBeneficiaries = ({beneficiaries, goBack}) => {
+  return beneficiaries.length < 1 ? <VStack spacing='2em'>
+      <Text fontSize='xl'>And you've chosen not to create any other keys for now.</Text>
+      <HStack>
+        <Button onClick={goBack} leftIcon={<IoIosAdd/>}>Add Keys</Button>
+        <Button colorScheme='yellow' leftIcon={<HiOutlineKey/>}>Mint Root Key</Button>
+      </HStack>
+  </VStack> :
+  <VStack>
+  </VStack>
 }
 
 const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, setButtonLabel, setHasError}) => {
@@ -162,12 +218,7 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, setBut
           .length);
   };
 
-  return <VStack spacing='2em'>
-    <HStack mt='3em'>
-      <Text fontSize='xl'>Ok, so you've named your Trust Ring <b>{trustName}</b>. A </Text>
-      <FcKey/>
-      <Text fontSize='xl'><b>root</b> key will be minted into your wallet.</Text>
-    </HStack>
+  return <VStack spacing='2em' mt='2em'>
     <Text fontSize='xl'>Next, name some beneficiaries - and where to send their Trust Key.</Text>
     <List spacing='3em'>
       { beneficiaries.map((b, x) => 
@@ -220,4 +271,8 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, setBut
       <Text fontSize='md'>Click next to use <b>{beneficiaries.length}</b> beneficiary keys.</Text>
     </HStack>
   </VStack>
+}
+
+const SetTrusteeName = ({trusteeName, setTrusteeName, setHasError}) => {
+  return "Hello";
 }
