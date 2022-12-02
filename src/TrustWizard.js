@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Center,
   Checkbox,
@@ -17,8 +18,14 @@ import {
   Spacer,
   Stack,
   Switch,
+  Tag,
+  TagLeftIcon,
+  TagLabel,
   Text,
+  Tooltip,
   VStack,
+  Wrap,
+  WrapItem,
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
@@ -28,6 +35,8 @@ import {
 } from 'react';
 import { ethers } from 'ethers';
 
+import { AiOutlineWallet } from 'react-icons/ai';
+import { BiGhost } from 'react-icons/bi';
 import { BsTrash } from 'react-icons/bs';
 import { FcKey } from 'react-icons/fc';
 import { HiOutlineKey } from 'react-icons/hi';
@@ -48,7 +57,7 @@ export function TrustWizard({...rest}) {
   const [beneficiaries, setBeneficiaries] = useState([]);
 
   // Step 2: Setting up a trustee, or creating trust.
-  const trusteeDisclosure = useDisclosure();
+  const trusteeQuestionDisclosure = useDisclosure();
   const [trusteeName, setTrusteeName] = useState('');
 
   // Step 3: Setting up a deadman switch, or creating a trust. 
@@ -66,7 +75,7 @@ export function TrustWizard({...rest}) {
   const stepDisclosures = [
     trustNameDisclosure,
     keyDisclosure,
-    trusteeDisclosure,
+    trusteeQuestionDisclosure,
     deadmanDisclosure,
     reviewDisclosure,
   ];
@@ -99,8 +108,9 @@ export function TrustWizard({...rest}) {
       <CreateBeneficiaries trustName={trustName} beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} 
         setButtonLabel={setButtonLabel} setHasError={setHasError}/> 
     </Collapse>
-    <Collapse in={trusteeDisclosure.isOpen && beneficiaries.length > 0}>
-      <SetTrusteeName trusteeName={trusteeName} setTrusteeName={setTrusteeName} setHasError={setHasError}/>
+    <Collapse in={trusteeQuestionDisclosure.isOpen && beneficiaries.length > 0}>
+      <SetTrusteeNameQuestion trusteeName={trusteeName} setTrusteeName={setTrusteeName} setHasError={setHasError}
+        buttonLabel={buttonLabel} setButtonLabel={setButtonLabel}/>
     </Collapse>
     <Collapse in={deadmanDisclosure.isOpen}>
       Deadman Disclosure
@@ -150,6 +160,7 @@ const ReviewTrustName = ({trustName}) => {
 }
 
 const ReviewBeneficiaries = ({beneficiaries, goBack}) => {
+  const boxColor = useColorModeValue('white', 'gray.800');
   return beneficiaries.length < 1 ? <VStack spacing='2em'>
       <Text fontSize='xl'>And you've chosen not to create any other keys for now.</Text>
       <HStack>
@@ -158,6 +169,30 @@ const ReviewBeneficiaries = ({beneficiaries, goBack}) => {
       </HStack>
   </VStack> :
   <VStack>
+    <Text fontSize='xl'>And with the following beneficiary keys:</Text>
+    <Wrap spacing='3em' p='3em'>
+      { beneficiaries.map((b,x) => <WrapItem key={'bwi' + x} p='1em' 
+        height='12em' width='10em' bg={boxColor} borderRadius='2xl' boxShadow='dark-lg'>
+        <VStack>
+          <Center w='8em'><Text fontWeight='bold'>{b.alias}</Text></Center>
+          <HiOutlineKey size='56px'/>
+          { b.sendToRoot && <Tag variant='subtle' colorScheme='yellow'>
+            <TagLeftIcon boxSize='12px' as={AiOutlineWallet} />
+            <TagLabel>(you)</TagLabel>
+          </Tag> }
+          { !b.sendToRoot && <Tooltip label={b.destination}>
+            <Tag variant='subtle' colorScheme='blue'>
+              <TagLeftIcon boxSize='12px' as={AiOutlineWallet} />
+              <TagLabel>{b.destination.substring(0,5) + '...' + b.destination.substring(b.destination.length - 3)}</TagLabel>
+            </Tag> 
+          </Tooltip>}
+          { b.soulbind && <Tag variant='subtle' colorScheme='purple'>
+            <TagLeftIcon boxSize='12px' as={BiGhost}/>
+            <TagLabel>Soulbound</TagLabel>
+          </Tag> }
+        </VStack>
+      </WrapItem>)}
+    </Wrap>
   </VStack>
 }
 
@@ -222,7 +257,7 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, setBut
     <Text fontSize='xl'>Next, name some beneficiaries - and where to send their Trust Key.</Text>
     <List spacing='3em'>
       { beneficiaries.map((b, x) => 
-        <ListItem key={'bli-' + x} p='2em' bg={boxColor} borderRadius='2xl' boxShadow='dark-lg'>
+        <ListItem key={'bli-' + x} p='2em' bg={boxColor} borderRadius='2xl' boxShadow='dark-lg' width='30em'>
           <HStack>
             <Spacer/>
           </HStack>
@@ -273,6 +308,29 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, setBut
   </VStack>
 }
 
-const SetTrusteeName = ({trusteeName, setTrusteeName, setHasError}) => {
-  return "Hello";
+const SetTrusteeNameQuestion = ({trusteeName, setTrusteeName, setHasError, buttonLabel, setButtonLabel}) => {
+  const [trusteeKeyName, setTrusteeKeyName] = useState('');
+  return <VStack spacing='2em'> 
+    <Text fontSize='xl'>Do you want to add a trustee? A trustee is a key holder that can distribute funds to beneficiaries.</Text>
+    <Box w='30em'> 
+    <FormControl>
+      <FormLabel>Trustee Name:</FormLabel>
+      <Input size='lg' fontSize='lg'
+        placeholder="Aunt Carol" _placeholder={{ color: 'gray.500' }}
+        value={trusteeKeyName}
+        onChange={(e) => {
+          if (e.target.value.length < 32) {
+            setTrusteeKeyName(e.target.value);
+          }
+        }}/>
+    </FormControl>
+    </Box>
+    <HStack width='100%' pr='3em'>
+      <Spacer/>
+        <Text fontSize='md'>{ trusteeKeyName.length > 0 ? 
+            'Click next to use this trustee name.' : 
+            'Click next to create a trustee later.' }
+        </Text> 
+    </HStack>
+  </VStack>
 }
