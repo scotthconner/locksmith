@@ -50,7 +50,6 @@ export function TrustWizard({...rest}) {
   const trustNameDisclosure = useDisclosure();
   const [trustName, setTrustName] = useState('');
   const [hasError, setHasError] = useState(false);
-  const isError = trustName.length < 1 || hasError;
 
   // Step 1: Setting up Beneficiaries
   const keyDisclosure = useDisclosure();
@@ -58,7 +57,12 @@ export function TrustWizard({...rest}) {
 
   // Step 2: Setting up a trustee, or creating trust.
   const trusteeQuestionDisclosure = useDisclosure();
-  const [trusteeName, setTrusteeName] = useState('');
+  const [trustee, setTrustee] = useState({
+    alias: '', 
+    destination: '',
+    sendToRoot: true,
+    soulbind: false,
+  });
 
   // Step 3: Setting up a deadman switch, or creating a trust. 
   const deadmanDisclosure = useDisclosure();
@@ -94,7 +98,8 @@ export function TrustWizard({...rest}) {
     </Stack>
     <Center><Progress hasStripe value={20 * (step + 1)} width='60%'/></Center>
     <Collapse in={(trustName.length === 0) || step === 0 || trustNameDisclosure.isOpen}>
-      <SetTrustName trustName={trustName} setTrustName={setTrustName} isError={isError}/>
+      <SetTrustName trustName={trustName} setTrustName={setTrustName} 
+        step={step} changeStep={changeStep} setHasError={setHasError} isError={hasError}/>
     </Collapse>
     <Collapse in={!trustNameDisclosure.isOpen && step > 0}>
       <VStack><ReviewTrustName trustName={trustName}/></VStack>
@@ -106,27 +111,22 @@ export function TrustWizard({...rest}) {
     </Collapse>
     <Collapse in={keyDisclosure.isOpen}>
       <CreateBeneficiaries trustName={trustName} beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} 
-        setButtonLabel={setButtonLabel} setHasError={setHasError}/> 
+        setButtonLabel={setButtonLabel} isError={hasError} setHasError={setHasError} step={step} changeStep={changeStep}/> 
     </Collapse>
     <Collapse in={trusteeQuestionDisclosure.isOpen && beneficiaries.length > 0}>
-      <SetTrusteeNameQuestion trusteeName={trusteeName} setTrusteeName={setTrusteeName} setHasError={setHasError}
-        buttonLabel={buttonLabel} setButtonLabel={setButtonLabel}/>
+      <SetTrustee trustee={trustee} setTrustee={setTrustee} 
+        step={step} changeStep={changeStep}/> 
     </Collapse>
     <Collapse in={deadmanDisclosure.isOpen}>
       Deadman Disclosure
     </Collapse>
     <Collapse in={reviewDisclosure.isOpen}>
       Review Disclosure
-    </Collapse>
-    { !(step > 1 && beneficiaries.length === 0) && <HStack pr='3em'>
-      <Spacer/>
-      { step > 0 && <Button size='lg' onClick={() => changeStep(step-1)}>Previous</Button> } 
-      <Button colorScheme='blue' {... isError ? {isDisabled: true} : {}} size='lg' onClick={() => changeStep(step+1)}>{buttonLabel}</Button>
-    </HStack> }
+    </Collapse> }
   </Stack>
 }
 
-const SetTrustName = ({trustName, setTrustName, isError}) => {
+const SetTrustName = ({trustName, setTrustName, step, changeStep, isError, setHasError}) => {
   return <FormControl p='3em' id="trustName" isInvalid={isError}>
     <VStack>
       <FormLabel>Let's start with the name of your Key Ring.</FormLabel>
@@ -148,6 +148,10 @@ const SetTrustName = ({trustName, setTrustName, isError}) => {
         <FormHelperText>Name the trust that will control all of your permissions.</FormHelperText>
       }
     </VStack>
+    <HStack pr='3em'>
+      <Spacer/>
+      <Button colorScheme='blue' {... trustName.length < 1 ? {isDisabled: true} : {}} size='lg' onClick={() => changeStep(step+1)}>Next</Button>
+    </HStack>
   </FormControl>
 }
 
@@ -196,8 +200,9 @@ const ReviewBeneficiaries = ({beneficiaries, goBack}) => {
   </VStack>
 }
 
-const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, setButtonLabel, setHasError}) => {
+const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, step, changeStep}) => {
   const boxColor = useColorModeValue('white', 'gray.800');
+  const [hasError, setHasError] = useState(false);
 
   const addKey = function() {
     setBeneficiaries([...beneficiaries, {
@@ -305,32 +310,80 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, setBut
       <Spacer/>
       <Text fontSize='md'>Click next to use <b>{beneficiaries.length}</b> beneficiary keys.</Text>
     </HStack>
+    <HStack width='100%' pr='3em'>
+      <Spacer/>
+      <Button size='lg' onClick={() => changeStep(step-1)}>Back</Button> 
+      <Button colorScheme='blue' {... hasError ? {isDisabled: true} : {}} size='lg' onClick={() => changeStep(step+1)}>Next</Button>
+    </HStack>
   </VStack>
 }
 
-const SetTrusteeNameQuestion = ({trusteeName, setTrusteeName, setHasError, buttonLabel, setButtonLabel}) => {
-  const [trusteeKeyName, setTrusteeKeyName] = useState('');
-  return <VStack spacing='2em'> 
+const SetTrustee = ({trustee, setTrustee, step, changeStep}) => {
+  const boxColor = useColorModeValue('white', 'gray.800');
+  const canNext = (trustee.sendToRoot || ethers.utils.isAddress(trustee.destination)) && trustee.alias.length > 0 
+
+  return <VStack spacing='2em' pb='2em'> 
     <Text fontSize='xl'>Do you want to add a trustee? A trustee is a key holder that can distribute funds to beneficiaries.</Text>
-    <Box w='30em'> 
-    <FormControl>
-      <FormLabel>Trustee Name:</FormLabel>
-      <Input size='lg' fontSize='lg'
-        placeholder="Aunt Carol" _placeholder={{ color: 'gray.500' }}
-        value={trusteeKeyName}
-        onChange={(e) => {
-          if (e.target.value.length < 32) {
-            setTrusteeKeyName(e.target.value);
-          }
-        }}/>
+    <Box w='30em' bg={boxColor} p='1em' borderRadius='lg' boxShadow='dark-lg'> 
+      <FormControl>
+        <FormLabel>Trustee Name:</FormLabel>
+        <Input size='lg' fontSize='lg'
+          placeholder="Aunt Carol" _placeholder={{ color: 'gray.500' }}
+          value={trustee.name}
+          onChange={(e) => {
+            if (e.target.value.length < 32) {
+              var t = {...trustee};
+              t.alias = e.target.value;
+              setTrustee(t);
+            }
+          }}/>
+        { trustee.alias.length > 0 && <>
+        <FormControl id={'address-t-'} isInvalid={ !ethers.utils.isAddress(trustee.destination)}>
+            { !trustee.sendToRoot && <FormLabel mt='1em'>Key Destination Address:</FormLabel> }
+            { !trustee.sendToRoot && <Input size='lg' fontSize='sm'
+                placeholder="0xDEADBEEF" _placeholder={{ color: 'gray.500' }}
+                value={trustee.destination}
+                onChange={(e) => {
+                  var t = {...trustee};
+                  t.destination = e.target.value;
+                  setTrustee(t);
+                }}/>
+            }
+            { !trustee.sendToRoot && !ethers.utils.isAddress(trustee.destination) && 
+                <FormErrorMessage>You need a valid ethereum address.</FormErrorMessage> }
+        </FormControl>
+        <HStack mt='1em'>
+            <Checkbox
+              isChecked={trustee.sendToRoot}
+              onChange={(e) => {
+                var t = {...trustee};
+                t.sendToRoot = e.target.checked;
+                setTrustee(t);
+              }}
+              size='md'>Send to me for now</Checkbox>
+          </HStack>
+          <HStack mt='1em'>
+            <FormLabel>Do you want to <b>soulbind</b> this key?</FormLabel>
+            <Spacer/>
+            <Switch colorScheme='purple' size='lg'
+              onChange={(e) => {
+                var t = {...trustee};
+                t.soulbind = e.target.checked;
+                setTrustee(t);
+              }}
+            />
+          </HStack></> }
     </FormControl>
     </Box>
-    <HStack width='100%' pr='3em'>
+    <HStack width='100%' pt='1em'>
       <Spacer/>
-        <Text fontSize='md'>{ trusteeKeyName.length > 0 ? 
-            'Click next to use this trustee name.' : 
-            'Click next to create a trustee later.' }
-        </Text> 
+      <Button size='lg' onClick={() => {changeStep(step-1);} }>Back</Button>
+      { trustee.alias.length < 1 &&
+        <Button size='lg' colorScheme='blue' onClick={() => {changeStep(step+2);} }>Skip</Button>
+      }
+      {trustee.alias.length > 0 && 
+        <Button {...(canNext ? {} : {isDisabled: true})} size='lg' colorScheme='blue' onClick={() => {changeStep(step+1);}}>Next</Button>
+      }
     </HStack>
   </VStack>
 }
