@@ -14,6 +14,7 @@ import {
   List,
   ListItem,
   Progress,
+  Select,
   Skeleton,
   Spacer,
   Stack,
@@ -29,9 +30,11 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
+import DatePicker from "react-datepicker";
 import {
   useState,
   useRef,
+  useEffect,
 } from 'react';
 import { ethers } from 'ethers';
 
@@ -45,6 +48,13 @@ import { IoIosAdd } from 'react-icons/io';
 export function TrustWizard({...rest}) {
   const [step, setStep] = useState(0);
   const [buttonLabel, setButtonLabel] = useState('Next');
+  const bottomRef = useRef(null);
+  const scrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({behavior: 'smooth'});
+  };
+  useEffect(() => {
+    scrollToBottom();
+  });
 
   // Step 0: Setting Trust Name
   const trustNameDisclosure = useDisclosure();
@@ -66,10 +76,12 @@ export function TrustWizard({...rest}) {
 
   // Step 3: Setting up a deadman switch, or creating a trust. 
   const deadmanDisclosure = useDisclosure();
-  const [deadmanConfig, setDeadmanConfig] = useState({
+  const [deadman, setDeadman] = useState({
+    description: '',
     alarmTime: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // one year
     snoozeIntervalUnit: 60 * 60 * 24, // day
-    snoozeUnitCount: 1
+    snoozeUnitCount: 1,
+    skipEvent: false,
   });
 
   // Step 4: Review Trust Creation
@@ -101,14 +113,6 @@ export function TrustWizard({...rest}) {
       <SetTrustName trustName={trustName} setTrustName={setTrustName} 
         step={step} changeStep={changeStep} setHasError={setHasError} isError={hasError}/>
     </Collapse>
-    <Collapse in={!trustNameDisclosure.isOpen && step > 0}>
-      <VStack><ReviewTrustName trustName={trustName}/></VStack>
-    </Collapse>
-    <Collapse in={step > 1}>
-      <VStack><ReviewBeneficiaries beneficiaries={beneficiaries} goBack={
-        () => { changeStep(step-1); }
-      }/></VStack>
-    </Collapse>
     <Collapse in={keyDisclosure.isOpen}>
       <CreateBeneficiaries trustName={trustName} beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} 
         setButtonLabel={setButtonLabel} isError={hasError} setHasError={setHasError} step={step} changeStep={changeStep}/> 
@@ -118,11 +122,34 @@ export function TrustWizard({...rest}) {
         step={step} changeStep={changeStep}/> 
     </Collapse>
     <Collapse in={deadmanDisclosure.isOpen}>
-      Deadman Disclosure
+      <SetDeadman deadman={deadman} setDeadman={setDeadman} step={step} changeStep={changeStep}/>
     </Collapse>
     <Collapse in={reviewDisclosure.isOpen}>
-      Review Disclosure
+      <VStack mt='2em'>
+        <Text fontSize='lg'>You've named your trust.</Text>
+        <HStack p='3em'>
+          <Text fontWeight='bold'>{trustName}</Text>
+          <Spacer/>
+          <Button>Change Trust Name</Button>
+        </HStack>
+        <Text fontSize='lg'>And defined your beneficairy keys.</Text>
+        <Wrap p='3em' spacing='1em'>
+          { beneficiaries.map((b, x) => <ReviewKey key={'rk-' + x} keyName={b.alias} destination={b.destination}
+              sendToRoot={b.sendToRoot} soulbound={b.soulbind}/>) }
+        </Wrap>
+        <Button>Change Beneficaries</Button>
+        <Text fontSize='lg'>You've enabled a trustee to distribute funds.</Text>
+        <Wrap p='3em' spacing='1em'>
+          <ReviewKey key='review-key-trustee' keyName={trustee.alias} destination={trustee.destination}
+            sendToRoot={trustee.sendToRoot} soulbound={trustee.soulbind}/>
+        </Wrap>
+        <ReviewTrustee trustee={trustee}/>
+        <Button>Change Trustee</Button>
+        <ReviewDeadman deadman={deadman}/>
+        <Button>Change Event</Button>
+      </VStack>
     </Collapse> }
+    <div ref={bottomRef}/>
   </Stack>
 }
 
@@ -163,41 +190,31 @@ const ReviewTrustName = ({trustName}) => {
   </HStack>
 }
 
-const ReviewBeneficiaries = ({beneficiaries, goBack}) => {
+const ReviewKey = ({keyName, destination, sendToRoot, soulbound}) => {
   const boxColor = useColorModeValue('white', 'gray.800');
-  return beneficiaries.length < 1 ? <VStack spacing='2em'>
-      <Text fontSize='xl'>And you've chosen not to create any other keys for now.</Text>
-      <HStack>
-        <Button onClick={goBack} leftIcon={<IoIosAdd/>}>Add Keys</Button>
-        <Button colorScheme='yellow' leftIcon={<HiOutlineKey/>}>Mint Root Key</Button>
-      </HStack>
-  </VStack> :
-  <VStack>
-    <Text fontSize='xl'>And with the following beneficiary keys:</Text>
-    <Wrap spacing='3em' p='3em'>
-      { beneficiaries.map((b,x) => <WrapItem key={'bwi' + x} p='1em' 
-        height='12em' width='10em' bg={boxColor} borderRadius='2xl' boxShadow='dark-lg'>
-        <VStack>
-          <Center w='8em'><Text fontWeight='bold'>{b.alias}</Text></Center>
-          <HiOutlineKey size='56px'/>
-          { b.sendToRoot && <Tag variant='subtle' colorScheme='yellow'>
+  return <WrapItem key={'rkwi' + keyName + destination + soulbound} p='0.5em' 
+       bg={boxColor} borderRadius='2xl' boxShadow='dark-lg'>
+        <HStack>
+          <HiOutlineKey size='30px'/>
+          <VStack>
+            <Center><Text fontWeight='bold'>{keyName}</Text></Center>
+          { sendToRoot && <Tag variant='subtle' colorScheme='yellow'>
             <TagLeftIcon boxSize='12px' as={AiOutlineWallet} />
             <TagLabel>(you)</TagLabel>
           </Tag> }
-          { !b.sendToRoot && <Tooltip label={b.destination}>
+          { !sendToRoot && <Tooltip label={destination}>
             <Tag variant='subtle' colorScheme='blue'>
               <TagLeftIcon boxSize='12px' as={AiOutlineWallet} />
-              <TagLabel>{b.destination.substring(0,5) + '...' + b.destination.substring(b.destination.length - 3)}</TagLabel>
+              <TagLabel>{destination.substring(0,5) + '...' + destination.substring(destination.length - 3)}</TagLabel>
             </Tag> 
           </Tooltip>}
-          { b.soulbind && <Tag variant='subtle' colorScheme='purple'>
+          { soulbound && <Tag variant='subtle' colorScheme='purple'>
             <TagLeftIcon boxSize='12px' as={BiGhost}/>
             <TagLabel>Soulbound</TagLabel>
           </Tag> }
         </VStack>
-      </WrapItem>)}
-    </Wrap>
-  </VStack>
+      </HStack>
+    </WrapItem>
 }
 
 const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, step, changeStep}) => {
@@ -318,6 +335,36 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, step, 
   </VStack>
 }
 
+const ReviewTrustee = ({trustee, step, changeStep}) => {
+  const boxColor = useColorModeValue('white', 'gray.800');
+  // we only want to return a review if the trustee is there
+  // this is coupled to the rest of the components in a bad way
+  return trustee.alias.length > 0 && <VStack spacing='2em' p='2em'>
+    <Text fontSize='xl'>The following key holder will have asset distrbution permissions.</Text>
+    <Box p='1em'
+        height='12em' width='10em' bg={boxColor} borderRadius='2xl' boxShadow='dark-lg'>
+        <VStack>
+          <Center w='8em'><Text fontWeight='bold'>{trustee.alias}</Text></Center>
+          <HiOutlineKey size='56px'/>
+          { trustee.sendToRoot && <Tag variant='subtle' colorScheme='yellow'>
+            <TagLeftIcon boxSize='12px' as={AiOutlineWallet} />
+            <TagLabel>(you)</TagLabel>
+          </Tag> }
+          { !trustee.sendToRoot && <Tooltip label={trustee.destination}>
+            <Tag variant='subtle' colorScheme='blue'>
+              <TagLeftIcon boxSize='12px' as={AiOutlineWallet} />
+              <TagLabel>{trustee.destination.substring(0,5) + '...' + trustee.destination.substring(trustee.destination.length - 3)}</TagLabel>
+            </Tag>
+          </Tooltip>}
+          { trustee.soulbind && <Tag variant='subtle' colorScheme='purple'>
+            <TagLeftIcon boxSize='12px' as={BiGhost}/>
+            <TagLabel>Soulbound</TagLabel>
+          </Tag> }
+        </VStack>
+      </Box>
+  </VStack>
+}
+
 const SetTrustee = ({trustee, setTrustee, step, changeStep}) => {
   const boxColor = useColorModeValue('white', 'gray.800');
   const canNext = (trustee.sendToRoot || ethers.utils.isAddress(trustee.destination)) && trustee.alias.length > 0 
@@ -386,4 +433,80 @@ const SetTrustee = ({trustee, setTrustee, step, changeStep}) => {
       }
     </HStack>
   </VStack>
+}
+
+const SetDeadman = ({deadman, setDeadman, step, changeStep}) => {
+  return <VStack>
+    <Text fontSize='xl'>Do you want to only enable trustee distribution after a time-lock or deadman switch?</Text>
+    <VStack spacing='2em'>
+      <FormControl id="Event Label" isInvalid={deadman.description.length < 1}> 
+        <FormLabel>Switch Name</FormLabel>
+        <Input
+          value={deadman.description}
+          placeholder="My ephemeral emersion."
+          _placeholder={{ color: 'gray.500' }}
+          onChange={(e) => {
+            if (e.target.value.length < 32) {
+              var d = {...deadman};
+              d.description = e.target.value;
+              setDeadman(d);
+            }  
+          }}/>
+        { deadman.description.length < 1 && <FormErrorMessage>Please provide a short description.</FormErrorMessage>}
+      </FormControl>
+      <FormControl id="Alarm Time">
+        <FormLabel>Alarm Date</FormLabel>
+        <DatePicker popperPlacement='auto' selected={deadman.alarmTime} onChange={(date) => {
+          var d = {...deadman};
+          d.alarmTime = date;
+          setDeadman(d);
+        }}/>
+      </FormControl>
+      <FormControl id="Snooze Interval" isInvalid={deadman.snoozeUnitCount.length > 0 && isNaN(parseInt(deadman.snoozeUnitCount))}>
+        <FormLabel>Root Key Snooze Interval</FormLabel>
+        <HStack>
+          <Input
+            width='20%'
+            placeholder="0"
+            _placeholder={{ color: 'gray.500' }}
+            onChange={(e) => { 
+              var d = {...deadman};
+              d.snoozeUnitCount = e.target.value;
+              setDeadman(d);
+            }}/>
+          <Select variant='filled'
+            width='40%'
+            onChange={(e) => { 
+              var d = {...deadman};
+              d.snoozeIntervalUnit = e.target.value;
+              setDeadman(d); 
+            }}>
+            <option value={60*60*24}>Days</option>
+            <option value={60*60*24*7}>Weeks</option>
+            <option value={60*60*24*365}>Years</option>
+          </Select>
+        </HStack>
+        { deadman.snoozeUnitCount.length > 0 && isNaN(parseInt(deadman.snoozeUnitCount)) ? 
+          <FormErrorMessage>The snooze interval must be a number.</FormErrorMessage> :
+          <FormHelperText>A blank snooze interval acts as a time-lock.</FormHelperText>}
+      </FormControl>
+    </VStack>
+    <HStack width='100%' p='3em'>
+      <Spacer/>
+      <Button size='lg' onClick={() => changeStep(step-1)}>Back</Button>
+      <Button size='lg' onClick={() => {
+        var d = {...deadman};
+        d.skipEvent = true;
+        setDeadman(d);
+        changeStep(step+1);
+      }}>Skip</Button>
+      <Button {... deadman.description.length < 1 ||
+          deadman.snoozeUnitCount.length > 0 && isNaN(parseInt(deadman.snoozeUnitCount)) ? {isDisabled: true} : {}}
+        colorScheme='blue' onClick={() => {changeStep(step+1);}}>Create Trust</Button>
+    </HStack>
+  </VStack>
+}
+
+const ReviewDeadman = ({deadman}) => {
+  return "Deadman Review";
 }
