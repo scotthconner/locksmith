@@ -16,6 +16,7 @@ import {
   Tabs, TabList, Tab,
   TabPanels, TabPanel,
   Text,
+  Tooltip,
   VStack,
   Wrap,
   WrapItem,
@@ -24,7 +25,13 @@ import {
 } from '@chakra-ui/react';
 import { IoIosAdd } from 'react-icons/io';
 import { BiCoinStack } from 'react-icons/bi';
-import { HiOutlineKey } from 'react-icons/hi';
+import { 
+  FiShare2
+} from 'react-icons/fi';
+import { 
+  HiOutlineKey, 
+  HiOutlineLightningBolt
+} from 'react-icons/hi';
 import { RiSafeLine, RiQuillPenLine } from 'react-icons/ri';
 import { 
   TrustKey,
@@ -86,25 +93,33 @@ export function Trusts() {
   // this could be as bad as O(n) + 1 where n 
   // is the number of keys in the wallet. In most
   // cases, it will be O(1).
+  const {isConnected} = useAccount();
+  const navigate = useNavigate();
   const trusts = useWalletTrusts(); 
 
   return (
     <Stack m='1em' spacing='1em'>
-      <Heading size='md'>Your Trust Participation</Heading>
-        <Wrap padding='3em' spacing='2em' pb='6em'>
-          {!trusts.isSuccess && <> 
-            <WrapItem key='1'>
-              <Skeleton width='14em' height='16em'/>
-            </WrapItem>
-            <WrapItem key='2'>
-              <Skeleton width='14em' height='16em'/>
-            </WrapItem>
-            <WrapItem key='3'>
-              <Skeleton width='14em' height='16em'/>
-            </WrapItem></>}
-          {trusts.isSuccess &&
-            trusts.data.map((t) => <TrustSummary key={'trust-' + t} trustId={t}/>)}
-        </Wrap>
+      <HStack width='100%'>
+        <Heading size='md'>Your Trust Participation</Heading>
+        <Spacer/>
+        { isConnected && 
+          <Button leftIcon={<IoIosAdd/>} colorScheme='blue'
+            onClick={() => { navigate('/wizard'); }}>Create Trust</Button> }
+      </HStack>
+      <Wrap padding='3em' spacing='2em' pb='6em'>
+        {!trusts.isSuccess && <> 
+        <WrapItem key='1'>
+          <Skeleton width='14em' height='16em'/>
+        </WrapItem>
+        <WrapItem key='2'>
+          <Skeleton width='14em' height='16em'/>
+        </WrapItem>
+        <WrapItem key='3'>
+          <Skeleton width='14em' height='16em'/>
+        </WrapItem></>}
+        {trusts.isSuccess &&
+          trusts.data.map((t) => <TrustSummary key={'trust-' + t} trustId={t}/>)}
+      </Wrap>
     </Stack>
   );
 }
@@ -112,8 +127,8 @@ export function TrustSummary({trustId, ...rest}) {
   const navigate = useNavigate();
   const trustInfo = useTrustInfo(trustId);
   const trustArns = useContextArnRegistry(TRUST_CONTEXT_ID, trustId);
-  const trustedProviders = useTrustedActors(trustId, COLLATERAL_PROVIDER);
-  const trustedScribes = useTrustedActors(trustId, SCRIBE);
+  const trustEvents = useTrustEventRegistry(trustId);
+  const trustPolicies = useTrustPolicyKeys(trustId);
   const walletKeys = useWalletKeys();
   const boxColor = useColorModeValue('white', 'gray.800');
   const hasRoot = !(trustInfo.isSuccess && walletKeys.isSuccess) ? false :
@@ -143,32 +158,40 @@ export function TrustSummary({trustId, ...rest}) {
               <Text fontSize='sm' color='gray.500'><i>in total assets</i></Text>
             </VStack>
             <HStack spacing='1em'>
-              {!trustArns.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
-              {trustArns.isSuccess &&
-                <Button borderRadius='full' leftIcon={<BiCoinStack/>}
-                  onClick={() => { navigate('/trust/' + trustId + '/assets/')}}>
-                  {trustArns.data.length}
-                </Button>}
-              {!trustInfo.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
-              {trustInfo.isSuccess && 
-                <Button borderRadius='full' leftIcon={<HiOutlineKey/>}
-                  onClick={() => { navigate('/trust/' + trustId + '/keys/')}}>
-                  {trustInfo.data.trustKeyCount.toString()}
-                </Button>}
+              { !trustArns.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/> }
+              { trustArns.isSuccess &&
+                <Tooltip label='Assets'>
+                  <Button borderRadius='full' leftIcon={<BiCoinStack/>}
+                    onClick={() => { navigate('/trust/' + trustId + '/assets/')}}>
+                      {trustArns.data.length}
+                  </Button>
+                </Tooltip> }
+              { !trustInfo.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
+              { trustInfo.isSuccess && 
+                <Tooltip label='Keys'>
+                  <Button borderRadius='full' leftIcon={<HiOutlineKey/> }
+                    onClick={() => { navigate('/trust/' + trustId + '/keys/')}}>
+                      {trustInfo.data.trustKeyCount.toString()}
+                  </Button>
+                </Tooltip> }
             </HStack>
             <HStack spacing='1em'>
-              {!trustedProviders.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
-              {trustedProviders.isSuccess &&
-                <Button borderRadius='full' leftIcon={<RiSafeLine/>}
-                  onClick={() => { navigate('/trust/' + trustId + '/providers/')}}>
-                  {trustedProviders.data.length}
-                </Button>}
-              {!trustedScribes.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
-              {trustedScribes.isSuccess &&
-                <Button borderRadius='full' leftIcon={<RiQuillPenLine/>}
-                  onClick={() => { navigate('/trust/' + trustId + '/scribes/')}}>
-                  {trustedScribes.data.length}
-                </Button>}
+              { !trustEvents.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
+              { trustEvents.isSuccess &&
+                <Tooltip label='Events'>
+                  <Button borderRadius='full' leftIcon={<HiOutlineLightningBolt/>}
+                    onClick={() => { navigate('/trust/' + trustId + '/events/') }}>
+                      { trustEvents.data.length }
+                  </Button> 
+                </Tooltip> }
+              { !trustPolicies.isSuccess && <Skeleton borderRadius='full' width='3.5em' height='2em'/>}
+              { trustPolicies.isSuccess &&
+                <Tooltip label='Trustees'>
+                  <Button borderRadius='full' leftIcon={<FiShare2/>}
+                    onClick={() => { navigate('/trust/' + trustId + '/policies/')}}>
+                      {trustPolicies.data.length}
+                  </Button>
+                </Tooltip> }
             </HStack>
           </VStack>
         </Center>
