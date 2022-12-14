@@ -34,7 +34,6 @@ import { ColorModeSwitcher } from '../ColorModeSwitcher';
 import { ConnectKitProvider, ConnectKitButton } from "connectkit";
 import { useNetwork } from 'wagmi';
 import { useState } from 'react';
-import NewTrustDialog from '../NewTrustDialog';
 import Locksmith from '../services/Locksmith.js';
 import { AssetResource } from '../services/AssetResource.js';
 
@@ -186,17 +185,12 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         variant="outline"
         aria-label="open menu"
         icon={<FiMenu />}/>
-
       <HStack spacing={0} display={{base: 'flex', md: 'none'}}>
         <Text fontSize='2xl'><b>L</b></Text>
         <RiLock2Fill size='22px'/>
         <Text fontSize='2xl'><b>cksmith</b></Text>
       </HStack>
-
-      <NewTrustDialog/>
-
       <ConnectKitButton />
-
       <HStack spacing={{ base: '0', md: '6' }}>
         <Flex alignItems={'center'}>
           <ColorModeSwitcher justifySelf="flex-end" />
