@@ -37,6 +37,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react'
+import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { FiSend } from 'react-icons/fi';
@@ -64,6 +65,7 @@ import {
 // Keys Function Component
 //////////////////////////////////////
 function Keys() {
+  const {isConnected} = useAccount();
   const keys = useWalletKeys();
   let keyBody = '';
 
@@ -90,14 +92,13 @@ function Keys() {
     )));
   }
 
-  return (<>
+  return !isConnected ? <ConnectWalletPrompt/> : 
     <Stack m='1em' spacing='1em'>
       <Heading size='md'>Keys in Your Wallet</Heading>
-        <Wrap padding='3em' spacing='2em' pb='6em'>
-          {keyBody}
-        </Wrap>
+      <Wrap padding='3em' spacing='2em' pb='6em'>
+        {keyBody}
+      </Wrap>
     </Stack>
-  </>);
 }
 
 interface KeyProps extends BoxProps {

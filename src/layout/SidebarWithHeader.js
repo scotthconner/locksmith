@@ -14,7 +14,7 @@ import {
   BoxProps,
   FlexProps
 } from '@chakra-ui/react';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate } from 'react-router-dom';
 import {
   FiMenu,
   FiShare2,
@@ -102,6 +102,7 @@ interface SidebarProps extends BoxProps {
 }
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+  const navigate = useNavigate();
   return (
     <Box
       transition="3s ease"
@@ -113,7 +114,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       h="full"
       {...rest}>
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <HStack spacing={0}>
+        <HStack spacing={0} onClick={() => {navigate('/');}} cursor='pointer'>
           <Text fontSize='2xl'><b>L</b></Text>
           <RiLock2Fill size='22px'/>
           <Text fontSize='2xl'><b>cksmith</b></Text>

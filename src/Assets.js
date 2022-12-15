@@ -30,6 +30,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { useState } from 'react';
 import { BiCoinStack } from 'react-icons/bi';
 import { BsShieldLock } from 'react-icons/bs';
@@ -41,6 +42,7 @@ import { CollateralProviderWithdrawalAdapter } from './components/withdrawal/Pro
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
+import { useAccount } from 'wagmi';
 import { ethers, BigNumber } from 'ethers';
 import { AssetResource } from './services/AssetResource.js';
 import {
@@ -65,8 +67,9 @@ import {
 } from './hooks/PriceHooks.js';
 
 function Assets() {
+  const {isConnected} = useAccount();
   const keys = useWalletKeys();
-  return (
+  return !isConnected ? <ConnectWalletPrompt/> : (
     <Stack m='1em' spacing='3em'>
       <Heading size='md'>Your Withdrawalable Assets</Heading>
         {(!keys.isSuccess || keys.data.length === 0) && 

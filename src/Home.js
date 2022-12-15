@@ -73,6 +73,9 @@ function Home() {
           Create an on-chain trust that executes exactly as you've designed. Leave the lawyers, wills,&nbsp;
           probate courts, and expensive corporate trustees behind.
         </Text>
+        <Text color={'gray.600'} fontSize={'xl'}>
+          All without sharing or storing your private key, ever.
+        </Text>
         <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Trust Now</Button>
       </VStack>
 

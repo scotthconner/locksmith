@@ -23,6 +23,7 @@ import {
   useDisclosure,
   useColorModeValue
 } from '@chakra-ui/react';
+import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { ConnectKitButton } from "connectkit";
 import { IoIosAdd } from 'react-icons/io';
 import { BiCoinStack } from 'react-icons/bi';
@@ -98,15 +99,7 @@ export function Trusts() {
   const navigate = useNavigate();
   const trusts = useWalletTrusts(); 
 
-  return !isConnected ?  
-    <VStack textAlign='center' spacing='2em' m='3em'>
-      <Text fontSize='lg'>You have not connected your wallet.</Text>
-      <HStack>
-        <ConnectKitButton/>
-        <Button colorScheme='blue' onClick={() => {navigate('/wizard');} }>Design Trust Now</Button>
-      </HStack>
-    </VStack>
-    : (
+  return !isConnected ? <ConnectWalletPrompt/> : (
     <Stack m='1em' spacing='1em'>
       <HStack width='100%'>
         <Heading size='md'>Your Trust Participation</Heading>

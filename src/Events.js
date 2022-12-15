@@ -24,6 +24,8 @@ import { BsShieldLock } from 'react-icons/bs';
 import { IoIosHourglass } from 'react-icons/io';
 import { FiPower } from 'react-icons/fi';
 import { HiOutlineLightningBolt } from 'react-icons/hi';
+
+import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { KeyInfoIcon } from './components/KeyInfo.js';
 import { alarmClockExpirationAgo } from './components/AlarmClock.js';
 
@@ -59,10 +61,11 @@ import {
 // Events Function Component
 //////////////////////////////////////
 function Events() {
+  const {isConnected} = useAccount();
   const keys = useWalletKeys();
   const walletTrusts = useWalletTrusts();
 
-  return (
+  return !isConnected ? <ConnectWalletPrompt/> : (
     <Stack m='1em' spacing='1em'>
       <Heading size='md' mb='2em'>Your Events</Heading>
       { !keys.isSuccess && <List spacing='2em'>

@@ -31,6 +31,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react'
+import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { useState } from 'react';
 import { AiOutlineUser } from 'react-icons/ai';
 import { BiCoinStack } from 'react-icons/bi';
@@ -47,6 +48,7 @@ import { PolicyActivationTag } from './trusts/Policies.js';
 //////////////////////////////////////
 // Wallet, Network, Contracts
 //////////////////////////////////////
+import { useAccount } from 'wagmi';
 import { ethers, BigNumber } from 'ethers';
 import { AssetResource } from './services/AssetResource.js';
 import {
@@ -77,9 +79,10 @@ import {
 // Trustees Function Component
 //////////////////////////////////////
 function Trustees() {
+  const {isConnected} = useAccount();
   const keys = useWalletKeys();
 
-  return <Stack m='1em' spacing='1em'>
+  return !isConnected ? <ConnectWalletPrompt/> : <Stack m='1em' spacing='1em'>
     <Heading size='md'>Trustee Keys in Your Wallet</Heading>
     <VStack spacing='1em' pb='2em' pt='2em'>
       { !keys.isSuccess && [1,2,3].map((k) => 
