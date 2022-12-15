@@ -3,6 +3,7 @@
 //////////////////////////////////////
 import {
   Box,
+  Button,
   Container,
   Heading,
   SimpleGrid,
@@ -13,6 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { CheckIcon } from '@chakra-ui/icons';
 import { RiLock2Fill } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
@@ -57,6 +59,8 @@ const features = [{
 ];
 
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <Box p={4}>
       <VStack spacing={4} as={Container} maxW={'3xl'} textAlign={'center'}>
@@ -69,6 +73,7 @@ function Home() {
           Create an on-chain trust that executes exactly as you've designed. Leave the lawyers, wills,&nbsp;
           probate courts, and expensive corporate trustees behind.
         </Text>
+        <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Trust Now</Button>
       </VStack>
 
       <Container maxW={'6xl'} mt={10}>

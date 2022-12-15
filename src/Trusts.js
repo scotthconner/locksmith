@@ -23,6 +23,7 @@ import {
   useDisclosure,
   useColorModeValue
 } from '@chakra-ui/react';
+import { ConnectKitButton } from "connectkit";
 import { IoIosAdd } from 'react-icons/io';
 import { BiCoinStack } from 'react-icons/bi';
 import { 
@@ -97,14 +98,21 @@ export function Trusts() {
   const navigate = useNavigate();
   const trusts = useWalletTrusts(); 
 
-  return (
+  return !isConnected ?  
+    <VStack textAlign='center' spacing='2em' m='3em'>
+      <Text fontSize='lg'>You have not connected your wallet.</Text>
+      <HStack>
+        <ConnectKitButton/>
+        <Button colorScheme='blue' onClick={() => {navigate('/wizard');} }>Design Trust Now</Button>
+      </HStack>
+    </VStack>
+    : (
     <Stack m='1em' spacing='1em'>
       <HStack width='100%'>
         <Heading size='md'>Your Trust Participation</Heading>
         <Spacer/>
-        { isConnected && 
-          <Button leftIcon={<IoIosAdd/>} colorScheme='blue'
-            onClick={() => { navigate('/wizard'); }}>Create Trust</Button> }
+        <Button leftIcon={<IoIosAdd/>} colorScheme='blue'
+          onClick={() => { navigate('/wizard'); }}>Create Trust</Button>
       </HStack>
       <Wrap padding='3em' spacing='2em' pb='6em'>
         {!trusts.isSuccess && <> 
@@ -117,8 +125,14 @@ export function Trusts() {
         <WrapItem key='3'>
           <Skeleton width='14em' height='16em'/>
         </WrapItem></>}
-        {trusts.isSuccess &&
-          trusts.data.map((t) => <TrustSummary key={'trust-' + t} trustId={t}/>)}
+        { trusts.isSuccess && trusts.data.length < 1 &&
+          <VStack spacing='1em' width='100%'>
+            <Text fontSize='30px'>You have no trusts.</Text>
+            <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Trust</Button>
+          </VStack>
+        }
+        { trusts.isSuccess &&
+            trusts.data.map((t) => <TrustSummary key={'trust-' + t} trustId={t}/>) }
       </Wrap>
     </Stack>
   );

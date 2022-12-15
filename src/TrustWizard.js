@@ -37,6 +37,7 @@ import {
   useRef,
   useEffect,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ConnectKitButton } from "connectkit";
 import { useAccount } from 'wagmi';
 import { ethers } from 'ethers';
@@ -50,6 +51,7 @@ import { IoIosAdd, IoIosHourglass } from 'react-icons/io';
 import { useTrustCreator } from './hooks/TrustCreatorHooks.js';
 
 export function TrustWizard({...rest}) {
+  const navigate = useNavigate();
   const toast = useToast();
   const { isConnected, address } = useAccount();
   const [step, setStep] = useState(0);
@@ -126,6 +128,7 @@ export function TrustWizard({...rest}) {
         duration: 9000,
         isClosable: true
       });
+      navigate('/trusts');
     }
   );
   const buttonProps = createTrust.isLoading ? {isLoading: true} : (!createTrust.write ? {isDisabled: true} : {});
