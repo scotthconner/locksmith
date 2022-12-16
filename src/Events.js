@@ -79,6 +79,9 @@ function Events() {
       { walletTrusts.isSuccess && <VStack spacing='1em'>
         { walletTrusts.data.map((t) => <TrustAlarmList key={'teli-' + t.toString()} trustId={t}/> ) }
       </VStack> }
+      <VStack width='100%'>
+        <Text pt='2em' fontSize='30px'>That's all, folks!</Text>
+      </VStack>
     </Stack>
   );
 }

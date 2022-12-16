@@ -34,7 +34,7 @@ const features = [{
   }, { 
     id: 2,
     title: 'Integrated Asset Vaults',
-    text: 'Store Ethereum and ERC-20 tokens safely in our key-access vaults.'
+    text: 'Store Ethereum and ERC-20 tokens safely in no-fee key-access vaults.'
   }, {
     id: 3,
     title: 'Collateral Platform',
@@ -70,11 +70,10 @@ function Home() {
           <Heading fontSize={'3xl'}>cksmith</Heading>
         </HStack>
         <Text color={'gray.600'} fontSize={'xl'}>
-          Create an on-chain trust that executes exactly as you've designed. Leave the lawyers, wills,&nbsp;
-          probate courts, and expensive corporate trustees behind.
+          Power your plans with the security of the Ethereum network. 
         </Text>
         <Text color={'gray.600'} fontSize={'xl'}>
-          All without sharing or storing your private key, ever.
+          Mint, configure, distribute, soulbind, and burn trust keys <b>you</b> control.
         </Text>
         <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Trust Now</Button>
       </VStack>

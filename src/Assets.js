@@ -30,6 +30,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { useState } from 'react';
 import { BiCoinStack } from 'react-icons/bi';
@@ -69,16 +70,22 @@ import {
 function Assets() {
   const {isConnected} = useAccount();
   const keys = useWalletKeys();
+  const navigate = useNavigate();
   return !isConnected ? <ConnectWalletPrompt/> : (
     <Stack m='1em' spacing='3em'>
       <Heading size='md'>Your Withdrawalable Assets</Heading>
-        {(!keys.isSuccess || keys.data.length === 0) && 
+        { !keys.isSuccess && 
           <VStack spacing='2em' mt='2em'>
             <Skeleton width='100%' height='4em'/>
             <Skeleton width='100%' height='4em'/>
             <Skeleton width='100%' height='4em'/>
             <Skeleton width='100%' height='4em'/>
-          </VStack>}
+          </VStack> }
+        { keys.isSuccess && keys.data.length < 1 && <VStack spacing='1em'>
+          <Text fontSize='30px'>You have no keys, and thus - no assets.</Text>
+          <Text fontSize='30px' pb='1em'>Create a trust to deposit funds.</Text>
+          <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Trust</Button>
+        </VStack> }
         {(keys.isSuccess && keys.data.length > 0) && 
           <WalletBalanceSheet keys={keys.data} position={0} balanceSheet={{}}/>} 
     </Stack>
@@ -105,6 +112,9 @@ const WalletBalanceSheet = ({keys, position, balanceSheet, ...rest}) => {
 
 const WalletArnList = ({arns, keys, balanceSheet, ...rest}) => {
   return <VStack spacing='1em' pb='2em'>
+      {Object.keys(balanceSheet).length < 1 && 
+        <Text fontSize='30px'>You have no withdrawalable assets at this time.</Text>
+      }
       {Object.keys(balanceSheet||{}).map((a) => <WalletArn key={'wallet-arn-' + a} 
         arn={a} arnBalanceSheet={balanceSheet[a]} keys={keys}/> 
       )}

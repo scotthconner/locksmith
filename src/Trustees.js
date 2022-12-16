@@ -31,6 +31,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react'
+import { useNavigate } from 'react-router-dom';
 import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { useState } from 'react';
 import { AiOutlineUser } from 'react-icons/ai';
@@ -81,6 +82,7 @@ import {
 function Trustees() {
   const {isConnected} = useAccount();
   const keys = useWalletKeys();
+  const navigate = useNavigate();
 
   return !isConnected ? <ConnectWalletPrompt/> : <Stack m='1em' spacing='1em'>
     <Heading size='md'>Trustee Keys in Your Wallet</Heading>
@@ -88,9 +90,15 @@ function Trustees() {
       { !keys.isSuccess && [1,2,3].map((k) => 
         <Skeleton key={'skeleton-key-' + k} width='100%' height='4em' borderRadius='lg'/>
       ) } 
+      { keys.isSuccess && keys.data.length < 1 && <VStack spacing='1em'>
+        <Text fontSize='30px'>You have no keys.</Text>
+        <Text fontSize='30px' pb='1em'>Design your trust to create a root key.</Text>
+        <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Trust</Button>
+      </VStack> }
       { keys.isSuccess && keys.data.map((k) => 
         <TrusteeKey keyId={k} key={'trustee-key-component-' + k}/>
-      ) } 
+      ) }
+      <Text fontSize='30px'>That's all, folks!</Text>
     </VStack>
   </Stack>
 }

@@ -37,6 +37,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react'
+import { useNavigate } from 'react-router-dom';
 import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
@@ -65,6 +66,7 @@ import {
 // Keys Function Component
 //////////////////////////////////////
 function Keys() {
+  const navigate = useNavigate();
   const {isConnected} = useAccount();
   const keys = useWalletKeys();
   let keyBody = '';
@@ -87,9 +89,13 @@ function Keys() {
         </Box>
       </WrapItem></>); 
   } else {
-    keyBody = (keys.data.map((k) => (
-      <Key key={k} keyId={k}/>
-    )));
+    keyBody = keys.data.length < 1 ?
+      <VStack spacing='1em' width='100%'>
+        <Text fontSize='30px'>You have no keys.</Text>
+        <Text pb='1em' fontSize='30px'>Design your trust to create a root key.</Text>
+        <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Trust</Button>
+      </VStack> :
+      (keys.data.map((k) => (<Key key={k} keyId={k}/>)));
   }
 
   return !isConnected ? <ConnectWalletPrompt/> : 
