@@ -34,7 +34,7 @@ const features = [{
   }, { 
     id: 2,
     title: 'Integrated Asset Vaults',
-    text: 'Store Ethereum and ERC-20 tokens safely in no-fee key-access vaults.'
+    text: 'Store and distribute Ethereum and ERC-20 tokens safely.'
   }, {
     id: 3,
     title: 'Collateral Platform',
@@ -70,7 +70,7 @@ function Home() {
           <Heading fontSize={'3xl'}>cksmith</Heading>
         </HStack>
         <Text color={'gray.600'} fontSize={'xl'}>
-          Power your plans with the security of the Ethereum network. 
+          Create and manage your Web3 circle of trust. 
         </Text>
         <Text color={'gray.600'} fontSize={'xl'}>
           Mint, configure, distribute, soulbind, and burn trust keys <b>you</b> control.
