@@ -39,8 +39,10 @@ export function CollateralProviderWithdrawalAdapter({provider, keyId, arn, allow
 const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => {
   const asset = AssetResource.getMetadata(arn);
   const [withdrawalAmount, setWithdrawalAmount] = useState(0);
+  const cleanWithdrawal = allowance.div(BigNumber.from(100)).mul(withdrawalAmount);
+
   const toast = useToast();
-  const withdrawalConfig = useEtherWithdrawal(keyId, withdrawalAmount,
+  const withdrawalConfig = useEtherWithdrawal(keyId, cleanWithdrawal,
     function(error) {
       // error
       toast({
@@ -54,7 +56,7 @@ const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
       // success
       toast({
         title: 'Withdrawal complete!',
-        description: ethers.utils.formatEther(withdrawalAmount) + ' ' + asset.symbol + ' was sent to your wallet.',
+        description: ethers.utils.formatEther(cleanWithdrawal) + ' ' + asset.symbol + ' was sent to your wallet.',
         status: 'success',
         duration: 9000,
         isClosable: true
@@ -66,17 +68,13 @@ const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
     return <Text textAlign='center' color='gray'><i>You need to set an allowance before you can withdrawal.</i></Text>
   }
 
-  if(withdrawalAmount > allowance) {
-    setWithdrawalAmount(allowance);
-  }
-  
   var withdrawalButtonProps = withdrawalConfig.isLoading ? {isLoading: true} : {};
 
   return <HStack spacing='1em'>
     <Box width='55%'>
       <Slider width='90%' m='1em' mt='2em' defaultValue={0} min={0}
-        max={allowance} step={ethers.utils.parseEther("1") / 4}
-        onChangeEnd={(e) => setWithdrawalAmount(BigNumber.from(e.toString()))}>
+        max={100} step={1}
+        onChangeEnd={(e) => setWithdrawalAmount(e)}>
         <SliderTrack bg='yellow.400'>
           <Box position='relative' right={10} />
           <SliderFilledTrack bg='yellow.600'/>
@@ -87,7 +85,7 @@ const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
       </Slider>
     </Box>
     <Text fontSize='lg' fontWeight='bold'>
-      {ethers.utils.formatEther(withdrawalAmount)}&nbsp;/&nbsp;{ethers.utils.formatEther(allowance)}
+      {parseFloat(ethers.utils.formatEther(cleanWithdrawal)).toFixed(2)}&nbsp;/&nbsp;{parseFloat(ethers.utils.formatEther(allowance)).toFixed(2)}
     </Text>
     <Spacer/>
     <Button {...withdrawalButtonProps} 
@@ -99,8 +97,10 @@ const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
 const TokenWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => {
   const asset = AssetResource.getMetadata(arn);
   const [withdrawalAmount, setWithdrawalAmount] = useState(0);
+  const cleanWithdrawal = allowance.div(BigNumber.from(100)).mul(withdrawalAmount);
+
   const toast = useToast();
-  const withdrawalConfig = useTokenWithdrawal(keyId, arn, withdrawalAmount,
+  const withdrawalConfig = useTokenWithdrawal(keyId, arn, cleanWithdrawal,
     function(error) {
       // error
       toast({
@@ -114,7 +114,7 @@ const TokenWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
       // success
       toast({
         title: 'Withdrawal complete!',
-        description: ethers.utils.formatEther(withdrawalAmount) + ' ' + asset.symbol + ' was sent to your wallet.',
+        description: ethers.utils.formatEther(cleanWithdrawal) + ' ' + asset.symbol + ' was sent to your wallet.',
         status: 'success',
         duration: 9000,
         isClosable: true
@@ -126,17 +126,13 @@ const TokenWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
     return <Text textAlign='center' color='gray'><i>You need to set an allowance before you can withdrawal.</i></Text>
   }
 
-  if(withdrawalAmount > allowance) {
-    setWithdrawalAmount(allowance);
-  }
-
   var withdrawalButtonProps = withdrawalConfig.isLoading ? {isLoading: true} : {};
 
   return <HStack spacing='1em'>
     <Box width='55%'>
       <Slider width='90%' m='1em' mt='2em' defaultValue={0} min={0}
-        max={allowance} step={ethers.utils.parseEther("1") / 4}
-        onChangeEnd={(e) => setWithdrawalAmount(BigNumber.from(e.toString()))}>
+        max={100} step={1}
+        onChangeEnd={(e) => setWithdrawalAmount(e)}>
         <SliderTrack bg='yellow.400'>
           <Box position='relative' right={10} />
           <SliderFilledTrack bg='yellow.600'/>
@@ -147,7 +143,7 @@ const TokenWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
       </Slider>
     </Box>
     <Text fontSize='lg' fontWeight='bold'>
-      {ethers.utils.formatEther(withdrawalAmount)}&nbsp;/&nbsp;{ethers.utils.formatEther(allowance)}
+      {parseFloat(ethers.utils.formatUnits(cleanWithdrawal, asset.decimals)).toFixed(2)}&nbsp;/&nbsp;{parseFloat(ethers.utils.formatUnits(allowance, asset.decimals)).toFixed(2)}
     </Text>
     <Spacer/>
     <Button {...withdrawalButtonProps}

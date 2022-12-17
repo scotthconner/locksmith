@@ -248,8 +248,9 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
 const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose, isOpen, ...rest}) => {
   const toast = useToast();
   const asset = AssetResource.getMetadata(arn);
-  const [slideAllowance, setAllowance]  = useState(allowance);
-  const allowanceConfig = useSetWithdrawalAllowance(provider, keyId, arn, slideAllowance,
+  const [slideAllowance, setAllowance]  = useState(allowance.gt(balance) ? 100 : allowance.mul(BigNumber.from(100)).div(balance)); 
+  const cleanAllowance = balance.div(BigNumber.from(100)).mul(slideAllowance);
+  const allowanceConfig = useSetWithdrawalAllowance(provider, keyId, arn, cleanAllowance,
     function(error) {
       // error
       toast({
@@ -259,11 +260,11 @@ const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose
         duration: 9000,
         isClosable: true
       });
-    }, function(data) {
+    },function(data) {
       // success
       toast({
         title: 'Allowance Set!',
-        description: 'The provider can withdrawal ' + ethers.utils.formatEther(slideAllowance) + ' ' + asset.symbol + '.',
+        description: 'The provider can withdrawal ' + ethers.utils.formatUnits(cleanAllowance, asset.decimals) + ' ' + asset.symbol + '.',
         status: 'success',
         duration: 9000,
         isClosable: true
@@ -282,9 +283,9 @@ const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose
           to withdrawal funds on your behalf. This is for your security.</Text>
         <HStack spacing='1em'>
           <Box width='55%'>
-            <Slider width='90%' m='1em' mt='2em' defaultValue={allowance} min={0}
-              max={balance} step={ethers.utils.parseEther("1") / 4}
-              onChangeEnd={(e) => setAllowance(BigNumber.from(e.toString()))}>
+            <Slider width='90%' m='1em' mt='2em' defaultValue={slideAllowance} min={0}
+              max={100} step={1}
+              onChangeEnd={(e) => setAllowance(e)}>
               <SliderTrack bg='blue.200'>
                 <Box position='relative' right={10} />
                 <SliderFilledTrack bg='blue.600'/>
@@ -295,7 +296,7 @@ const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose
             </Slider>
           </Box>
           <Text fontSize='lg' fontWeight='bold'>
-            {ethers.utils.formatEther(slideAllowance)}&nbsp;/&nbsp;{ethers.utils.formatEther(balance)}
+            {parseFloat(ethers.utils.formatUnits(cleanAllowance, asset.decimals)).toFixed(2)}&nbsp;/&nbsp;{parseFloat(ethers.utils.formatUnits(balance, asset.decimals)).toFixed(2)}
           </Text>
           <Spacer/>
           <Button {... allowButtonProps} onClick={() => {allowanceConfig.write?.()}} 
