@@ -26,11 +26,11 @@ import { useNavigate } from 'react-router-dom';
 const features = [{
     id: 0,
     title: 'Full Root Access',
-    text: 'Configure your trust exactly as you see fit. Or burn you root key to make the trust irrevocable.'
+    text: 'Configure your keys exactly as you see fit. Or burn your own root key to make the trust irrevocable.'
   }, {
     id: 1,
     title: 'Granular Permissions',
-    text: 'Enable your trust participants to do only what you allow.'
+    text: 'Enable your key holders to do only what you allow.'
   }, { 
     id: 2,
     title: 'Integrated Asset Vaults',
@@ -46,7 +46,7 @@ const features = [{
   }, {
     id: 5,
     title: 'Event Platform',
-    text: 'Use the integrated event bus to chain life events or set up gating factors on trust execution.' 
+    text: 'Use the integrated event bus to gate key permissions and chain complex interactions.' 
   }, {
     id: 6,
     title: 'Crypto Notarization',
@@ -70,10 +70,7 @@ function Home() {
           <Heading fontSize={'3xl'}>cksmith</Heading>
         </HStack>
         <Text color={'gray.600'} fontSize={'xl'}>
-          Create and manage your Web3 circle of trust. 
-        </Text>
-        <Text color={'gray.600'} fontSize={'xl'}>
-          Mint, configure, distribute, soulbind, and burn trust keys <b>you</b> control.
+          Easily create your own bank account, trust fund, vesting program, and much more with Locksmith's Soulbound NFT Key Management Platform. 
         </Text>
         <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Trust Now</Button>
       </VStack>
