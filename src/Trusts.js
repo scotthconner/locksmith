@@ -266,7 +266,7 @@ export function Trust() {
           {!trustBalanceSheet.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
             <HStack mt='1.5em'>
               <Text fontSize='lg'>
-                This trust has <b>{trustArns.length}</b> asset&nbsp;
+                This wallet has <b>{trustArns.length}</b> asset&nbsp;
                 {trustArns.length > 1 || trustArns.length === 0 ? 'types' : 'type'}.
               </Text>
               <Spacer/>
@@ -301,7 +301,7 @@ export function Trust() {
           {!trustInfo.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
             <HStack mt='1.5em'>
               <Text fontSize='lg'>
-                This trust has <b>{trustInfo.data.trustKeyCount.toString()}</b>&nbsp;
+                This wallet has <b>{trustInfo.data.trustKeyCount.toString()}</b>&nbsp;
                 {trustInfo.data.trustKeyCount > 1 ? 'keys' : 'key'}.
               </Text>
               <Spacer/>
@@ -342,7 +342,7 @@ export function Trust() {
           {registeredEvents.isSuccess && <>
               <HStack mt='1.5em'>
                 <Text fontSize='lg'>
-                  This trust has <b>{registeredEvents.data.length}</b>&nbsp;
+                  This wallet has <b>{registeredEvents.data.length}</b>&nbsp;
                   {registeredEvents.data.length > 1 || 
                     registeredEvents.data.length === 0 ? 'events' : 'event'}.
                 </Text>
@@ -374,7 +374,7 @@ export function Trust() {
           }{ trustPolicyKeys.isSuccess && trustInfo.isSuccess &&
             <><HStack mt='1.5em'>
                 <Text fontSize='lg'>
-                  This trust has <b>{trustPolicyKeys.data.length}</b> trustee&nbsp;
+                  This wallet has <b>{trustPolicyKeys.data.length}</b> trustee&nbsp;
                   {trustPolicyKeys.data.length === 1 ? 'policy' : 'policies'}.
                 </Text>
                 <Spacer/>
@@ -404,7 +404,7 @@ export function Trust() {
             </VStack></> : <>
               <HStack mt='1.5em'> 
                 <Text fontSize='lg'>
-                  This trust has <b>{trustedProviders.data.length}</b>&nbsp;
+                  This wallet has <b>{trustedProviders.data.length}</b>&nbsp;
                   trusted collateral {trustedProviders.data.length > 1 || 
                     trustedProviders.data.length === 0 ? 'providers' : 'provider'}.
                 </Text>
@@ -450,7 +450,7 @@ export function Trust() {
             </VStack></> : <>
             <HStack mt='1.5em'>
               <Text fontSize='lg'>
-                This trust has <b>{trustedScribes.data.length}</b> trusted ledger&nbsp;
+                This wallet has <b>{trustedScribes.data.length}</b> trusted ledger&nbsp;
                 {trustedScribes.data.length > 1 || trustedScribes.data.length === 0 ? 'scribes' : 'scribe'}. 
               </Text>
               <Spacer/>
