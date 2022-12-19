@@ -31,6 +31,7 @@ import { RiLock2Fill } from 'react-icons/ri';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
+import { PendingTransactionMonitor } from '../components/Locksmith.js';
 import { ConnectKitProvider, ConnectKitButton } from "connectkit";
 import { useNetwork } from 'wagmi';
 import { useState } from 'react';
@@ -191,6 +192,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         <RiLock2Fill size='22px'/>
         <Text fontSize='2xl'><b>cksmith</b></Text>
       </HStack>
+      <PendingTransactionMonitor/> 
       <ConnectKitButton />
       <HStack spacing={{ base: '0', md: '6' }}>
         <Flex alignItems={'center'}>

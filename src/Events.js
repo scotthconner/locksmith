@@ -24,7 +24,6 @@ import { BsShieldLock } from 'react-icons/bs';
 import { IoIosHourglass } from 'react-icons/io';
 import { FiPower } from 'react-icons/fi';
 import { HiOutlineLightningBolt } from 'react-icons/hi';
-
 import { ConnectWalletPrompt } from './components/Locksmith.js';
 import { KeyInfoIcon } from './components/KeyInfo.js';
 import { alarmClockExpirationAgo } from './components/AlarmClock.js';
@@ -156,6 +155,7 @@ const AlarmClockSnoozeButton = ({trustId, eventHash, alarmTime, snoozeInterval, 
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Alarm successfully snoozed!',
         description: 'The alarm expiry has been delayed.',
@@ -186,6 +186,7 @@ const AlarmClockChallengeButton = ({trustId, eventHash, alarmTime, ...rest}) => 
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Alarm successfully challenged!',
         description: 'The event has been enabled.',
@@ -232,6 +233,7 @@ const KeyEventListItem = ({keyId, eventHash, ...rest}) => {
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Event Fired!',
         description: 'The event has been enabled.',

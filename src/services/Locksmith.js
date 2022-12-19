@@ -22,6 +22,7 @@ import * as creator from "../contracts/agents/TrustCreator.sol/TrustCreator.json
  * Service provides an interface to the locksmith contracts.
  **/
 const Locksmith = (function() {
+  var pendingHashes = [];
   var myChainId = 31337; // hardhat
   var contractAddresses = {};
   var assetAddresses = {};
@@ -99,6 +100,34 @@ const Locksmith = (function() {
           console.log("Something really bad happened: " + error);
         }
       }
+    },
+    ////////////////////////////////////////////
+    // watchHash
+    //
+    // A small utility function that will watch this
+    // hash and wait for it to receive a confirmation,
+    // then clear itself.
+    ////////////////////////////////////////////
+    watchHash: function(hash) {
+      pendingHashes.push(hash);
+    },
+    ////////////////////////////////////////////
+    // getHashes
+    //
+    // Powers the react components to get their state.
+    // Needs to be wrapped in a hook.
+    ////////////////////////////////////////////
+    getHashes: function() {
+      return pendingHashes;
+    },
+    ////////////////////////////////////////////
+    // removeHash
+    //
+    // Once the transaction completes, we will remove
+    // the hash from the registry.
+    ////////////////////////////////////////////
+    removeHash: function(hash) {
+      pendingHashes = pendingHashes.filter((h) => h !== hash);
     }
   }
 })();

@@ -450,3 +450,9 @@ export function useTrustKeys(trustId) {
 
   return trustKeys;
 }
+
+export function usePendingHashes() {
+  return useQuery({queryKey: Date.now(), queryFn: async function() {
+    return Locksmith.getHashes();
+  }, cacheTime: 3000, staleTime: 3000});
+}

@@ -39,6 +39,7 @@ import { FiUnlock } from 'react-icons/fi';
 import { RiHandCoinLine, RiSafeLine } from 'react-icons/ri';
 import { KeyInfoIcon } from './components/KeyInfo.js';
 import { CollateralProviderWithdrawalAdapter } from './components/withdrawal/Provider.js';
+import Locksmith from './services/Locksmith.js';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
@@ -261,6 +262,7 @@ const SlotWithdrawalDialog = ({provider, keyId, arn, allowance, balance, onClose
         isClosable: true
       });
     },function(data) {
+      Locksmith.watchHash(data.hash);
       // success
       toast({
         title: 'Allowance Set!',

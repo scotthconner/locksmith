@@ -41,6 +41,7 @@ import { useNavigate } from 'react-router-dom';
 import { ConnectKitButton } from "connectkit";
 import { useAccount } from 'wagmi';
 import { ethers } from 'ethers';
+import Locksmith from './services/Locksmith.js';
 import { secondsToUnits } from './components/AlarmClock.js';
 import { AiOutlineWallet } from 'react-icons/ai';
 import { BiGhost } from 'react-icons/bi';
@@ -121,6 +122,7 @@ export function TrustWizard({...rest}) {
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Trust Created!',
         description: 'Your trust has been set up.',

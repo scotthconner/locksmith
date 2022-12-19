@@ -53,6 +53,7 @@ const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
         isClosable: true
       });
     }, function(data) {
+      Locksmith.watchHash(data.hash); 
       // success
       toast({
         title: 'Withdrawal complete!',
@@ -111,6 +112,7 @@ const TokenWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
         isClosable: true
       });
     }, function(data) {
+      Locksmith.watchHash(data.hash); 
       // success
       toast({
         title: 'Withdrawal complete!',

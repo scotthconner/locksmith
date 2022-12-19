@@ -61,6 +61,7 @@ import {
   useKeySupply,
   useSendKey,
 } from './hooks/LocksmithHooks.js';
+import Locksmith from './services/Locksmith.js';
 
 //////////////////////////////////////
 // Keys Function Component
@@ -191,6 +192,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
       isClosable: true
     });
   }, function(data) {
+    Locksmith.watchHash(data.hash);
     // success
     toast({
       title: 'Keys Sent!',

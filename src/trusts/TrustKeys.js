@@ -66,6 +66,7 @@ import {
 } from '../hooks/LocksmithHooks.js';
 import {ethers} from 'ethers';
 import { useAccount } from 'wagmi';
+import Locksmith from '../services/Locksmith.js';
 
 //////////////////////////////////////
 // Trustees Function Component
@@ -206,6 +207,7 @@ const KeyActionModal = ({rootKeyId, keyId, onOpen, onClose, isOpen, ...rest}) =>
     });
   }, function(data) {
     // success
+    Locksmith.watchHash(data.hash);
     toast({
       title: 'Key copied!',
       description: 'The key is now in ' + input,
@@ -343,6 +345,7 @@ const BindFormControl = ({rootKeyId, keyId, address, keyBalance, soulbound, onCl
     });
   }, function(data) {
     // success
+    Locksmith.watchHash(data.hash);
     toast({
       title: 'Keys bound!',
       description: 'The user now has ' + soulbindAmount + ' bound keys.',
@@ -397,6 +400,7 @@ const BurnFormControl = ({rootKeyId, keyId, address, keyBalance, onClose, ...res
       isClosable: true
     });
   }, function(data) {
+    Locksmith.watchHash(data.hash);
     // success
     toast({
       title: 'Keys burned!',
@@ -462,6 +466,7 @@ export function CreateKeyModal({trustId, rootKeyId, isOpen, onClose, ...rest}) {
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Key ' + alias + ' created!',
         description: 'It has been sent to ' + address + '.',

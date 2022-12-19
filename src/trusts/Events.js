@@ -218,6 +218,7 @@ const KeyOracleForm = ({trustId, rootKeyId, onClose, onToggle}) => {
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Key Oracle Created!',
         description: 'They event has been added to your trust',
@@ -303,6 +304,7 @@ const AlarmClockForm = ({trustId, rootKeyId, onClose, onToggle}) => {
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Alarm Clock event Created!',
         description: 'They event has been added to your trust',

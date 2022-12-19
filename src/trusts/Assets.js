@@ -43,6 +43,7 @@ import { useState } from 'react';
 import { ethers, BigNumber } from 'ethers';
 import { useAccount, useBalance } from 'wagmi';
 import { AssetResource } from '../services/AssetResource.js';
+import Locksmith from '../services/Locksmith.js';
 import {
   useInspectKey,
   useTrustInfo,
@@ -279,6 +280,7 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, precision, onClose,
   };
 
   const successFunc = function(data) {
+    Locksmith.watchHash(data.hash);
     toast({
       title: 'Funds Deposited!',
       description: 'You\'ve added ' + depositAmount + ' ' + symbol + '.',
@@ -300,6 +302,7 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, precision, onClose,
   
   const approve = useApprove(address, account.address, ethers.utils.parseUnits(depositAmount.toString(), precision), errorFunc,
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Funds Approved!',
         description: 'You\'ve approved ' + depositAmount + ' ' + symbol + ' for deposit.',

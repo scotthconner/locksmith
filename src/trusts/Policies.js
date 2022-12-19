@@ -29,6 +29,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useState } from 'react';
+import Locksmith from '../services/Locksmith.js';
 
 // icons
 import { KeyInfoIcon } from '../components/KeyInfo.js';
@@ -79,6 +80,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
         });
       },
       function(data) {
+        Locksmith.watchHash(data.hash);
         toast({
           title: 'Trustee Policy Removed!',
           description: 'This distribution rule has been deleted.',
@@ -231,6 +233,7 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Trustee Policy created!',
         description: 'This distribution rule has been saved.',

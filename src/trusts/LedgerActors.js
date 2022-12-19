@@ -34,6 +34,7 @@ import { useState, useRef } from 'react';
 //////////////////////////////////////
 import { ethers } from 'ethers';
 import { useAccount } from 'wagmi';
+import Locksmith from '../services/Locksmith.js';
 import {
   useKeyBalance
 } from '../hooks/LocksmithHooks.js';
@@ -63,6 +64,7 @@ export function TrustedLedgerActors({trustId, rootKeyId, role, actor, roleIcon, 
       });
     },
     function(data) {
+      Locksmith.watchHash(data.hash);
       toast({
         title: 'Actor untrusted!',
         description: 'They can no longer act on your ledger.',
@@ -122,6 +124,7 @@ export function AddTrustedLedgerActorModal({trustId, rootKeyId, role, isOpen, on
     },
     function(data) {
       setAlias('');
+      Locksmith.watchHash(data.hash);
       toast({
         title: alias + ' entrusted!',
         description: 'They can now act on your ledger accordingly.',

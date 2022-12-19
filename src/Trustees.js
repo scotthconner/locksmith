@@ -52,6 +52,7 @@ import { PolicyActivationTag } from './trusts/Policies.js';
 import { useAccount } from 'wagmi';
 import { ethers, BigNumber } from 'ethers';
 import { AssetResource } from './services/AssetResource.js';
+import Locksmith from './services/Locksmith.js';
 import {
   useWalletKeys,
   useKeyInfo,
@@ -293,6 +294,7 @@ export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider
         isClosable: true
       });
     }, function(data) {
+      Locksmith.watchHash(data.hash);
       // success
       toast({
         title: 'Funds Distributed!',
