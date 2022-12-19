@@ -24,7 +24,6 @@ import {
   useColorModeValue
 } from '@chakra-ui/react';
 import { ConnectWalletPrompt } from './components/Locksmith.js';
-import { ConnectKitButton } from "connectkit";
 import { IoIosAdd } from 'react-icons/io';
 import { BiCoinStack } from 'react-icons/bi';
 import { 

@@ -7,14 +7,13 @@ import {
   Tag,
   TagLabel
 } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
 import Locksmith from '../services/Locksmith.js';
 import { usePendingHashes } from '../hooks/LocksmithHooks.js';
 import { ConnectKitButton } from 'connectkit';
 import { useNavigate } from 'react-router-dom';
 import { useWaitForTransaction } from 'wagmi';
 
-export function ConnectWalletPrompt({}) {
+export function ConnectWalletPrompt() {
   const navigate = useNavigate();
   return <VStack textAlign='center' spacing='2em' m='3em'>
     <Text fontSize='lg'>You have not connected your wallet.</Text>
@@ -25,7 +24,7 @@ export function ConnectWalletPrompt({}) {
   </VStack>
 }
 
-export function PendingTransactionMonitor({}) {
+export function PendingTransactionMonitor() {
   const hashes = usePendingHashes();
   return hashes.isSuccess && hashes.data.length > 0 && 
     <Tag mr='1em' size='lg' colorScheme='red' borderRadius='full'>

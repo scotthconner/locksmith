@@ -15,7 +15,6 @@ import {
   ListItem,
   Progress,
   Select,
-  Skeleton,
   Spacer,
   Stack,
   Switch,
@@ -46,7 +45,6 @@ import { secondsToUnits } from './components/AlarmClock.js';
 import { AiOutlineWallet } from 'react-icons/ai';
 import { BiGhost } from 'react-icons/bi';
 import { BsTrash, BsShieldLock } from 'react-icons/bs';
-import { FcKey } from 'react-icons/fc';
 import { HiOutlineKey } from 'react-icons/hi';
 import { IoIosAdd, IoIosHourglass } from 'react-icons/io';
 import { useTrustCreator } from './hooks/TrustCreatorHooks.js';
@@ -54,9 +52,8 @@ import { useTrustCreator } from './hooks/TrustCreatorHooks.js';
 export function TrustWizard({...rest}) {
   const navigate = useNavigate();
   const toast = useToast();
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
   const [step, setStep] = useState(0);
-  const [buttonLabel, setButtonLabel] = useState('Next');
   const bottomRef = useRef(null);
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({behavior: 'smooth'});
@@ -148,7 +145,7 @@ export function TrustWizard({...rest}) {
     </Collapse>
     <Collapse in={keyDisclosure.isOpen}>
       <CreateBeneficiaries trustName={trustName} beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} 
-        setButtonLabel={setButtonLabel} isError={hasError} setHasError={setHasError} step={step} changeStep={changeStep}/> 
+        isError={hasError} setHasError={setHasError} step={step} changeStep={changeStep}/> 
     </Collapse>
     <Collapse in={trusteeQuestionDisclosure.isOpen && beneficiaries.length > 0}>
       <SetTrustee trustee={trustee} setTrustee={setTrustee} 
@@ -325,7 +322,7 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, step, 
   // beneficiary in bulk against some hard coded requirements that
   // hopefully match the individual form controls.
   const calculateErrors = function(bens) {
-    setHasError(bens.length != 
+    setHasError(bens.length !== 
       bens.filter(
         (b) => (b.sendToRoot || ethers.utils.isAddress(b.destination)) && b.alias.length > 0)
           .length);
@@ -528,8 +525,8 @@ const SetDeadman = ({deadman, setDeadman, step, changeStep}) => {
           setDeadman(d);
           changeStep(step+1);
         }}>Skip</Button>
-        <Button {... deadman.description.length < 1 ||
-          deadman.snoozeUnitCount.length > 0 && isNaN(parseInt(deadman.snoozeUnitCount)) ? {isDisabled: true} : {}}
+        <Button {... (deadman.description.length < 1) ||
+          (deadman.snoozeUnitCount.length > 0 && isNaN(parseInt(deadman.snoozeUnitCount))) ? {isDisabled: true} : {}}
           colorScheme='blue' onClick={() => {
             var d = {...deadman};
             d.skipEvent = false;
