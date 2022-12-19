@@ -70,9 +70,9 @@ function Home() {
           <Heading fontSize={'3xl'}>cksmith</Heading>
         </HStack>
         <Text color={'gray.600'} fontSize={'xl'}>
-          Easily create your own bank account, trust fund, vesting program, and much more with Locksmith's Soulbound NFT Key Management Platform. 
+          A Soulbound NFT Smart Wallet. 
         </Text>
-        <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Trust Now</Button>
+        <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Wallet Now</Button>
       </VStack>
 
       <Container maxW={'6xl'} mt={10}>

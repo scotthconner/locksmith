@@ -44,7 +44,7 @@ interface LinkItemProps {
   href: string;
 }
 const LinkItems: Array<LinkItemProps> = [
-  { name: 'Trusts', icon: BsShieldLock, href: '/trusts'},
+  { name: 'Wallets', icon: BsShieldLock, href: '/trusts'},
   { name: 'Keys', icon: HiOutlineKey, href: '/keys'},
   { name: 'Assets', icon: BiCoinStack, href: '/assets'},
   { name: 'Distribute', icon: FiShare2, href: '/trustees'},

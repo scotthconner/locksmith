@@ -228,7 +228,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
               <Tag colorScheme='purple'><TagLabel>{keyInfo.data.soulbound.toString()} × Soulbound</TagLabel></Tag>}
           </VStack>
           <VStack ml='1em' spacing='0.1em' align='stretch'>
-            <Text><b>Trust Name:</b> {keyInfo.data.trust.name}</Text>
+            <Text><b>Wallet Name:</b> {keyInfo.data.trust.name}</Text>
             <Text><b>Key Alias:</b> {keyInfo.data.alias}</Text>
             <Text><b>Key ID:</b> {keyInfo.data.keyId}</Text>
             <HStack>
@@ -242,7 +242,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
           <Spacer/>
           <VStack>
             <Link to={'/trust/' + keyInfo.data.trust.id + '/keys/'}>
-              <Button colorScheme='gray' leftIcon={<BsEye/>}>See Trust</Button>
+              <Button colorScheme='gray' leftIcon={<BsEye/>}>See Wallet</Button>
             </Link>
             {!transferBound && (
               <Button colorScheme='blue' 

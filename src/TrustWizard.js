@@ -121,8 +121,8 @@ export function TrustWizard({...rest}) {
     function(data) {
       Locksmith.watchHash(data.hash);
       toast({
-        title: 'Trust Created!',
-        description: 'Your trust has been set up.',
+        title: 'Wallet Created!',
+        description: 'Your wallet has been set up.',
         status: 'success',
         duration: 9000,
         isClosable: true
@@ -134,7 +134,7 @@ export function TrustWizard({...rest}) {
   
   return <Stack spacing='1em'>
     <Stack spacing='1em' mb='3em'>
-      <Heading size='lg'>Design Your Trust</Heading>
+      <Heading size='lg'>Design Your Wallet</Heading>
       <Text fontSize='xl'>Use the Locksmith key system to secure your assets <i>without</i> sharing your private key in just a few quick steps.</Text>
       <Text fontSize='xl'>You will get a set of NFT keys, a vault to store your ether and ERC20s, and an optional trustee and deadman switch. You can re-configure your trust at any time.</Text>
     </Stack>
@@ -157,12 +157,12 @@ export function TrustWizard({...rest}) {
     <Collapse in={reviewDisclosure.isOpen}>
       <VStack mt='2em' spacing='1em'>
         <VStack pb='3em'>
-          <Text fontSize='lg'>You've named your trust.</Text>
+          <Text fontSize='lg'>You've named your wallet.</Text>
           <HStack p='1em'>
             <BsShieldLock size='30px'/>
             <Text fontWeight='bold'>{trustName}</Text>
           </HStack>
-          <Button onClick={()=> changeStep(0)}>Change Trust Name</Button>
+          <Button onClick={()=> changeStep(0)}>Change Wallet Name</Button>
         </VStack>
         { beneficiaries.length > 0 && <VStack pb='3em'>
           <Text fontSize='lg'>And defined your beneficiary keys.</Text>
@@ -189,7 +189,7 @@ export function TrustWizard({...rest}) {
           <Button onClick={() => changeStep(2)}>Change Trustee</Button>
         </VStack> }
         {!deadman.skipEvent && <VStack pb='3em'>
-          <Text fontSize='lg'>You've added an event to your trust.</Text>
+          <Text fontSize='lg'>You've added an event to your wallet.</Text>
           <VStack>
             <HStack p='1em'>
               <IoIosHourglass size='30px'/>
@@ -201,10 +201,10 @@ export function TrustWizard({...rest}) {
           <Button onClick={() => changeStep(3)}>Change Event</Button>
         </VStack>}
         <VStack pb='4em'>
-          <Text fontSize='lg'>Are you ready to create your trust?</Text>
+          <Text fontSize='lg'>Are you ready to create your wallet?</Text>
           { isConnected && 
             <Button {...buttonProps} size='lg' colorScheme='yellow' leftIcon={<HiOutlineKey/>}
-              onClick={() => {createTrust.write?.();} }>Mint Trust</Button> }
+              onClick={() => {createTrust.write?.();} }>Mint Wallet Keys</Button> }
           { isConnected && !createTrust.write && <Text fontSize='sm'>Calculating gas...</Text> }
           { !isConnected && <ConnectKitButton/> }
         </VStack>
@@ -224,7 +224,7 @@ const SetTrustName = ({trustName, setTrustName, step, changeStep, isError, setHa
         fontSize='2xl'
         width='16em'
         value={trustName}
-        placeholder="My Living Trust"
+        placeholder="My Smart Wallet"
         _placeholder={{ color: 'gray.500' }}
         onChange={(e) => {
           if (e.target.value.length < 32) {
@@ -234,7 +234,7 @@ const SetTrustName = ({trustName, setTrustName, step, changeStep, isError, setHa
       />
       { isError ?
         <FormErrorMessage>Ring name can't be empty</FormErrorMessage> :
-        <FormHelperText>Name the trust that will control all of your permissions.</FormHelperText>
+        <FormHelperText>Name the wallet that will control all of your permissions.</FormHelperText>
       }
       <VStack p='2em'>
         <Button colorScheme='blue' {... trustName.length < 1 ? {isDisabled: true} : {}} size='lg' onClick={() => changeStep(step+1)}>Next</Button>
@@ -329,7 +329,10 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, step, 
   };
 
   return <VStack spacing='2em' mt='2em'>
-    <Text fontSize='xl'>Next, name some beneficiaries - and where to send their Trust Key.</Text>
+    <VStack>
+      <Text fontSize='xl'>Next, name some beneficiaries - and where to send their Trust Key.</Text>
+      <Text fontSize='xl'>These keys will have permission to take distributions from trustees you configure.</Text>
+    </VStack>
     <List spacing='3em'>
       { beneficiaries.map((b, x) => 
         <ListItem key={'bli-' + x} p='2em' bg={boxColor} borderRadius='2xl' boxShadow='dark-lg' width='30em'>
@@ -532,7 +535,7 @@ const SetDeadman = ({deadman, setDeadman, step, changeStep}) => {
             d.skipEvent = false;
             setDeadman(d);
             changeStep(step+1);
-          }}>Review Trust</Button>
+          }}>Review Wallet</Button>
       </HStack>
     </VStack>
   </VStack>

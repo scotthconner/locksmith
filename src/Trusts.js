@@ -101,10 +101,10 @@ export function Trusts() {
   return !isConnected ? <ConnectWalletPrompt/> : (
     <Stack m='1em' spacing='1em'>
       <HStack width='100%'>
-        <Heading size='md'>Your Trust Participation</Heading>
+        <Heading size='md'>Your Wallet Participation</Heading>
         <Spacer/>
         <Button leftIcon={<IoIosAdd/>} colorScheme='blue'
-          onClick={() => { navigate('/wizard'); }}>Create Trust</Button>
+          onClick={() => { navigate('/wizard'); }}>Create Wallet</Button>
       </HStack>
       <Wrap padding='3em' spacing='2em' pb='6em'>
         {!trusts.isSuccess && <> 
@@ -120,7 +120,7 @@ export function Trusts() {
         { trusts.isSuccess && trusts.data.length < 1 &&
           <VStack spacing='1em' width='100%'>
             <Text fontSize='30px'>You have no trusts.</Text>
-            <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Trust</Button>
+            <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Wallet</Button>
           </VStack>
         }
         { trusts.isSuccess &&
