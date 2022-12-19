@@ -30,6 +30,8 @@ import Keys from './Keys.js';
 import Assets from './Assets.js';
 import Trustees from './Trustees.js';
 import Events from './Events.js';
+import { Security } from './Security.js'
+import { Footer } from './Footer.js';
 import { TrustWizard } from './TrustWizard.js';
 
 // We are using alchemy for now
@@ -69,8 +71,10 @@ function App() {
               <Route path='/trustees' element={<Trustees/>} />
               <Route path='/events' element={<Events/>} />
               <Route path='/wizard' element={<TrustWizard/>} />
+              <Route path='/security' element={<Security/>} />
             </Routes>
           </SidebarWithHeader>
+          <Footer/>
         </Router>
       </WagmiConfig>
     </ChakraProvider>

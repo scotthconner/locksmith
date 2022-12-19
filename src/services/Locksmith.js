@@ -58,11 +58,17 @@ const Locksmith = (function() {
     setChainId: function(chainId) {
       myChainId = chainId; 
     },
+    getChainId: function() {
+      return myChainId;
+    },
     ////////////////////////////////////////////
     // getContractAddress
     ////////////////////////////////////////////
     getContractAddress: function(contract) {
       return (contractAddresses[myChainId][contract]||{})['address'];
+    },
+    getContractRegistry: function(chainId) {
+      return contractAddresses[chainId];
     },
     ////////////////////////////////////////////
     // getContractAddress
