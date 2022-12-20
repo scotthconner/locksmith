@@ -34,7 +34,6 @@ import DatePicker from "react-datepicker";
 import {
   useState,
   useRef,
-  useEffect,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ConnectKitButton } from "connectkit";
@@ -55,12 +54,6 @@ export function TrustWizard({...rest}) {
   const { isConnected } = useAccount();
   const [step, setStep] = useState(0);
   const bottomRef = useRef(null);
-  const scrollToBottom = () => {
-    bottomRef.current?.scrollIntoView({behavior: 'smooth'});
-  };
-  useEffect(() => {
-    scrollToBottom();
-  });
 
   // Step 0: Setting Trust Name
   const trustNameDisclosure = useDisclosure();
