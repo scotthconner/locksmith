@@ -13,6 +13,8 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { CheckIcon } from '@chakra-ui/icons';
+import { AiOutlineTwitter, AiOutlineGithub } from 'react-icons/ai';
+import { FaDiscord } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 
@@ -73,9 +75,17 @@ function Home() {
           A Soulbound NFT Smart Wallet. 
         </Text>
         <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Wallet Now</Button>
+        <HStack>
+          <Button variant='ghost' colorScheme='twitter' leftIcon={<AiOutlineTwitter/>}
+            onClick={() => window.open('https://twitter.com/LocksmithWallet')}>Twitter</Button>
+          <Button variant='ghost' colorScheme='purple' leftIcon={<FaDiscord/>}
+            onClick={() => window.open('https://discord.gg/PErVhWqr')}>Discord</Button>
+          <Button variant='ghost' colorScheme='gray' leftIcon={<AiOutlineGithub/>}
+            onClick={() => window.open('https://github.com/scotthconner?tab=repositories')}>Github</Button>
+        </HStack>
       </VStack>
 
-      <Container maxW={'6xl'} mt={10}>
+      <Container maxW={'6xl'} mt={10} mb='4em'>
         <SimpleGrid columns={{ base: 1, md: 2, lg: 2 }} spacing={10}>
           {features.map((feature) => (
             <HStack key={feature.id} align={'top'}>

@@ -73,8 +73,8 @@ function App() {
               <Route path='/wizard' element={<TrustWizard/>} />
               <Route path='/security' element={<Security/>} />
             </Routes>
+            <Footer/>
           </SidebarWithHeader>
-          <Footer/>
         </Router>
       </WagmiConfig>
     </ChakraProvider>

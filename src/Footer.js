@@ -23,7 +23,7 @@ const ListHeader = ({ children }: { children: ReactNode }) => {
 
 export function Footer() {
   return (
-    <Box
+    <Box 
       bg={useColorModeValue('gray.50', 'gray.900')}
       color={useColorModeValue('gray.700', 'gray.200')}>
       <Container as={Stack} maxW={'6xl'} py={10}>
@@ -42,6 +42,7 @@ export function Footer() {
           <Stack align={'flex-start'}>
             <ListHeader>Follow Us</ListHeader>
             <Link target='_blank' href={'https://twitter.com/LocksmithWallet'}>Twitter</Link>
+            <Link target='_blank' href={'https://discord.gg/PErVhWqr'}>Discord</Link>
           </Stack>
         </SimpleGrid>
       </Container>
