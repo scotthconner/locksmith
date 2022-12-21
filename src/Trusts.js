@@ -248,7 +248,7 @@ export function Trust() {
   
   return (<>
     {!trustInfo.isSuccess ? <Skeleton width='20em' height='3em'/> :
-      <Heading>
+      <Heading p='0.5em'>
         {trustInfo.data.trustKeyCount < 1 ? 'Invalid Trust' : trustInfo.data.name}
       </Heading>
     }

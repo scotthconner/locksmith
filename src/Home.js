@@ -67,9 +67,9 @@ function Home() {
     <Box p={4}>
       <VStack spacing={4} as={Container} maxW={'3xl'} textAlign={'center'}>
         <HStack spacing='0'>
-          <Heading fontSize={'3xl'}>Welcome to L</Heading>
-          <RiLock2Fill size='26px'/>
-          <Heading fontSize={'3xl'}>cksmith</Heading>
+          <Heading fontSize='5xl'>L</Heading>
+          <RiLock2Fill size='44px'/>
+          <Heading fontSize={'5xl'}>cksmith</Heading>
         </HStack>
         <Text color={'gray.600'} fontSize={'xl'}>
           A Soulbound NFT Smart Wallet. 
