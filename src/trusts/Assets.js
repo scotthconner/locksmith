@@ -166,7 +166,7 @@ export function TrustArnProvider({rootKeyId, trustId, arn, provider, trustKeys, 
       </Button>
       {!providerBalance.isSuccess && <Skeleton width='4em' height='1em'/>}
       {providerBalance.isSuccess && 
-        <Text>{ethers.utils.formatEther(providerBalance.data[0])} {asset.symbol}</Text>}
+        <Text>{ethers.utils.formatUnits(providerBalance.data[0], asset.decimals)} {asset.symbol}</Text>}
     </HStack>
     <List width='100%'>
       <Collapse in={keyBalanceDisclosure.isOpen} width='100%'>
@@ -183,14 +183,14 @@ export function TrustArnProvider({rootKeyId, trustId, arn, provider, trustKeys, 
 export function TrustArnKeyBalance({rootKeyId, trustId, arn, provider, keyId, asset, ...rest}) {
   const inspectKey = useInspectKey(keyId);  
   const keyBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, [arn], provider);
-
+  
   return inspectKey.isSuccess && keyBalance.isSuccess && keyBalance.data[0] > 0 &&
     <ListItem pt='1em' key={keyId + '-' + arn + '-' + provider} width='100%' fontSize='sm'>
       <HStack>
         {KeyInfoIcon(inspectKey, 20)}
         <Text><i>{inspectKey.data.alias}</i></Text>
         <Spacer/>
-        <Text><i>{ethers.utils.formatEther(keyBalance.data.toString())} {asset.symbol}</i></Text>
+        <Text><i>{ethers.utils.formatUnits(keyBalance.data.toString(), asset.decimals)} {asset.symbol}</i></Text>
       </HStack>
     </ListItem>
 }

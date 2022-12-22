@@ -116,7 +116,7 @@ const TokenWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
       // success
       toast({
         title: 'Withdrawal complete!',
-        description: ethers.utils.formatEther(cleanWithdrawal) + ' ' + asset.symbol + ' was sent to your wallet.',
+        description: ethers.utils.formatUnits(cleanWithdrawal, asset.decimals) + ' ' + asset.symbol + ' was sent to your wallet.',
         status: 'success',
         duration: 9000,
         isClosable: true

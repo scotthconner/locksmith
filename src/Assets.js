@@ -125,9 +125,9 @@ const WalletArnList = ({arns, keys, balanceSheet, ...rest}) => {
 const WalletArn = ({arn, arnBalanceSheet, keys, ...rest}) => {
   const asset = AssetResource.getMetadata(arn);
   const boxColor = useColorModeValue('white', 'gray.800');
-  const total = ethers.utils.formatEther(
+  const total = ethers.utils.formatUnits(
     Object.values(arnBalanceSheet||[]).reduce((p, n) =>
-      p.add(n), BigNumber.from(0)))
+      p.add(n), BigNumber.from(0)), asset.decimals)
   const assetPrice = useCoinCapPrice([asset.coinCapId]);
   const assetValue = assetPrice.isSuccess ?
     USDFormatter.format(assetPrice.data * total) : null;
@@ -193,7 +193,7 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
   const allowance = useWithdrawalAllowance(provider, keyId, arn);
   const assetPrice = useCoinCapPrice(asset.coinCapId);
   const boxColor = useColorModeValue('gray.100', 'gray.700');
-  const ethAmount = ethers.utils.formatEther(balance);
+  const ethAmount = ethers.utils.formatUnits(balance, asset.decimals);
   const withdrawalDisclosure = useDisclosure();
 
   return <WrapItem key={'key-withdrawal-slot' + arn + keyId + provider}
@@ -212,7 +212,7 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
             <Text><b>{USDFormatter.format(assetPrice.data * ethAmount)}</b></Text> } 
           <HStack fontStyle='italic' color='gray' fontSize='sm'>
             {!allowance.isSuccess ? <Skeleton width='2em' height='1em'/> :
-              <Text>{ethers.utils.formatEther(allowance.data)}</Text>}
+              <Text>{ethers.utils.formatUnits(allowance.data, asset.decimals)}</Text>}
             <Text> / {ethAmount} {asset.symbol}</Text>
           </HStack>
         </VStack>
@@ -237,7 +237,7 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
           </>}
       </HStack>
     </VStack>
-    {allowance.isSuccess &&  
+    {allowance.isSuccess && !balance.eq(BigNumber.from(0)) && 
       <SlotWithdrawalDialog provider={provider} keyId={keyId}
         arn={arn} onClose={withdrawalDisclosure.onClose}
         isOpen={withdrawalDisclosure.isOpen}

@@ -162,7 +162,7 @@ export function KeyBalanceSheet({trustId, keyId, trusteeKey, ...rest}) {
 export function KeyAssetBalanceOption({trustId, keyId, arn, balance, trusteeKey, ...rest}) {
   const asset = AssetResource.getMetadata(arn);
   const assetPrice = useCoinCapPrice(asset.coinCapId);
-  const ethAmount = ethers.utils.formatEther(balance);
+  const ethAmount = ethers.utils.formatUnits(balance, asset.decimals);
   const assetValue = assetPrice.isSuccess ?
     USDFormatter.format(ethAmount * assetPrice.data) : null;
   const providers = useContextProviderRegistry(KEY_CONTEXT_ID, keyId, arn);
@@ -207,7 +207,7 @@ export function KeyArnProviderOption({trustId, keyId, trusteeKey, arn, provider,
   const providerBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, [arn], provider);
   const providerAlias = useTrustedActorAlias(trustId, COLLATERAL_PROVIDER, provider); 
   const ethAmount = !providerBalance.isSuccess ? 0 : 
-    ethers.utils.formatEther(providerBalance.data[0]);
+    ethers.utils.formatUnits(providerBalance.data[0], asset.decimals);
   const usdAmount = assetPrice.isSuccess ?
     USDFormatter.format(ethAmount * assetPrice.data) : null;
   const boxColor = useColorModeValue('gray.100', 'gray.700'); 
@@ -298,7 +298,7 @@ export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider
       // success
       toast({
         title: 'Funds Distributed!',
-        description: 'There is ' + ethers.utils.formatEther(balanceLeft) 
+        description: 'There is ' + ethers.utils.formatUnits(balanceLeft, asset.decimals) 
           + " " + asset.symbol + ' left on that provider.',
         status: 'success',
         duration: 9000,
@@ -344,12 +344,12 @@ export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider
         { policy.isSuccess && policy.data[2].map((b) => {
           var amount= keyDistributions[b.toString()] || BigNumber.from(0);
           return <BeneficiaryDistributionSlider keyId={b} maxBalance={amount.add(balanceLeft)} 
-            balance={amount} setBalance={assignDistributionAmount}
+            balance={amount} setBalance={assignDistributionAmount} asset={asset}
             symbol={asset.symbol} key={'bds-' + b}/>
         }) }
       </ModalBody>
       <ModalFooter>
-        <Text mr='2em' fontStyle='italic'>With <b>{ethers.utils.formatEther(balanceLeft)} {asset.symbol}</b> left.</Text>
+        <Text mr='2em' fontStyle='italic'>With <b>{ethers.utils.formatUnits(balanceLeft, asset.decimals)} {asset.symbol}</b> left.</Text>
         <Button {...buttonProps} leftIcon={<FiShare2/>} colorScheme='yellow'
           onClick={() => { distribution.write?.() }}>Distribute Funds</Button>
       </ModalFooter>
@@ -357,10 +357,10 @@ export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider
   </Modal>
 }
 
-export function BeneficiaryDistributionSlider({keyId, symbol, maxBalance, balance, setBalance, ...rest}) {
+export function BeneficiaryDistributionSlider({keyId, symbol, maxBalance, balance, setBalance, asset, ...rest}) {
   const beneficiaryInfo = useInspectKey(keyId);
-  const balanceDisplay = ethers.utils.formatEther(balance||BigNumber.from(0));
-  const maxBalanceDisplay = ethers.utils.formatEther(maxBalance);
+  const balanceDisplay = ethers.utils.formatUnits(balance||BigNumber.from(0), asset.decimals);
+  const maxBalanceDisplay = ethers.utils.formatUnits(maxBalance, asset.decimals);
 
   return <HStack mt='1em' ml='2em' spacing='1em'>
     <Box width='70%'>
@@ -372,7 +372,7 @@ export function BeneficiaryDistributionSlider({keyId, symbol, maxBalance, balanc
           <Text fontSize='sm' color='gray'><i>id: {keyId.toString()}</i></Text>
         </HStack> }
       <Slider mt='0.5em' width='100%' defaultValue={0} min={0}
-        max={maxBalance} step={ethers.utils.parseEther("1") / 100}
+        max={maxBalance} step={ethers.utils.parseUnits("1", asset.decimals) / 100}
         onChangeEnd={(e) => { setBalance(keyId, BigNumber.from(e.toString()));}}>
         <SliderTrack bg='blue.200'>
           <Box position='relative' right={10} />
