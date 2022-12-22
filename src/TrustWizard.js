@@ -125,7 +125,7 @@ export function TrustWizard({...rest}) {
   );
   const buttonProps = createTrust.isLoading ? {isLoading: true} : (!createTrust.write ? {isDisabled: true} : {});
   
-  return <Stack spacing='1em'>
+  return <Stack spacing='1em' p='1em'>
     <Stack spacing='1em' mb='3em'>
       <Heading size='lg'>Design Your Wallet</Heading>
       <Text fontSize='xl'>Use the Locksmith key system to secure your assets <i>without</i> sharing your private key in just a few quick steps.</Text>
@@ -328,7 +328,7 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, step, 
     </VStack>
     <List spacing='3em'>
       { beneficiaries.map((b, x) => 
-        <ListItem key={'bli-' + x} p='2em' bg={boxColor} borderRadius='2xl' boxShadow='dark-lg' width='30em'>
+        <ListItem key={'bli-' + x} p='2em' bg={boxColor} borderRadius='2xl' boxShadow='lg'>
           <HStack>
             <Spacer/>
           </HStack>
@@ -347,7 +347,7 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, step, 
           </FormControl>
           <FormControl id={'address-' + x} isInvalid={ !ethers.utils.isAddress(b.destination)}>
             { !b.sendToRoot && <FormLabel mt='1em'>Key Destination Address:</FormLabel> }
-            { !b.sendToRoot && <Input size='lg' fontSize='sm' 
+            { !b.sendToRoot && <Input size='lg' fontSize='12px' 
                 placeholder="0xDEADBEEF" _placeholder={{ color: 'gray.500' }}
                 value={b.destination}
                 onChange={(e) => {
@@ -389,7 +389,7 @@ const SetTrustee = ({trustee, setTrustee, step, changeStep}) => {
 
   return <VStack spacing='2em' pb='2em'> 
     <Text fontSize='xl'>Do you want to add a trustee? A trustee is a key holder that can distribute funds to beneficiaries.</Text>
-    <Box w='30em' bg={boxColor} p='1em' borderRadius='lg' boxShadow='dark-lg'> 
+    <Box bg={boxColor} p='1em' borderRadius='lg' boxShadow='lg' minWidth='23em'> 
       <FormControl>
         <FormLabel>Trustee Name:</FormLabel>
         <Input size='lg' fontSize='lg'
@@ -405,7 +405,7 @@ const SetTrustee = ({trustee, setTrustee, step, changeStep}) => {
         { trustee.alias.length > 0 && <>
         <FormControl id={'address-t-'} isInvalid={ !ethers.utils.isAddress(trustee.destination)}>
             { !trustee.sendToRoot && <FormLabel mt='1em'>Key Destination Address:</FormLabel> }
-            { !trustee.sendToRoot && <Input size='lg' fontSize='sm'
+            { !trustee.sendToRoot && <Input size='lg' fontSize='12px'
                 placeholder="0xDEADBEEF" _placeholder={{ color: 'gray.500' }}
                 value={trustee.destination}
                 onChange={(e) => {
