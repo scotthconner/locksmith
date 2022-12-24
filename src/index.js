@@ -7,7 +7,7 @@ import * as serviceWorker from './serviceWorker';
 import { QueryClient, QueryClientProvider } from "react-query";
 
 const container = document.getElementById('root');
-document.title = 'Locksmith Trusts';
+document.title = 'Locksmith Wallet';
 const root = ReactDOM.createRoot(container);
 
 const queryClient = new QueryClient();
