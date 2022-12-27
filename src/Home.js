@@ -27,36 +27,20 @@ import { useNavigate } from 'react-router-dom';
 //////////////////////////////////////
 const features = [{
     id: 0,
-    title: 'Full Root Access',
-    text: 'Configure your keys exactly as you see fit. Or burn your own root key to make the trust irrevocable.'
-  }, {
-    id: 1,
-    title: 'Granular Permissions',
-    text: 'Enable your key holders to do only what you allow.'
+    title: 'NFT Key Permissions',
+    text: 'Manage wallet permissions with a customizable NFT collection.'
   }, { 
     id: 2,
-    title: 'Integrated Asset Vaults',
-    text: 'Store and distribute Ethereum and ERC-20 tokens safely.'
+    title: 'Asset Vault Integration',
+    text: 'Store your crypto safely on-chain.'
   }, {
     id: 3,
-    title: 'Collateral Platform',
-    text: 'Bring interest bearing or exotic assets of your own into the managed trust ledger.'
-  }, {
-    id: 4,
-    title: 'Trustee Platform',
-    text: 'Configure scribes or write your own to manage complex distributions.',
-  }, {
+    title: 'Wallet Recovery and Inheritance',
+    text: 'Recover your wallet with a social plan you choose.'
+  }, { 
     id: 5,
-    title: 'Event Platform',
-    text: 'Use the integrated event bus to gate key permissions and chain complex interactions.' 
-  }, {
-    id: 6,
-    title: 'Crypto Notarization',
-    text: 'Only trusted collateral providers or scribes can deposit, withdrawal, or distribute funds on your behalf.'
-  }, {
-    id: 7,
-    title: 'Soulbound Key Security',
-    text: 'Prevent keys from being transferred, sold, or collateralized. Enable soulbound contract agents.'
+    title: 'Automation Platform',
+    text: 'Use events to schedule, gate, or enable wallet activity.' 
   }
 ];
 
@@ -72,7 +56,7 @@ function Home() {
           <Heading fontSize={'5xl'}>cksmith</Heading>
         </HStack>
         <Text color={'gray.600'} fontSize={'xl'}>
-          A Soulbound NFT Smart Wallet. 
+          Your Keys. Your Crypto. 
         </Text>
         <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Wallet Now</Button>
         <HStack>
