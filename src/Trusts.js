@@ -24,6 +24,7 @@ import {
   useColorModeValue
 } from '@chakra-ui/react';
 import { ConnectWalletPrompt } from './components/Locksmith.js';
+import { AiOutlineRobot } from 'react-icons/ai';
 import { IoIosAdd } from 'react-icons/io';
 import { BiCoinStack } from 'react-icons/bi';
 import { 
@@ -69,6 +70,7 @@ import {
 import {
   COLLATERAL_PROVIDER,
   SCRIBE,
+  DISPATCHER,
   useTrustedActors,
 } from './hooks/NotaryHooks.js';
 import {
@@ -216,8 +218,10 @@ export function Trust() {
   const trustedProviders = useTrustedActors(id, COLLATERAL_PROVIDER);
   const registeredEvents = useTrustEventRegistry(id);
   const trustedScribes = useTrustedActors(id, SCRIBE);
+  const trustedDispatchers = useTrustedActors(id, DISPATCHER, 'TrustEventLog'); 
   const providerDisclosure = useDisclosure();
   const scribeDisclosure = useDisclosure();
+  const dispatcherDisclosure = useDisclosure();
   const createKeyDisclosure = useDisclosure();
   const depositDisclosure = useDisclosure();
   const createEventDisclosure = useDisclosure();
@@ -233,12 +237,12 @@ export function Trust() {
   let trustKeyCount = trustInfo.isSuccess ? 
     <Tag mr='1em'><TagLabel>{trustInfo.data.trustKeyCount.toNumber()}</TagLabel></Tag> : 
     <Skeleton mr='1em' width='1em' height='1em'/>;
-  let providerCount = trustedProviders.isSuccess ?  
-    <Tag mr='1em'><TagLabel>{trustedProviders.data.length}</TagLabel></Tag> : 
-    <Skeleton mr='1em' width='1em' height='1em'/>;
-  let scribeCount = trustedScribes.isSuccess ?  
-    <Tag mr='1em'><TagLabel>{trustedScribes.data.length}</TagLabel></Tag> : 
-    <Skeleton mr='1em' width='1em' height='1em'/>;
+  let notaryCount = <Tag mr='1em'>
+    <TagLabel>{(trustedProviders.isSuccess ? trustedProviders.data.length : 0) +
+      (trustedScribes.isSuccess ? trustedScribes.data.length : 0) +
+      (trustedDispatchers.isSuccess ? trustedDispatchers.data.length : 0)}
+    </TagLabel>
+  </Tag>
   let eventCount = registeredEvents.isSuccess ?
     <Tag mr='1em'><TagLabel>{registeredEvents.data.length}</TagLabel></Tag> :
     <Skeleton mr='1em' width='1em' height='1em'/>;
@@ -252,14 +256,13 @@ export function Trust() {
         {trustInfo.data.trustKeyCount < 1 ? 'Invalid Trust' : trustInfo.data.name}
       </Heading>
     }
-    <Tabs isLazy isFitted mt='1.5em' defaultIndex={['assets','keys','events','policies','providers','scribes'].indexOf(tab)}>
+    <Tabs isLazy isFitted mt='1.5em' defaultIndex={['assets','keys','events','policies','notary','scribes'].indexOf(tab)}>
       <TabList>
         <Tab>{trustArnCount}Assets</Tab>
         <Tab>{trustKeyCount}Keys</Tab>
         <Tab>{eventCount}Events</Tab>
         <Tab>{trusteeCount}Trustees</Tab>
-        <Tab>{providerCount}Providers</Tab>
-        <Tab>{scribeCount}Scribes</Tab>
+        <Tab>{notaryCount}Notary</Tab>
       </TabList>
       <TabPanels>
         <TabPanel>
@@ -421,9 +424,7 @@ export function Trust() {
                   modalTitle='Add Collateral Provider'
                   roleName='Provider'
                   roleIcon={<RiSafeLine/>}>
-                  <Text>By trusting a <b>collateral provider</b>, you will enable that contract&nbsp;
-                    to <b>deposit</b> funds for the root key, and <b>withdrawal</b> funds on behalf of your trust's keyholders.
-                  </Text>
+                  <Text>By trusting a <b>collateral provider</b>, you will be able to deposit, distribute, and withdrawal funds using Locksmith keys.</Text>
                 </AddTrustedLedgerActorModal>}
               </HStack>
             <VStack spacing='1em' pb='2em' pt='2em'>
@@ -438,8 +439,6 @@ export function Trust() {
               ))}
             </VStack></>
           }
-        </TabPanel>
-        <TabPanel>
           {!(trustedScribes.isSuccess && trustInfo.isSuccess) ? <> 
             <Skeleton width='14em' height='1.1em' mt='1.5em'/> 
               <VStack mt='1.5em'>
@@ -466,13 +465,56 @@ export function Trust() {
                   modalTitle='Add Scribe'
                   roleName='Scribe'
                   roleIcon={<RiQuillPenLine/>}>
-                  <Text>By trusting a <b>scribe</b>, you enable that contract&nbsp;
-                    to <b>distrbute</b> funds from the root key to key holders of your trust.
+                  <Text>By trusting a <b>scribe</b>, you enable that address&nbsp;
+                    to <b>distribute</b> funds between keys in your wallet. 
                   </Text>
                 </AddTrustedLedgerActorModal>}
             </HStack>
             <VStack spacing='1em' pb='2em' pt='2em'>
               { trustedScribes.data.map((a) => (
+                <TrustedLedgerActors
+                  trustId={id}
+                  key={a}
+                  rootKeyId={trustInfo.data.rootKeyId}
+                  actor={a}
+                  role={SCRIBE}
+                  roleIcon={<RiQuillPenLine size='30px'/>}/>
+              ))}
+            </VStack></>
+          }
+          {!(trustedDispatchers.isSuccess && trustInfo.isSuccess) ? <>
+            <Skeleton width='14em' height='1.1em' mt='1.5em'/>
+              <VStack mt='1.5em'>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+              <Skeleton width='100%' height='4em'/>
+            </VStack></> : <>
+            <HStack mt='1.5em'>
+              <Text fontSize='lg'>
+                This wallet has <b>{trustedDispatchers.data.length}</b> trusted event&nbsp; 
+                {trustedDispatchers.data.length === 1 ? 'dispatcher' : 'dispatchers'}.
+              </Text>
+              <Spacer/>
+              {hasRoot && <Button
+                  colorScheme='blue'
+                  leftIcon={<IoIosAdd/>}
+                  onClick={dispatcherDisclosure.onOpen}>
+                    Add Dispatcher</Button>}
+                {hasRoot && <AddTrustedLedgerActorModal
+                  trustId={id} rootKeyId={trustInfo.data.rootKeyId}
+                  role={DISPATCHER} isOpen={dispatcherDisclosure.isOpen}
+                  onClose={dispatcherDisclosure.onClose}
+                  modalTitle='Add Dispatcher'
+                  roleName='Event Dispatcher'
+                  roleIcon={<AiOutlineRobot/>}>
+                  <Text>By trusting a <b>dispatcher</b>, you enable that address&nbsp;
+                    to <b>register</b> and <b>fire</b> events in your wallet.
+                  </Text>
+                </AddTrustedLedgerActorModal>}
+            </HStack>
+            <VStack spacing='1em' pb='2em' pt='2em'>
+              { trustedDispatchers.data.map((a) => (
                 <TrustedLedgerActors
                   trustId={id}
                   key={a}

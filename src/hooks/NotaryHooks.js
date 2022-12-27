@@ -13,6 +13,7 @@ import {ethers} from 'ethers';
 //////////////////////////////////////////////
 export const COLLATERAL_PROVIDER = 0;
 export const SCRIBE = 1;
+export const DISPATCHER = 2;
 
 /**
  * useTrustedActors
@@ -21,11 +22,11 @@ export const SCRIBE = 1;
  * ledger in this call.
  *   
  */
-export function useTrustedActors(trustId, role) {
+export function useTrustedActors(trustId, role, ledgerContractAlias = 'Ledger') {
   const provider = useProvider();
-  const ledgerAddress = Locksmith.getContractAddress('Ledger'); 
+  const ledgerAddress = Locksmith.getContractAddress(ledgerContractAlias); 
   const Notary = useContract(Locksmith.getContract('Notary', provider));
-  return useQuery('getTrustedActors for ' + trustId + " " + role, async function() {
+  return useQuery('getTrustedActors for ' + trustId + " " + role + " " + ledgerAddress, async function() {
     return await Notary.getTrustedActors(ledgerAddress, trustId, role);
   });
 }
