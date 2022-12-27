@@ -121,7 +121,7 @@ export function Trusts() {
         </WrapItem></>}
         { trusts.isSuccess && trusts.data.length < 1 &&
           <VStack spacing='1em' width='100%'>
-            <Text fontSize='30px'>You have no trusts.</Text>
+            <Text fontSize='30px'>You have no wallets.</Text>
             <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Wallet</Button>
           </VStack>
         }
@@ -520,8 +520,9 @@ export function Trust() {
                   key={a}
                   rootKeyId={trustInfo.data.rootKeyId}
                   actor={a}
-                  role={SCRIBE}
-                  roleIcon={<RiQuillPenLine size='30px'/>}/>
+                  role={DISPATCHER}
+                  ledgerAlias='TrustEventLog'
+                  roleIcon={<AiOutlineRobot size='30px'/>}/>
               ))}
             </VStack></>
           }

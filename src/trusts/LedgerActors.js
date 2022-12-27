@@ -46,10 +46,10 @@ import {
 //////////////////////////////////////
 // Function Component
 //////////////////////////////////////
-export function TrustedLedgerActors({trustId, rootKeyId, role, actor, roleIcon, ...rest}) {
+export function TrustedLedgerActors({trustId, rootKeyId, role, actor, ledgerAlias, roleIcon, ...rest}) {
   var account = useAccount();
   var userKeyBalance = useKeyBalance(rootKeyId, account.address);
-  var actorAlias = useTrustedActorAlias(trustId, role, actor);
+  var actorAlias = useTrustedActorAlias(trustId, role, actor, ledgerAlias || 'Ledger');
   var toast = useToast();
   var hasRoot = userKeyBalance.isSuccess && userKeyBalance.data > 0 ? true : false; 
   var boxColor = useColorModeValue('white', 'gray.800');
