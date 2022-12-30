@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { CheckIcon } from '@chakra-ui/icons';
 import { AiOutlineTwitter, AiOutlineGithub } from 'react-icons/ai';
-import { FaDiscord } from 'react-icons/fa';
+import { FaDiscord, FaPaintBrush } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,20 +27,28 @@ import { useNavigate } from 'react-router-dom';
 //////////////////////////////////////
 const features = [{
     id: 0,
-    title: 'NFT Key Permissions',
-    text: 'Manage wallet permissions with a customizable NFT collection.'
-  }, { 
+    title: 'NFT-based Permissions',
+    text: 'Manage wallet permissions with a fully customizable NFT collection.'
+  }, {
+    id: 1,
+    title: 'Virtual Wallet Identity',
+    text: 'Maintain a single on-chain address irrespective of private key.'
+  }, {
     id: 2,
-    title: 'Asset Vault Integration',
-    text: 'Store your crypto safely on-chain.'
+    title: 'Next Generation Security',
+    text: 'Block unsolicited token deposits. Prevent dustings.' 
   }, {
     id: 3,
+    title: 'Chain-wide Portfolio',
+    text: 'Store, track, and permission your crypto anywhere on-chain.'
+  },{
+    id: 4,
     title: 'Wallet Recovery and Inheritance',
-    text: 'Recover your wallet with a social plan you choose.'
-  }, { 
+    text: 'Recover your entire wallet, or divide in absence.'
+  }, {
     id: 5,
-    title: 'Automation Platform',
-    text: 'Use events to schedule, gate, or enable wallet activity.' 
+    title: 'Open Platform API',
+    text: 'Customize events, permissions, asset storage, or build on top.'
   }
 ];
 
@@ -55,11 +63,11 @@ function Home() {
           <RiLock2Fill size='44px'/>
           <Heading fontSize={'5xl'}>cksmith</Heading>
         </HStack>
-        <Text color={'gray.600'} fontSize={'xl'}>
+        <Text pb='1em' color={'gray.600'} fontSize={'xl'}>
           Your Keys. Your Crypto. 
         </Text>
-        <Button colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Wallet Now</Button>
-        <HStack>
+        <Button leftIcon={<FaPaintBrush/>} colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Wallet</Button>
+        <HStack pt='1em'>
           <Button variant='ghost' colorScheme='twitter' leftIcon={<AiOutlineTwitter/>}
             onClick={() => window.open('https://twitter.com/LocksmithWallet')}>Twitter</Button>
           <Button variant='ghost' colorScheme='purple' leftIcon={<FaDiscord/>}
@@ -67,6 +75,7 @@ function Home() {
           <Button variant='ghost' colorScheme='gray' leftIcon={<AiOutlineGithub/>}
             onClick={() => window.open('https://github.com/scotthconner?tab=repositories')}>Github</Button>
         </HStack>
+        <Heading pt='0.5em' fontSize='3xl'>The Wallet. Redefined.</Heading>
       </VStack>
 
       <Container maxW={'6xl'} mt={10} mb='4em'>

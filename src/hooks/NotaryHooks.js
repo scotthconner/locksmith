@@ -55,7 +55,7 @@ export function useTrustedActorAlias(trustId, role, address, ledgerContractAlias
 export function useSetTrustedLedgerRole(rootKeyId, trustId, role, address, trusted, alias, errorFunc, successFunc) {
   // the function interface is messy enough, so here is a blatant hack my guy
   // this is going to immediately break the minute we add another actor to the notary
-  const ledgerAddress = Locksmith.getContractAddress(role == 0 || role == 1 ? 'Ledger' : 'TrustEventLog');
+  const ledgerAddress = Locksmith.getContractAddress(role === 0 || role === 1 ? 'Ledger' : 'TrustEventLog');
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('Notary', 'setTrustedLedgerRole',
       [rootKeyId, role, ledgerAddress, address, trusted, ethers.utils.formatBytes32String(alias)],
