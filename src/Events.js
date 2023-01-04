@@ -100,6 +100,7 @@ const AlarmClockItem = ({trustId, eventHash, ...rest}) => {
   const eventDescription = useEventDescription(eventHash);
   const eventState = useEventState(eventHash);
   const alarmInfo = useAlarm(eventHash);
+  const trustInfo = useTrustInfo(trustId);
 
   return <Box p='1em' width='90%'
       borderRadius='lg' bg={boxColor} boxShadow='dark-lg'
@@ -115,13 +116,18 @@ const AlarmClockItem = ({trustId, eventHash, ...rest}) => {
         { !eventDescription.isSuccess && <Skeleton width='10em' height='1em'/> }
         { eventDescription.isSuccess && <Text fontWeight='bold'>{eventDescription.data}</Text> }
         { !alarmInfo.isSuccess && <Skeleton width='8em' height='1em'/> }
-        <Text color='gray' fontStyle='italic'>
-          { alarmInfo.isSuccess && (
-            alarmInfo.data.alarmTime*1000 <= (new Date()).getTime() ? 
-              'This alarm has expired!' : 
-              'This alarm expires in about ' + alarmClockExpirationAgo(1000*alarmInfo.data.alarmTime.toNumber()) 
-          ) }
-        </Text>
+        <HStack>
+          <Text>
+            { alarmInfo.isSuccess && (
+              alarmInfo.data.alarmTime*1000 <= (new Date()).getTime() ? 
+                'Expired in ' : 
+                '' + alarmClockExpirationAgo(1000*alarmInfo.data.alarmTime.toNumber()) + " left on "
+            ) }
+          </Text>
+          <BsShieldLock/>
+          { !trustInfo.isSuccess && <Skeleton width='5em' height='1em'/> }
+          { trustInfo.isSuccess && <Text><i>{trustInfo.data.name}</i></Text> }
+        </HStack>
       </VStack>
       <Spacer/>
       { alarmInfo.isSuccess && <AlarmClockSnoozeButton trustId={trustId} eventHash={eventHash}

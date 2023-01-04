@@ -15,7 +15,7 @@ import * as keyOracle from "../contracts/dispatchers/KeyOracle.sol/KeyOracle.jso
 import * as alarmClock from "../contracts/dispatchers/AlarmClock.sol/AlarmClock.json";
 import * as trustee from "../contracts/scribes/Trustee.sol/Trustee.json";
 import * as creator from "../contracts/agents/TrustCreator.sol/TrustCreator.json";
-
+import * as postOffice from '../contracts/PostOffice.sol/PostOffice.json';
 /**
  * Locksmith
  *
@@ -45,7 +45,8 @@ const Locksmith = (function() {
     KeyOracle: keyOracle, 
     AlarmClock: alarmClock, 
     Trustee: trustee,
-    TrustCreator: creator
+    TrustCreator: creator,
+    PostOffice: postOffice,
   };
 
   return {

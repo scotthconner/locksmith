@@ -38,6 +38,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import { DisplayAddress } from '../components/Address.js';
 import { useState, useRef } from 'react';
 import {
   KeyInfoIcon
@@ -49,6 +50,7 @@ import {
 } from 'react-icons/ai';
 import { HiOutlineKey } from 'react-icons/hi';
 import { BiGhost } from 'react-icons/bi';
+import { ImQrcode } from 'react-icons/im';
 
 //////////////////////////////////////
 // Wallet, Network, Contracts
@@ -64,6 +66,9 @@ import {
   useBurnKey,
   useSoulbindKey,
 } from '../hooks/LocksmithHooks.js';
+import {
+  useKeyInboxAddress
+} from '../hooks/PostOfficeHooks.js';
 import {ethers} from 'ethers';
 import { useAccount } from 'wagmi';
 import Locksmith from '../services/Locksmith.js';
@@ -77,6 +82,7 @@ export function TrustKey({keyId, rootKeyId, ...rest}) {
   var keyInventory = useKeySupply(keyId);
   var userKeyBalance = useKeyBalance(rootKeyId, account.address);
   var keyHolders = useKeyHolders(keyId);
+  const keyInboxAddress = useKeyInboxAddress(keyId);
   const { isOpen, getButtonProps } = useDisclosure();
   const copyKeyDisclosure = useDisclosure();
   const buttonProps = getButtonProps();
@@ -135,7 +141,8 @@ export function TrustKey({keyId, rootKeyId, ...rest}) {
         {!keyHolders.isSuccess ? '' :
         <List width='100%' mt={isOpen ? '1em' : '0'} spacing='1em'> 
             <Collapse in={isOpen} width='100%'>
-              <KeyHolderList rootKeyId={rootKeyId} hasRoot={hasRoot} keyId={keyId} keyHolders={keyHolders.data}/>
+              <KeyHolderList inbox={keyInboxAddress}
+                rootKeyId={rootKeyId} hasRoot={hasRoot} keyId={keyId} keyHolders={keyHolders.data}/>
             </Collapse>
           </List>} 
         </HStack>
@@ -143,15 +150,15 @@ export function TrustKey({keyId, rootKeyId, ...rest}) {
   )
 }
 
-const KeyHolderList = ({rootKeyId, keyId, keyHolders, hasRoot, ...rest}) => { 
+const KeyHolderList = ({rootKeyId, keyId, keyHolders, hasRoot, inbox, ...rest}) => { 
   return keyHolders.map((address, x) => (
-    <AddressKeyBalance hasRoot={hasRoot} 
+    <AddressKeyBalance hasRoot={hasRoot} inbox={inbox} 
       key={'key: ' + keyId + " address " + address} 
         rootKeyId={rootKeyId} rowNum={x} keyId={keyId} address={address}/>
   ));
 }
 
-const AddressKeyBalance = ({rootKeyId, keyId, address, rowNum, hasRoot, ...rest}) => { 
+const AddressKeyBalance = ({rootKeyId, keyId, address, rowNum, hasRoot, inbox, ...rest}) => { 
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure();
   const account = useAccount();
   const keyBalance = useKeyBalance(keyId, address);
@@ -164,8 +171,10 @@ const AddressKeyBalance = ({rootKeyId, keyId, address, rowNum, hasRoot, ...rest}
 
   return (<ListItem padding='1em' bg={rowNum % 2 === 0 ? stripeColor : ''}> 
       <HStack>
-        <AiOutlineUser/>
-        <Text noOfLines={1}>{address === account.address ? <i>(you)</i> : address}</Text>
+        { address === (inbox.isSuccess ? inbox.data : '') ? <ImQrcode/> : <AiOutlineUser/> }
+        <Tooltip label={address}>
+          <Text noOfLines={1}>{address === account.address ? <i>(you)</i> : <DisplayAddress address={address}/>}</Text>
+        </Tooltip>
         <Spacer/>
         <HStack>
           <Button size='sm' {... rootProps} {... modalProps} 

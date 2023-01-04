@@ -64,7 +64,7 @@ function Home() {
           <Heading fontSize={'5xl'}>cksmith</Heading>
         </HStack>
         <Text pb='1em' color={'gray.600'} fontSize={'xl'}>
-          Your Keys. Your Crypto. 
+          Your Keys. Your Locks. Your Wallet. 
         </Text>
         <Button leftIcon={<FaPaintBrush/>} colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Wallet</Button>
         <HStack pt='1em'>
@@ -75,7 +75,8 @@ function Home() {
           <Button variant='ghost' colorScheme='gray' leftIcon={<AiOutlineGithub/>}
             onClick={() => window.open('https://github.com/scotthconner?tab=repositories')}>Github</Button>
         </HStack>
-        <Heading pt='0.5em' fontSize='3xl'>The Wallet. Redefined.</Heading>
+        <Heading pt='0.5em' fontSize='3xl'>The Next Generation Wallet is Virtual.</Heading>
+        <Text pt='0.5em' fontSize='lg'>Keep your existing wallet. Extend it with Locksmith.</Text>
       </VStack>
 
       <Container maxW={'6xl'} mt={10} mb='4em'>
