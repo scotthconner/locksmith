@@ -48,6 +48,7 @@ import {
   AiOutlineNumber,
   AiOutlineFire,
 } from 'react-icons/ai';
+import { FiCopy } from 'react-icons/fi';
 import { HiOutlineKey } from 'react-icons/hi';
 import { BiGhost } from 'react-icons/bi';
 import { ImQrcode } from 'react-icons/im';
@@ -160,6 +161,7 @@ const KeyHolderList = ({rootKeyId, keyId, keyHolders, hasRoot, inbox, ...rest}) 
 
 const AddressKeyBalance = ({rootKeyId, keyId, address, rowNum, hasRoot, inbox, ...rest}) => { 
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure();
+  const toast = useToast();
   const account = useAccount();
   const keyBalance = useKeyBalance(keyId, address);
   const soulboundCount = useSoulboundKeyAmounts(keyId, address);
@@ -175,6 +177,17 @@ const AddressKeyBalance = ({rootKeyId, keyId, address, rowNum, hasRoot, inbox, .
         <Tooltip label={address}>
           <Text noOfLines={1}>{address === account.address ? <i>(you)</i> : <DisplayAddress address={address}/>}</Text>
         </Tooltip>
+        <Button variant='ghost' size='sm' borderRadius='full' onClick={() => {
+          navigator.clipboard.writeText(address);
+          toast({
+            title: 'Copied to clipboard',
+            description: address, 
+            status: 'info',
+            duration: 2000,
+            isClosable: false 
+          });
+
+        }}><FiCopy/></Button>
         <Spacer/>
         <HStack>
           <Button size='sm' {... rootProps} {... modalProps} 

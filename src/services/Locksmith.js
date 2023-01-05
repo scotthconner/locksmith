@@ -16,6 +16,8 @@ import * as alarmClock from "../contracts/dispatchers/AlarmClock.sol/AlarmClock.
 import * as trustee from "../contracts/scribes/Trustee.sol/Trustee.json";
 import * as creator from "../contracts/agents/TrustCreator.sol/TrustCreator.json";
 import * as postOffice from '../contracts/PostOffice.sol/PostOffice.json';
+import * as inbox from '../contracts/agents/VirtualKeyAddress.sol/VirtualKeyAddress.json';
+
 /**
  * Locksmith
  *
@@ -46,6 +48,7 @@ const Locksmith = (function() {
     AlarmClock: alarmClock, 
     Trustee: trustee,
     TrustCreator: creator,
+    VirtualKeyAddress: inbox,
     PostOffice: postOffice,
   };
 
@@ -83,9 +86,9 @@ const Locksmith = (function() {
     // Given a contract alias, produce the ethers
     // map necessary for a useContract hook.
     ////////////////////////////////////////////
-    getContract: function(contract, provider) {
+    getContract: function(contract, provider, address = null) {
       return {
-        addressOrName: Locksmith.getContractAddress(contract) || Locksmith.getAssetAddress(contract), 
+        addressOrName: Locksmith.getContractAddress(contract) || Locksmith.getAssetAddress(contract) || address, 
         contractInterface: interfaces[contract].abi,
         signerOrProvider: provider
       }

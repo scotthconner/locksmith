@@ -33,6 +33,7 @@ import Events from './Events.js';
 import { Security } from './Security.js'
 import { Footer } from './Footer.js';
 import { TrustWizard } from './TrustWizard.js';
+import { Inbox } from './Inbox.js';
 
 // We are using alchemy for now
 // Choose which chains you'd like to show
@@ -71,6 +72,7 @@ function App() {
               <Route path='/trustees' element={<Trustees/>} />
               <Route path='/events' element={<Events/>} />
               <Route path='/wizard' element={<TrustWizard/>} />
+              <Route path='/key/:keyId/inbox' element={<Inbox/>} />
               <Route path='/security' element={<Security/>} />
             </Routes>
             <Footer/>

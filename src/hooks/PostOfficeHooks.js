@@ -1,12 +1,9 @@
-import useDebounce from './UseDebounce.js';
 import Locksmith from '../services/Locksmith.js';
 import {useQuery} from 'react-query';
 import {
   useProvider,
   useContract
 } from 'wagmi';
-
-import {ethers} from 'ethers';
 
 /**
  * useKeyInboxAddress
