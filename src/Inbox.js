@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Collapse,
   HStack,
   List,
   ListItem,
@@ -16,6 +17,7 @@ import {
   TagRightIcon,
   Text,
   Skeleton,
+  Spacer,
   Spinner,
   VStack,
   useColorModeValue,
@@ -34,14 +36,19 @@ import {
 import { BiGhost } from 'react-icons/bi';
 import { ImQrcode } from 'react-icons/im';
 import { BsShieldLock } from 'react-icons/bs';
+import { RiSafeLine } from 'react-icons/ri';
 import { useAccount } from 'wagmi';
 import { useParams } from 'react-router-dom';
+import { AssetResource } from './services/AssetResource.js';
 
 // Raw Hooks
+import { ethers } from 'ethers';
 import { useKeyInboxAddress } from './hooks/PostOfficeHooks.js';
 import { 
   KEY_CONTEXT_ID,
-  useContextBalanceSheet
+  useContextBalanceSheet,
+  useContextProviderRegistry,
+  useContextArnBalances,
 } from './hooks/LedgerHooks.js';
 import { 
   useKeyBalance,
@@ -53,6 +60,14 @@ import {
 import {
   useInboxTransactionCount,
 } from './hooks/VirtualKeyAddressHooks.js';
+import {
+  useTrustedActorAlias,
+  COLLATERAL_PROVIDER,
+} from './hooks/NotaryHooks.js';
+import {
+  useCoinCapPrice,
+  USDFormatter,
+} from './hooks/PriceHooks.js';
 
 // Components
 import { ContextBalanceUSD } from './components/Trust.js';
@@ -72,7 +87,7 @@ export function Inbox({...rest}) {
   // get the profile of the key itself
   const keyInfo = useInspectKey(keyId);
 
-  return <VStack>{ 
+  return <VStack mb='1em'>{ 
     !inboxAddress.isSuccess || !userKeyBalance.isSuccess || !keyInfo.isSuccess ? 
       <VStack p='5em'><Spinner thickness='4px' speed='0.65s' emptyColor='gray.200' color='blue.500' size='xl'/></VStack> : 
     ( userKeyBalance.data.gt(0) ? <VirtualKeyInbox keyId={keyId} keyInfo={keyInfo.data} address={inboxAddress.data}/> :
@@ -191,7 +206,8 @@ const InboxAssetBalance = ({keyId, keyInfo, address, ...rest}) => {
 
 const InboxAssetList = ({keyId, keyInfo, address, ...rest}) => {
   const boxColor = useColorModeValue('white', 'gray.800');
-  
+  const providerDisclosure = useDisclosure();
+
   // grab the asset list for the key
   const keyBalanceSheet = useContextBalanceSheet(KEY_CONTEXT_ID, keyId);
   const keyArns = keyBalanceSheet.isSuccess ? keyBalanceSheet.data[0] : [];
@@ -205,13 +221,73 @@ const InboxAssetList = ({keyId, keyInfo, address, ...rest}) => {
     </List> }
     { keyBalanceSheet.isSuccess && <List>
       { keyArns.map((arn, x) => <ListItem key={'ali-'+x}>
-          <InboxAssetArn keyId={keyId} keyInfo={keyInfo} address={address}
-            arn={arn} balance={keyArnBalances[x]}/>
+          <VStack spacing='1em' width='100%' align='stretch'>
+            <InboxAssetArn keyId={keyId} keyInfo={keyInfo} address={address}
+              arn={arn} balance={keyArnBalances[x]} toggle={providerDisclosure.onToggle}/>
+            <Collapse in={providerDisclosure.isOpen}>
+              <InboxAssetArnProviderList keyId={keyId} keyInfo={keyInfo} arn={arn}/>
+            </Collapse>
+          </VStack>
         </ListItem> )}
       </List> }
   </Box>;
 }
 
-const InboxAssetArn = ({keyId, keyInfo, address, arn, balance, ...rest}) => {
-  return arn;
+const InboxAssetArn = ({keyId, keyInfo, address, arn, balance, toggle, ...rest}) => {
+  const asset = AssetResource.getMetadata(arn);
+  const assetPrice = useCoinCapPrice(asset.coinCapId);
+  const formatted = ethers.utils.formatUnits(balance, asset.decimals);
+  const assetValue = assetPrice.isSuccess ? USDFormatter.format(assetPrice.data * formatted) : null;
+
+  return <HStack onClick={toggle}>
+    {asset.icon()}
+    <Text>{asset.name}</Text>
+    <Spacer/>
+    <VStack align='stretch' spacing='0em'>
+      <HStack><Spacer/><Text>{assetValue}</Text></HStack>
+      <HStack><Spacer/><Text fontSize='sm' color='gray'>{formatted} {asset.symbol}</Text></HStack>
+    </VStack>
+  </HStack>;
+}
+
+const InboxAssetArnProviderList = ({keyId, keyInfo, arn, ...rest}) => {
+  const providers = useContextProviderRegistry(KEY_CONTEXT_ID, keyId, arn);
+  const stripeColor = useColorModeValue('gray.100', 'gray.700');
+
+  return <List>
+    {!providers.isSuccess && [...Array(2)].map((y,x) =>
+      <ListItem key={'lie-'+arn+x} padding='1em' width='100%' bg={x % 2 === 0 ? stripeColor : ''}>
+        <HStack spacing='1em'>
+          <Skeleton width='10em' height='1em'/>
+          <Spacer/>
+          <Skeleton width='3em' height='1em'/>
+        </HStack>
+      </ListItem>)}
+    {providers.isSuccess &&
+      providers.data.map((provider, x) => (
+        <ListItem key={'li-'+arn+provider} p='0.5em' width='100%'
+          bg={x % 2 === 0 ? stripeColor : ''}>
+          <KeyArnProvider keyId={keyId} keyInfo={keyInfo} arn={arn} provider={provider}/>
+        </ListItem>
+      ))
+    }</List>
+}
+
+export function KeyArnProvider({keyId, keyInfo, arn, provider, ...rest}) {
+  const providerAlias = useTrustedActorAlias(keyInfo.trustId, COLLATERAL_PROVIDER, provider);
+  const providerBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, [arn], provider);
+  const asset = AssetResource.getMetadata(arn);
+
+  return (<>
+    <HStack align='stretch' fontSize='sm'>
+      {!providerAlias.isSuccess && <Skeleton width='8em' height='1em'/>}
+      {providerAlias.isSuccess && <>
+        <RiSafeLine size={20}/>
+        <Text>{providerAlias.data}</Text></>}
+      <Spacer/>
+      {!providerBalance.isSuccess && <Skeleton width='4em' height='1em'/>}
+      {providerBalance.isSuccess &&
+        <Text>{ethers.utils.formatUnits(providerBalance.data[0], asset.decimals)} {asset.symbol}</Text>}
+    </HStack>
+  </>)
 }
