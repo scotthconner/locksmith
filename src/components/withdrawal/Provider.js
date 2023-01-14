@@ -39,7 +39,8 @@ export function CollateralProviderWithdrawalAdapter({provider, keyId, arn, allow
 const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => {
   const asset = AssetResource.getMetadata(arn);
   const [withdrawalAmount, setWithdrawalAmount] = useState(0);
-  const cleanWithdrawal = allowance.div(BigNumber.from(100)).mul(withdrawalAmount);
+  const maxWithdrawal = allowance.gt(balance) ? balance : allowance;
+  const cleanWithdrawal = maxWithdrawal.div(BigNumber.from(100)).mul(withdrawalAmount);
 
   const toast = useToast();
   const withdrawalConfig = useEtherWithdrawal(keyId, cleanWithdrawal,
@@ -86,7 +87,7 @@ const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
       </Slider>
     </Box>
     <Text fontSize='lg' fontWeight='bold'>
-      {parseFloat(ethers.utils.formatEther(cleanWithdrawal)).toFixed(2)}&nbsp;/&nbsp;{parseFloat(ethers.utils.formatEther(allowance)).toFixed(2)}
+      {parseFloat(ethers.utils.formatEther(cleanWithdrawal)).toFixed(2)}&nbsp;/&nbsp;{parseFloat(ethers.utils.formatEther(maxWithdrawal)).toFixed(2)}
     </Text>
     <Spacer/>
     <Button {...withdrawalButtonProps} 
@@ -98,7 +99,8 @@ const VaultWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
 const TokenWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => {
   const asset = AssetResource.getMetadata(arn);
   const [withdrawalAmount, setWithdrawalAmount] = useState(0);
-  const cleanWithdrawal = allowance.div(BigNumber.from(100)).mul(withdrawalAmount);
+  const maxWithdrawal = allowance.gt(balance) ? balance : allowance;
+  const cleanWithdrawal = maxWithdrawal.div(BigNumber.from(100)).mul(withdrawalAmount);
 
   const toast = useToast();
   const withdrawalConfig = useTokenWithdrawal(keyId, arn, cleanWithdrawal,
@@ -145,7 +147,7 @@ const TokenWithdrawal = ({keyId, arn, allowance, balance, onClose, ...rest}) => 
       </Slider>
     </Box>
     <Text fontSize='lg' fontWeight='bold'>
-      {parseFloat(ethers.utils.formatUnits(cleanWithdrawal, asset.decimals)).toFixed(2)}&nbsp;/&nbsp;{parseFloat(ethers.utils.formatUnits(allowance, asset.decimals)).toFixed(2)}
+      {parseFloat(ethers.utils.formatUnits(cleanWithdrawal, asset.decimals)).toFixed(2)}&nbsp;/&nbsp;{parseFloat(ethers.utils.formatUnits(maxWithdrawal, asset.decimals)).toFixed(2)}
     </Text>
     <Spacer/>
     <Button {...withdrawalButtonProps}

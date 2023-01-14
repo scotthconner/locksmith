@@ -190,7 +190,7 @@ export function useKeyInfo(keyId, address = null) {
       isRoot: response[3],
       trust: {
         id: response[2], 
-        name: ethers.utils.parseBytes32String(trust ? trust.name || '' : ''),
+        name: ethers.utils.parseBytes32String(trust ? trust[1] || '' : ''),
         rootKeyId: trust.rootKeyId,
         keys: response[4]
       }

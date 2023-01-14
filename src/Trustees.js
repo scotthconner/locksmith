@@ -372,8 +372,8 @@ export function BeneficiaryDistributionSlider({keyId, symbol, maxBalance, balanc
           <Text fontSize='sm' color='gray'><i>id: {keyId.toString()}</i></Text>
         </HStack> }
       <Slider mt='0.5em' width='100%' defaultValue={0} min={0}
-        max={maxBalance} step={ethers.utils.parseUnits("1", asset.decimals) / 100}
-        onChangeEnd={(e) => { setBalance(keyId, BigNumber.from(e.toString()));}}>
+        max={100} step={1}
+        onChangeEnd={(e) => { setBalance(keyId, maxBalance.div(BigNumber.from(100)).mul(BigNumber.from(e)));}}>
         <SliderTrack bg='blue.200'>
           <Box position='relative' right={10} />
           <SliderFilledTrack bg='blue.600'/>

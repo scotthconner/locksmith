@@ -196,7 +196,7 @@ const KeyWithdrawalSlot = ({arn, keyId, provider, balance, ...rest}) => {
   const ethAmount = ethers.utils.formatUnits(balance, asset.decimals);
   const withdrawalDisclosure = useDisclosure();
 
-  return <WrapItem key={'key-withdrawal-slot' + arn + keyId + provider}
+  return balance.gt(0) && <WrapItem key={'key-withdrawal-slot' + arn + keyId + provider}
     _hover= {{
       transform: 'scale(1.1)',
     }}
