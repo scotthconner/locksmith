@@ -42,7 +42,7 @@ export function useContextProviderRegistry(context, context_id, arn = ethers.con
 }
 
 /**
- * useContextArnBalance
+ * useContextArnBalances
  *
  * Calls the Ledger, and for a given ARN gives you the context
  * level balance, or per-provider within the context if provided.

@@ -2,7 +2,11 @@ import {
   Box,
   Button,
   Collapse,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
   HStack,
+  Input,
   List,
   ListItem,
   Modal,
@@ -16,6 +20,7 @@ import {
   TagLeftIcon,
   TagRightIcon,
   Text,
+  Select,
   Skeleton,
   Spacer,
   Spinner,
@@ -24,6 +29,9 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import {
+  useState
+} from 'react';
 import { QRCode } from 'react-qrcode-logo';
 import { 
   AiOutlineWarning,
@@ -42,7 +50,7 @@ import { useParams } from 'react-router-dom';
 import { AssetResource } from './services/AssetResource.js';
 
 // Raw Hooks
-import { ethers } from 'ethers';
+import { ethers, BigNumber } from 'ethers';
 import { useKeyInboxAddress } from './hooks/PostOfficeHooks.js';
 import { 
   KEY_CONTEXT_ID,
@@ -192,62 +200,54 @@ const TrustLabel = ({trustId, ...rest}) => {
 
 const InboxAssetBalance = ({keyId, keyInfo, address, ...rest}) => {
   const boxColor = useColorModeValue('white', 'gray.800');
+  const sendDisclosure = useDisclosure();
+
   return <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'>
     <VStack spacing='0.5em'> 
       <ContextBalanceUSD contextId={KEY_CONTEXT_ID} identifier={keyId} textProps={{
         fontSize: '4xl'
       }}/>
-      <Button leftIcon={<FiSend/>} variant='solid' size='lg' borderRadius='full'>
+      <Button leftIcon={<FiSend/>} variant='solid' size='lg' borderRadius='full'
+        onClick={sendDisclosure.onOpen}>
         Send
       </Button>
+      <SendAssetDialog keyId={keyId} keyInfo={keyInfo} address={address} disclosure={sendDisclosure}/>
     </VStack>
   </Box>
 }
 
 const InboxAssetList = ({keyId, keyInfo, address, ...rest}) => {
-  const boxColor = useColorModeValue('white', 'gray.800');
-  const providerDisclosure = useDisclosure();
-
   // grab the asset list for the key
   const keyBalanceSheet = useContextBalanceSheet(KEY_CONTEXT_ID, keyId);
   const keyArns = keyBalanceSheet.isSuccess ? keyBalanceSheet.data[0] : [];
   const keyArnBalances = keyBalanceSheet.isSuccess ? keyBalanceSheet.data[1] : [];
 
-  return <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'>
-    { !keyBalanceSheet.isSuccess && <List>
-      <ListItem key='0'><Skeleton width='100%' height='4em'/></ListItem>
-      <ListItem key='1'><Skeleton width='100%' height='4em'/></ListItem>
-      <ListItem key='2'><Skeleton width='100%' height='4em'/></ListItem>
-    </List> }
-    { keyBalanceSheet.isSuccess && <List>
-      { keyArns.map((arn, x) => <ListItem key={'ali-'+x}>
-          <VStack spacing='1em' width='100%' align='stretch'>
-            <InboxAssetArn keyId={keyId} keyInfo={keyInfo} address={address}
-              arn={arn} balance={keyArnBalances[x]} toggle={providerDisclosure.onToggle}/>
-            <Collapse in={providerDisclosure.isOpen}>
-              <InboxAssetArnProviderList keyId={keyId} keyInfo={keyInfo} arn={arn}/>
-            </Collapse>
-          </VStack>
-        </ListItem> )}
-      </List> }
-  </Box>;
+  return !keyBalanceSheet.isSuccess ? '' : keyArns.map((arn, x) => 
+      <InboxAssetArn keyId={keyId} keyInfo={keyInfo} address={address} key={'iar'+arn}
+        arn={arn} balance={keyArnBalances[x]}/>)
 }
 
-const InboxAssetArn = ({keyId, keyInfo, address, arn, balance, toggle, ...rest}) => {
+const InboxAssetArn = ({keyId, keyInfo, address, arn, balance, ...rest}) => {
+  const boxColor = useColorModeValue('white', 'gray.800');
   const asset = AssetResource.getMetadata(arn);
   const assetPrice = useCoinCapPrice(asset.coinCapId);
   const formatted = ethers.utils.formatUnits(balance, asset.decimals);
   const assetValue = assetPrice.isSuccess ? USDFormatter.format(assetPrice.data * formatted) : null;
+  const sendDisclosure = useDisclosure();
 
-  return <HStack onClick={toggle}>
-    {asset.icon()}
-    <Text>{asset.name}</Text>
-    <Spacer/>
-    <VStack align='stretch' spacing='0em'>
-      <HStack><Spacer/><Text>{assetValue}</Text></HStack>
-      <HStack><Spacer/><Text fontSize='sm' color='gray'>{formatted} {asset.symbol}</Text></HStack>
-    </VStack>
-  </HStack>;
+  return <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'> 
+    <HStack onClick={sendDisclosure.onToggle} cursor='pointer'>
+      {asset.icon()}
+      <Text>{asset.name}</Text>
+      <Spacer/>
+      <VStack align='stretch' spacing='0em'>
+        <HStack><Spacer/><Text>{assetValue}</Text></HStack>
+        <HStack><Spacer/><Text fontSize='sm' color='gray'>{formatted} {asset.symbol}</Text></HStack>
+      </VStack>
+    </HStack>
+    <SendAssetDialog keyId={keyId} keyInfo={keyInfo} address={address} 
+      arn={arn} disclosure={sendDisclosure}/>
+  </Box>
 }
 
 const InboxAssetArnProviderList = ({keyId, keyInfo, arn, ...rest}) => {
@@ -278,8 +278,7 @@ export function KeyArnProvider({keyId, keyInfo, arn, provider, ...rest}) {
   const providerBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, [arn], provider);
   const asset = AssetResource.getMetadata(arn);
 
-  return (<>
-    <HStack align='stretch' fontSize='sm'>
+  return (<HStack align='stretch' fontSize='sm'>
       {!providerAlias.isSuccess && <Skeleton width='8em' height='1em'/>}
       {providerAlias.isSuccess && <>
         <RiSafeLine size={20}/>
@@ -288,6 +287,124 @@ export function KeyArnProvider({keyId, keyInfo, arn, provider, ...rest}) {
       {!providerBalance.isSuccess && <Skeleton width='4em' height='1em'/>}
       {providerBalance.isSuccess &&
         <Text>{ethers.utils.formatUnits(providerBalance.data[0], asset.decimals)} {asset.symbol}</Text>}
-    </HStack>
-  </>)
+    </HStack>)
+}
+
+const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) => {
+  // form inputs
+  const [selectedArn, setSelectedArn] = useState(arn);
+  const [selectedProvider, setSelectedProvider] = useState(null); 
+  const [selectedAmount, setSelectedAmount] = useState('0'); // this will be in "units" by decimal, not wei.
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  
+  // conditional state
+  const selectedProviderBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, 
+    arn ? [arn] : null, selectedProvider || ethers.constants.AddressZero);
+
+  // get the arn information
+  const asset = AssetResource.getMetadata(selectedArn);
+  const assetPrice = useCoinCapPrice(asset.coinCapId); 
+  console.log("before send in dollars: " + selectedAmount);
+  const sendInDollars = !assetPrice.isSuccess ? 0 : USDFormatter.format(assetPrice.data * selectedAmount); 
+ 
+  console.log("after send in dollars: " + selectedAmount);
+  const rawAmount = ethers.utils.parseUnits(selectedAmount, asset.decimals);
+  console.log("after raw : " + selectedAmount);
+
+  // grab the asset list for the key
+  const keyBalanceSheet = useContextBalanceSheet(KEY_CONTEXT_ID, keyId);
+  const keyArns = keyBalanceSheet.isSuccess ? keyBalanceSheet.data[0] : [];
+  const keyArnBalances = keyBalanceSheet.isSuccess ? keyBalanceSheet.data[1] : [];
+  
+  // grab the arn providers for a given key assuming the arn is set.
+  // NOTE: if this comes from the 'send' button and arn is null, it will default to
+  //       all providers. This is generally an OK thing since it won't be displayed to
+  //       the user until an arn is selected, its an additional RPC call that is un-necessary
+  //       and we will want to fix as part of RPC reduction on the frontend.
+  const keyArnProviders = useContextProviderRegistry(KEY_CONTEXT_ID, keyId, selectedArn);
+
+  console.log("before error conditions: " + selectedAmount);
+  // error conditions
+  const addressError = !ethers.utils.isAddress(selectedAddress);
+  const amountError = !selectedProviderBalance.isSuccess || selectedProviderBalance.data.length < 1 ? true :
+    rawAmount.gt(selectedProviderBalance.data[0]);
+  console.log("after error conditions: " + selectedAmount);
+
+  console.log(selectedProviderBalance.isSuccess);
+  console.log(selectedProviderBalance.data);
+
+  if (selectedProviderBalance.isSuccess && selectedProviderBalance.data.length > 0) {
+    console.log('sanity');
+    console.log(selectedProviderBalance.data[0].toString());
+    console.log("selected Amount:" + selectedAmount);
+    console.log(selectedAmount);
+    console.log(rawAmount.toString());
+    console.log(rawAmount.gt(selectedProviderBalance.data[0]));
+    console.log("end sanity");
+  }
+
+  return <Modal isOpen={disclosure.isOpen} onClose={disclosure.onClose} isCentered size='xl' width='100%'>
+    <ModalOverlay backdropFilter='blur(10px)'/>
+    <ModalContent>
+      <ModalHeader>Send Funds</ModalHeader>
+      <ModalCloseButton />
+      <ModalBody>
+        <VStack mb='3em' spacing='3em'>
+          <FormControl key='send_asset_form'>
+            <FormLabel>What do you want to send?</FormLabel>
+            <Select onChange={(e) => {setSelectedArn(e.target.value);}}>
+              { keyArns.map((a) => 
+              <option key={'send-option-'+a} value={a} {... a === arn ? {selected: true} : {}}>
+                {AssetResource.getMetadata(a).name}
+              </option>
+              ) }
+            </Select>
+          </FormControl>
+          { selectedArn && 
+            <FormControl key='send_asset_provider_form'> 
+              <FormLabel>Which provider do you want to send from?</FormLabel>
+              <Select onChange={(e) => {setSelectedProvider(e.target.value);}}>
+                { keyArnProviders.isSuccess && keyArnProviders.data.map(
+                  (p) => <ProviderOption key={'provider-' + p} keyId={keyId} keyInfo={keyInfo} provider={p} arn={selectedArn}/>
+                ) }
+              </Select>
+            </FormControl> }
+          { selectedArn &&
+            <FormControl key='send_amount_form' isInvalid={amountError}>
+              <FormLabel>Send how much {asset.symbol}?</FormLabel>
+              <HStack>
+                <Input type='number' placeholder='0.0' size='lg' width='50%' onChange={(e) => {
+                  setSelectedAmount(e.target.value.length === 0 ? '0' : e.target.value);
+                }}/>
+                <Text align='center' width='50%'>{sendInDollars}</Text>
+              </HStack>
+              <FormErrorMessage>You don't have that much.</FormErrorMessage>
+            </FormControl> }
+          { selectedArn && selectedAmount > 0 && !amountError &&
+            <FormControl key='send_destination_form' isInvalid={addressError}>
+              <FormLabel>Send where?</FormLabel>
+              <Input placeholder='0x000000000000000000000000' size='lg' onChange={(e) => {
+                setSelectedAddress(e.target.value);
+              }}/>
+              <FormErrorMessage>Address looks kinda invalid?</FormErrorMessage>
+            </FormControl> }
+          <HStack width='100%'>
+            <Spacer/>
+            <Button leftIcon={<FiSend/>} colorScheme='yellow'>Send</Button>
+          </HStack>
+        </VStack>
+      </ModalBody>
+    </ModalContent>
+  </Modal>
+}
+
+const ProviderOption = ({keyId, keyInfo, provider, arn, ...rest}) => {
+  const providerAlias = useTrustedActorAlias(keyInfo.trustId, COLLATERAL_PROVIDER, provider);
+  const providerBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, [arn], provider);
+  const asset = AssetResource.getMetadata(arn);
+
+  return providerAlias.isSuccess && providerBalance.isSuccess &&
+    <option value={provider} {...rest}>
+      {providerAlias.data} ({ethers.utils.formatUnits(providerBalance.data[0], asset.decimals)} {asset.symbol})
+    </option>
 }

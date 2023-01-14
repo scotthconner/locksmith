@@ -170,7 +170,7 @@ export function useKeyInfo(keyId, address = null) {
     // get the trust slug if the key is valid
     if (response[0]) {
       // grab the trust information
-      trust = await locksmith.trustRegistry(response[2]);
+      trust = await locksmith.getTrustInfo(response[2]);
 
       // get the user's inventory
       if(address) {
@@ -419,7 +419,7 @@ export function useTrustInfo(trustId) {
     }
 
     // grab the trust information
-    let trust = await locksmith.trustRegistry(trustId);
+    let trust = await locksmith.getTrustInfo(trustId);
 
     return {
       trustId: trust[0],
