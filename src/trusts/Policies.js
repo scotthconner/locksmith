@@ -29,10 +29,11 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useState } from 'react';
+import { BigNumber } from 'ethers';
 import Locksmith from '../services/Locksmith.js';
 
 // icons
-import { KeyInfoIcon } from '../components/KeyInfo.js';
+import { KeyInfoIcon, KeyIcon, KeyName } from '../components/KeyInfo.js';
 import { AiOutlineUser } from 'react-icons/ai';
 import { BsTrash } from 'react-icons/bs';
 import { HiOutlineLightningBolt } from 'react-icons/hi';
@@ -102,11 +103,21 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
 	  <HStack spacing='1em'>
         { !key.isSuccess && policy.isSuccess && <Skeleton width='2em' height='2em'/> }
         { key.isSuccess && policy.isSuccess && KeyInfoIcon(key, 30) }
-        { !key.isSuccess && <Skeleton width='5em' height='1em'/> }
-        { !key.isSuccess && <Skeleton width='8em' height='1em'/> }
-        { key.isSuccess && <b>{key.data.alias}</b> }
-        { policy.isSuccess && <PolicyActivationTag activated={policy.data[0]}/> }
-        { !policy.isSuccess && <Skeleton width='5em' height='1em'/> }
+        <VStack align='stretch'>
+          <HStack>
+            { !key.isSuccess && <Skeleton width='5em' height='1em'/> }
+            { !key.isSuccess && <Skeleton width='8em' height='1em'/> }
+            { key.isSuccess && <b>{key.data.alias}</b> }
+            { policy.isSuccess && <PolicyActivationTag activated={policy.data[0]}/> }
+            { !policy.isSuccess && <Skeleton width='5em' height='1em'/> }
+          </HStack>
+          <HStack fontSize='sm'>
+            { !policy.isSuccess && <Skeleton width='6em' height='1em'/> }
+            { policy.isSuccess && <Text>Distribute funds from</Text> }
+            { policy.isSuccess && <KeyIcon keyId={policy.data[2]}/> }
+            { policy.isSuccess && <KeyName keyId={policy.data[2]}/> }
+          </HStack>
+        </VStack>
         <Spacer/>
         { !policy.isSuccess && <Skeleton width='2.2em' height='1.3em'/> }
         { policy.isSuccess && 
@@ -115,7 +126,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
                 beneficiariesDisclosure.onToggle();
                 eventsDisclosure.onClose();
               }}>
-              {policy.data[2].length}
+              {policy.data[3].length}
             </Button> 
           </Tooltip> }
         { !policy.isSuccess && <Skeleton width='2.2em' height='1.3em'/> }
@@ -123,7 +134,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
           <Tooltip label='Required Events'>
             <Button size='sm' leftIcon={<HiOutlineLightningBolt/>}
               onClick={() => { eventsDisclosure.onToggle(); beneficiariesDisclosure.onClose();}}>
-                <PolicyFiredEventCount events={policy.data[3]} position={0} total={0}/> / {policy.data[3].length}
+                <PolicyFiredEventCount events={policy.data[4]} position={0} total={0}/> / {policy.data[4].length}
             </Button>
           </Tooltip>}
         <Tooltip label='Remove Policy'>
@@ -133,12 +144,12 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
       </HStack>
       <List width='100%' spacing='1em' mt={eventsDisclosure.isOpen ? '1em' : '0'}>
         <Collapse width='100%' in={eventsDisclosure.isOpen}>
-          { policy.isSuccess && <PolicyEventList keyId={keyId} events={policy.data[3]}/> }
+          { policy.isSuccess && <PolicyEventList keyId={keyId} events={policy.data[4]}/> }
         </Collapse>
       </List>
       <List width='100%' spacing='1em' mt={beneficiariesDisclosure.isOpen ? '1em' : '0'}>
         <Collapse width='100%' in={beneficiariesDisclosure.isOpen}>
-          { policy.isSuccess && <PolicyBeneficiaryList keyId={keyId} beneficiaries={policy.data[2]}/> }
+          { policy.isSuccess && <PolicyBeneficiaryList keyId={keyId} beneficiaries={policy.data[3]}/> }
         </Collapse>
       </List>
     </Box>
@@ -214,15 +225,19 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
   const trustPolicies = useTrustPolicyKeys(trustId);
   const trusteeChecks = trustPolicies.isSuccess ? trustPolicies.data.map((k) => k.toString()) : [];
   const events = useTrustEventRegistry(trustId);
+  const sourceKeyDisclosure = useDisclosure();
   const eventsDisclosure = useDisclosure();
   const keyDisclosure = useDisclosure();
   const reviewDisclosure = useDisclosure(); 
   const [trusteeKey, setTrusteeKey] = useState(null);
+  const [sourceKey, setSourceKey] = useState(null);
   const [eventHashes, setEventHashes] = useState([]);
   const [beneficiaries, setBeneficiaries] = useState([]);
   const trusteeKeyInfo = useInspectKey(trusteeKey);
+  const sourceKeyInfo = useInspectKey(sourceKey);
   const isKeyError = !trusteeKey || trusteeKey === 'Choose Key';
-  const setPolicy = useSetPolicy(rootKeyId, trusteeKey, beneficiaries, reviewDisclosure.isOpen ? eventHashes : null,
+  const isSourceKeyError = !sourceKey || sourceKey === 'Choose Key';
+  const setPolicy = useSetPolicy(rootKeyId, trusteeKey, sourceKey, beneficiaries, reviewDisclosure.isOpen ? eventHashes : null,
     function(error) {
       toast({
         title: 'Transaction Error!',
@@ -243,6 +258,7 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
       });
       reviewDisclosure.onClose();
       setTrusteeKey(null);
+      setSourceKey(null);
       setEventHashes([]);
       setBeneficiaries([]);
       onClose();
@@ -250,6 +266,7 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
   );
 
   const buttonProps = isKeyError ? {isDisabled: true} : {};
+  const sourceButtonProps = isSourceKeyError ? {isDisabled: true} : {};
   const keyButtonProps = beneficiaries.length < 1 ? {isDisabled: true}: {};
   const policyButtonProps = setPolicy.isLoading ? {isLoading: true} : {};
 
@@ -258,6 +275,13 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
     {(!trusteeKeyInfo.isSuccess || !trusteeKeyInfo.data) && <Skeleton height='1.2em' width='8em'/>}
     {trusteeKeyInfo.isSuccess && trusteeKeyInfo.data && KeyInfoIcon(trusteeKeyInfo)}
     {trusteeKeyInfo.isSuccess && trusteeKeyInfo.data && <Text><b>{trusteeKeyInfo.data.alias}</b> with distribution rights.</Text>}
+  </HStack>
+  
+  const sourceReview = <HStack mt='1em'>
+    <Text>You've chosen to fund from </Text>
+    {(!sourceKeyInfo.isSuccess || !sourceKeyInfo.data) && <Skeleton height='1.2em' width='8em'/>}
+    {sourceKeyInfo.isSuccess && sourceKeyInfo.data && KeyInfoIcon(sourceKeyInfo)}
+    {sourceKeyInfo.isSuccess && sourceKeyInfo.data && <Text><b>{sourceKeyInfo.data.alias}</b>.</Text>}
   </HStack>
 
   const eventReview = <VStack mt='2em' align='stretch' spacing='1em'>
@@ -273,8 +297,8 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
         <ModalHeader>Create Trustee Policy</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Collapse in={!eventsDisclosure.isOpen && !keyDisclosure.isOpen && !reviewDisclosure.isOpen}>
-            <Text>You can allow a <b>trustee</b> to distribute funds in the trust to certain <b>beneficiaries.</b> You can restrict the ability to distribute assets until certain <b>event conditions</b> are met.</Text> 
+          <Collapse in={!eventsDisclosure.isOpen && !keyDisclosure.isOpen && !reviewDisclosure.isOpen && !sourceKeyDisclosure.isOpen}>
+            <Text>You can allow a <b>trustee</b> to distribute funds from a <b>source key</b> to a set <b>beneficiaries</b>. You can restrict the ability to distribute assets until certain <b>event conditions</b> are met.</Text> 
             <Text mt='1em'>First, pick a <b>trustee</b> by choosing which key to give distribution rights.</Text>
             <FormControl mt='2em' isInvalid={isKeyError}>
               <FormLabel>Trustee Key</FormLabel>
@@ -282,14 +306,26 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
                 onChange={(e) => { setTrusteeKey(e.target.value) }}>
                 {keys.isSuccess && trustPolicies.isSuccess &&  
                   keys.data.filter((k) => !trusteeChecks.includes(k.toString()))
-                    .map((k) => !k.eq(rootKeyId) && 
-                      <TrustKeyOption key={'select-option-key' + k} keyId={k}/>)}
+                    .map((k) => <TrustKeyOption key={'select-option-key' + k} keyId={k}/>)}
               </Select>
               { isKeyError && <FormErrorMessage>Which key do you want to give distribution rights to?</FormErrorMessage>}
             </FormControl>
           </Collapse>
-          <Collapse in={eventsDisclosure.isOpen}>
+          <Collapse in={sourceKeyDisclosure.isOpen}>
             {trusteeReview}
+            <FormControl mt='2em' isInvalid={isSourceKeyError}>
+              <FormLabel>Source Key</FormLabel>
+              <Select placeholder='Choose Key' variant='filled'
+                onChange={(e) => { setSourceKey(e.target.value) }}>
+                {keys.isSuccess && trustPolicies.isSuccess &&
+                  keys.data.map((k) => <TrustKeyOption key={'select-option-key' + k} keyId={k}/>)}
+              </Select>
+              { isSourceKeyError && <FormErrorMessage>Which key do you want to be able to move funds from?</FormErrorMessage>}
+            </FormControl>
+          </Collapse>
+          <Collapse in={eventsDisclosure.isOpen}>
+            { trusteeReview }
+            { sourceReview }
             <FormControl mt='2em'>
               <FormLabel>Add Event Conditions</FormLabel>
               <Select placeholder='Choose Event' variant='filled'
@@ -313,6 +349,7 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
           </Collapse>
           <Collapse in={keyDisclosure.isOpen}>
             { trusteeReview }
+            { sourceReview }
             { eventReview }
             <FormControl mt='2em'>
               <FormLabel>Add Beneficiaries</FormLabel>
@@ -321,7 +358,7 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
                   setBeneficiaries([beneficiaries, e.target.value].flat());
                 }}>
                   { keys.isSuccess &&
-                      keys.data.map((k) => !k.eq(rootKeyId) && !beneficiaries.includes(k.toString()) && 
+                      keys.data.map((k) => !k.eq(BigNumber.from(sourceKey || 0)) && !beneficiaries.includes(k.toString()) && 
                       <TrustKeyOption key={'select-option-key' + k} keyId={k}/>)}
               </Select>
             </FormControl>
@@ -338,8 +375,9 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
           </Collapse>
           <Collapse in={reviewDisclosure.isOpen}>
             { trusteeReview }
+            { sourceReview } 
             { eventReview }
-            <Text mt='2em'>Distribution will be enabled only for:</Text>
+            <Text mt='2em'>Distribution will be enabled only to:</Text>
             <VStack align='stretch' mt='1em' spacing='1em'>
             { beneficiaries.map((b) =>
               <SelectedBeneficiaryKey keyId={b} key={'selected-beneficiary-review-key-' + b}
@@ -349,13 +387,22 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
           </Collapse>
         </ModalBody>
         <ModalFooter>
-          {!eventsDisclosure.isOpen && !keyDisclosure.isOpen && !reviewDisclosure.isOpen && 
+          {!eventsDisclosure.isOpen && !keyDisclosure.isOpen && !reviewDisclosure.isOpen && !sourceKeyDisclosure.isOpen && 
             <Button {... buttonProps} colorScheme='blue'
-              onClick={eventsDisclosure.onOpen}>
+              onClick={sourceKeyDisclosure.onOpen}>
               Trust {trusteeKeyInfo.isSuccess && trusteeKeyInfo.data && 
                 ("'" + trusteeKeyInfo.data.alias + "'") }
             </Button> }
-          {eventsDisclosure.isOpen && 
+          { sourceKeyDisclosure.isOpen &&
+            <HStack spacing='1em'>
+              <Button onClick={sourceKeyDisclosure.onClose} colorScheme='gray'>Back</Button>
+              <Button {... sourceButtonProps} onClick={() => {eventsDisclosure.onOpen(); sourceKeyDisclosure.onClose(); }}
+                colorScheme='blue'>
+                Fund from {sourceKeyInfo.isSuccess && sourceKeyInfo.data && 
+                  ("'" + sourceKeyInfo.data.alias + "'") }
+              </Button>
+            </HStack> }
+          { eventsDisclosure.isOpen && 
             <HStack spacing='1em'>
               <Button onClick={eventsDisclosure.onClose} colorScheme='gray'>Back</Button>
               <Button onClick={() => {keyDisclosure.onOpen(); eventsDisclosure.onClose(); }}
@@ -363,7 +410,7 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
                 Require {eventHashes.length} Events
               </Button>
             </HStack> }
-          {keyDisclosure.isOpen && 
+          { keyDisclosure.isOpen && 
             <HStack spacing='1em'>
               <Button onClick={() => {
                   keyDisclosure.onClose();

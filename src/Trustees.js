@@ -110,7 +110,7 @@ export function TrusteeKey({keyId, ...rest}) {
   const keyInfo = useKeyInfo(keyId);
   const policy = usePolicy(keyId);
 
-  return policy.isSuccess && policy.data[2].length > 0 && 
+  return policy.isSuccess && policy.data[3].length > 0 && 
     <Box width='90%' 
       p='1em' bg={boxColor} borderRadius='lg' boxShadow='dark-lg' 
       _hover={{
@@ -127,18 +127,18 @@ export function TrusteeKey({keyId, ...rest}) {
           </VStack>
           <HStack>
             <AiOutlineUser size='24px'/>
-            <Text>{policy.data[2].length}</Text>
+            <Text>{policy.data[3].length}</Text>
           </HStack>
         </> }
         <Spacer/>
         <PolicyActivationTag activated={policy.data[0]}/>
-        <ContextBalanceUSD contextId={KEY_CONTEXT_ID} identifier={policy.data[1]} 
+        <ContextBalanceUSD contextId={KEY_CONTEXT_ID} identifier={policy.data[2]} 
           textProps={{fontSize: '2xl' }} skeletonProps={{width: '6em', height: '1.5em'}}/>
       </HStack>
       <Collapse in={sheetDisclosure.isOpen} width='100%'>
         { keyInfo.isSuccess && 
           <KeyBalanceSheet trustId={keyInfo.data.trust.id} 
-            keyId={policy.data[1]} trusteeKey={keyId}/> }
+            keyId={policy.data[2]} trusteeKey={keyId}/> }
       </Collapse>
     </Box>
 }
@@ -246,7 +246,7 @@ export function RequiredEventsDialog({trustId, keyId, trusteeKey, isOpen, onClos
         { !policy.isSuccess && [1,2,3].map((k) => 
           <Skeleton mt='1em' width='100%' height='1em' key={'missing-event-' + k}/>) }
         <List spacing='1em' mt='1em'>
-        { policy.isSuccess && policy.data[3].map((event) => 
+        { policy.isSuccess && policy.data[4].map((event) => 
           <UnfiredEventLabel eventHash={event} key={'ufel-' + event}/>
         ) }
         </List>
@@ -282,7 +282,7 @@ export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider
   }
 
   const distribution = useDistribute(trusteeKey, provider, arn, 
-    policy.isSuccess ? policy.data[2] : null, policy.data[2].map((k) => 
+    policy.isSuccess ? policy.data[3] : null, policy.data[3].map((k) => 
       keyDistributions[k.toString()] || BigNumber.from(0)),
     function(error) {
       // error
@@ -341,7 +341,7 @@ export function DistributeFundsDialog({trustId, keyId, trusteeKey, arn, provider
           </HStack>}
         { !policy.isSuccess && [1,2,3].map((k) => 
           <Skeleton mt='1em' key={'skeleton-key-distribution-' + k} width='100%' height='2em'/>) }
-        { policy.isSuccess && policy.data[2].map((b) => {
+        { policy.isSuccess && policy.data[3].map((b) => {
           var amount= keyDistributions[b.toString()] || BigNumber.from(0);
           return <BeneficiaryDistributionSlider keyId={b} maxBalance={amount.add(balanceLeft)} 
             balance={amount} setBalance={assignDistributionAmount} asset={asset}

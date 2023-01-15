@@ -30,7 +30,8 @@ export function useTrustPolicyKeys(trustId) {
  * policy:
  *
  * boolean : is the policy currently enabled
- * BigNumber: the root key Id that the funds are withdrawn from
+ * BigNumber: the root key Id that set up the policy
+ * BigNumber: the source key Id that is the source of funds.
  * [KeyId:BigNumber]: a list of key ids that can get distributions from the Trustee key
  * [EventHash:Bytes32]: a list of event hashes that are required for the policy to be enabled
  */
@@ -48,11 +49,11 @@ export function usePolicy(keyId) {
  * Given a root key, will create a Trustee Policy for a given set of events
  * and associated beneficiary keys.
  */
-export function useSetPolicy(rootKeyId, trusteeKeyId, beneficiaries, events, errorFunc, successFunc) {
+export function useSetPolicy(rootKeyId, trusteeKeyId, sourceKeyId, beneficiaries, events, errorFunc, successFunc) {
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('Trustee', 'setPolicy',
-      [rootKeyId, trusteeKeyId, beneficiaries, events],
-      rootKeyId && trusteeKeyId && beneficiaries.length > 0 && events
+      [rootKeyId, trusteeKeyId, sourceKeyId, beneficiaries, events],
+      rootKeyId && trusteeKeyId && sourceKeyId && beneficiaries.length > 0 && events
     )
   );
 
