@@ -114,6 +114,14 @@ export const AssetResource = (function() {
     /////////////////////////////////////////////
     refreshMetadata: function() { freshenUp(); },
     /////////////////////////////////////////////
+    // getGasArn
+    // 
+    // This will return the gas ARN for a chain.
+    /////////////////////////////////////////////
+    getGasArn: function() {
+      return getArn(ethers.constants.AddressZero, 0, 0);
+    },
+    /////////////////////////////////////////////
     // getTokenArn
     //
     // Assumes you are trying to get an ARN for

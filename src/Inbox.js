@@ -48,6 +48,7 @@ import { RiSafeLine } from 'react-icons/ri';
 import { useAccount } from 'wagmi';
 import { useParams } from 'react-router-dom';
 import { AssetResource } from './services/AssetResource.js';
+import Locksmith from './services/Locksmith.js';
 
 // Raw Hooks
 import { ethers, BigNumber } from 'ethers';
@@ -67,6 +68,7 @@ import {
 } from './hooks/LocksmithHooks.js';
 import {
   useInboxTransactionCount,
+  useSend,
 } from './hooks/VirtualKeyAddressHooks.js';
 import {
   useTrustedActorAlias,
@@ -291,6 +293,8 @@ export function KeyArnProvider({keyId, keyInfo, arn, provider, ...rest}) {
 }
 
 const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) => {
+  const toast = useToast();
+
   // form inputs
   const [selectedArn, setSelectedArn] = useState(arn);
   const [selectedProvider, setSelectedProvider] = useState(null); 
@@ -299,17 +303,13 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   
   // conditional state
   const selectedProviderBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, 
-    arn ? [arn] : null, selectedProvider || ethers.constants.AddressZero);
+    selectedArn ? [selectedArn] : null, selectedProvider || ethers.constants.AddressZero);
 
   // get the arn information
   const asset = AssetResource.getMetadata(selectedArn);
   const assetPrice = useCoinCapPrice(asset.coinCapId); 
-  console.log("before send in dollars: " + selectedAmount);
   const sendInDollars = !assetPrice.isSuccess ? 0 : USDFormatter.format(assetPrice.data * selectedAmount); 
- 
-  console.log("after send in dollars: " + selectedAmount);
   const rawAmount = ethers.utils.parseUnits(selectedAmount, asset.decimals);
-  console.log("after raw : " + selectedAmount);
 
   // grab the asset list for the key
   const keyBalanceSheet = useContextBalanceSheet(KEY_CONTEXT_ID, keyId);
@@ -323,27 +323,46 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   //       and we will want to fix as part of RPC reduction on the frontend.
   const keyArnProviders = useContextProviderRegistry(KEY_CONTEXT_ID, keyId, selectedArn);
 
-  console.log("before error conditions: " + selectedAmount);
   // error conditions
-  const addressError = !ethers.utils.isAddress(selectedAddress);
+  const addressError = !ethers.utils.isAddress(selectedAddress) || selectedAddress == address;
   const amountError = !selectedProviderBalance.isSuccess || selectedProviderBalance.data.length < 1 ? true :
     rawAmount.gt(selectedProviderBalance.data[0]);
-  console.log("after error conditions: " + selectedAmount);
 
-  console.log(selectedProviderBalance.isSuccess);
-  console.log(selectedProviderBalance.data);
+  // sending ethereum, only when arn is ethereum arn
+  const sendEth = useSend(address, selectedArn === AssetResource.getGasArn() ? 
+    selectedProvider || (keyArnProviders.data||[null])[0] : null, rawAmount, selectedAddress,
+    function(error) {
+        toast({
+          title: 'Transaction Error!',
+          description: error.toString(),
+          status: 'error',
+          duration: 9000,
+          isClosable: true
+        });
+      },
+      function(data) {
+        Locksmith.watchHash(data.hash);
+        toast({
+          title: 'Sent!',
+          description: 'The funds have been sent.',
+          status: 'success',
+          duration: 9000,
+          isClosable: true
+        });
+        disclosure.onClose();
+      }
+  );
 
-  if (selectedProviderBalance.isSuccess && selectedProviderBalance.data.length > 0) {
-    console.log('sanity');
-    console.log(selectedProviderBalance.data[0].toString());
-    console.log("selected Amount:" + selectedAmount);
-    console.log(selectedAmount);
-    console.log(rawAmount.toString());
-    console.log(rawAmount.gt(selectedProviderBalance.data[0]));
-    console.log("end sanity");
-  }
+  const buttonProps = addressError || amountError || !selectedArn ? {isDisabled: true} : (
+    sendEth.isLoading ? {isLoading: true} : {}); 
 
-  return <Modal isOpen={disclosure.isOpen} onClose={disclosure.onClose} isCentered size='xl' width='100%'>
+  return <Modal isOpen={disclosure.isOpen} onClose={() => {
+    setSelectedArn(arn);
+    setSelectedProvider(null);
+    setSelectedAmount('0');
+    setSelectedAddress(null);
+    disclosure.onClose();
+  }} isCentered size='xl' width='100%'>
     <ModalOverlay backdropFilter='blur(10px)'/>
     <ModalContent>
       <ModalHeader>Send Funds</ModalHeader>
@@ -352,9 +371,9 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
         <VStack mb='3em' spacing='3em'>
           <FormControl key='send_asset_form'>
             <FormLabel>What do you want to send?</FormLabel>
-            <Select onChange={(e) => {setSelectedArn(e.target.value);}}>
+            <Select placeholder='Choose Asset' value={arn} onChange={(e) => {setSelectedArn(e.target.value);}}>
               { keyArns.map((a) => 
-              <option key={'send-option-'+a} value={a} {... a === arn ? {selected: true} : {}}>
+              <option key={'send-option-'+a} value={a}>
                 {AssetResource.getMetadata(a).name}
               </option>
               ) }
@@ -386,11 +405,11 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
               <Input placeholder='0x000000000000000000000000' size='lg' onChange={(e) => {
                 setSelectedAddress(e.target.value);
               }}/>
-              <FormErrorMessage>Address looks kinda invalid?</FormErrorMessage>
+              <FormErrorMessage>{selectedAddress === address ? 'This is your own virtual address!' : 'Address looks kinda invalid?'}</FormErrorMessage>
             </FormControl> }
           <HStack width='100%'>
             <Spacer/>
-            <Button leftIcon={<FiSend/>} colorScheme='yellow'>Send</Button>
+            <Button onClick={() => {sendEth.write?.();}} {... buttonProps} leftIcon={<FiSend/>} colorScheme='yellow'>Send</Button>
           </HStack>
         </VStack>
       </ModalBody>
