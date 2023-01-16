@@ -310,7 +310,6 @@ const WalletArnBalanceSlider = ({rootKeyId, address, symbol, precision, onClose,
         duration: 9000,
         isClosable: true
       });
-      onClose();
     }
   );
   

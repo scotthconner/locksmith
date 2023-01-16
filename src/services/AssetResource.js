@@ -45,6 +45,8 @@ export const AssetResource = (function() {
       symbol: 'ETH',
       decimals: 18,
       contractAddress: null,
+      standard: 0,
+      id: 0,
       coinCapId: 'ethereum',
       icon: function(props = {}) {
         return <ETH {...props} color='#716b94'/>;
@@ -57,6 +59,8 @@ export const AssetResource = (function() {
       symbol: 'LINK',
       decimals: 18,
       contractAddress: Locksmith.getAssetAddress('link'),
+      standard: 20,
+      id: 0,
       coinCapId: 'chainlink',
       icon: function(props = {}) {
         return <LINK {...props} color='#375BD2'/>;
@@ -67,6 +71,8 @@ export const AssetResource = (function() {
       symbol: 'WAVAX',
       decimals: 18,
       contractAddress: Locksmith.getAssetAddress('avax'),
+      standard: 20,
+      id: 0,
       coinCapId: 'avalanche',
       icon: function(props = {}) {
         return <AVAX color='#e84142' {...props}/>;
@@ -78,6 +84,8 @@ export const AssetResource = (function() {
       decimals: 18,
       coinCapId: 'the-graph',
       contractAddress: Locksmith.getAssetAddress('grt'),
+      standard: 20,
+      id: 0,
       icon: function(props = {}) {
         return <GRT color='#6f4cff' {...props}/>;
       }
@@ -87,6 +95,8 @@ export const AssetResource = (function() {
       symbol: 'USDC',
       decimals: 6,
       contractAddress: Locksmith.getAssetAddress('usdc'),
+      standard: 20,
+      id: 0,
       coinCapId: 'usd-coin',
       icon: function(props = {}) {
         return <USDC color='#2775ca' {...props}/>;
@@ -98,6 +108,8 @@ export const AssetResource = (function() {
       decimals: 18,
       coinCapId: 'multi-collateral-dai',
       contractAddress: Locksmith.getAssetAddress('dai'),
+      standard: 20,
+      id: 0,
       icon: function(props = {}) {
         return <DAI color='#febe44' {...props}/>;
       }

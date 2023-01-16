@@ -40,3 +40,24 @@ export function useSend(inboxAddress, provider, amount, destination, errorFunc, 
     }
   });
 }
+
+/**
+ * useSendToken
+ *
+ * Will send ethereum out of an inbox.
+ */
+export function useSendToken(inboxAddress, provider, token, amount, destination, errorFunc, successFunc) {
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('VirtualKeyAddress', 'sendToken',
+      [provider, token, amount, destination],
+      inboxAddress && provider && token && amount && amount.gt(0) && destination, inboxAddress));
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
+}

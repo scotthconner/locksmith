@@ -69,6 +69,7 @@ import {
 import {
   useInboxTransactionCount,
   useSend,
+  useSendToken,
 } from './hooks/VirtualKeyAddressHooks.js';
 import {
   useTrustedActorAlias,
@@ -300,7 +301,7 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   const [selectedProvider, setSelectedProvider] = useState(null); 
   const [selectedAmount, setSelectedAmount] = useState('0'); // this will be in "units" by decimal, not wei.
   const [selectedAddress, setSelectedAddress] = useState(null);
-  
+
   // conditional state
   const selectedProviderBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, 
     selectedArn ? [selectedArn] : null, selectedProvider || ethers.constants.AddressZero);
@@ -328,33 +329,40 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   const amountError = !selectedProviderBalance.isSuccess || selectedProviderBalance.data.length < 1 ? true :
     rawAmount.gt(selectedProviderBalance.data[0]);
 
+  // callbacks
+  const error = function(error) {
+    toast({
+      title: 'Transaction Error!',
+      description: error.toString(),
+      status: 'error',
+      duration: 9000,
+      isClosable: true
+    });
+  };
+
+  const success = function(data) {
+    Locksmith.watchHash(data.hash);
+    toast({
+      title: 'Sent!',
+      description: 'The funds have been sent.',
+      status: 'success',
+      duration: 9000,
+      isClosable: true
+    });
+    disclosure.onClose();
+  };
+
   // sending ethereum, only when arn is ethereum arn
   const sendEth = useSend(address, selectedArn === AssetResource.getGasArn() ? 
-    selectedProvider || (keyArnProviders.data||[null])[0] : null, rawAmount, selectedAddress,
-    function(error) {
-        toast({
-          title: 'Transaction Error!',
-          description: error.toString(),
-          status: 'error',
-          duration: 9000,
-          isClosable: true
-        });
-      },
-      function(data) {
-        Locksmith.watchHash(data.hash);
-        toast({
-          title: 'Sent!',
-          description: 'The funds have been sent.',
-          status: 'success',
-          duration: 9000,
-          isClosable: true
-        });
-        disclosure.onClose();
-      }
-  );
+    selectedProvider || (keyArnProviders.data||[null])[0] : null, amountError ? null : rawAmount, selectedAddress, error, success);
+  
+  // sending erc-20
+  const sendToken = useSendToken(address, selectedProvider || (keyArnProviders.data||[null])[0],
+    (asset||{}).standard === 20 ? asset.contractAddress : null,
+    amountError ? null : rawAmount, selectedAddress, error, success); 
 
   const buttonProps = addressError || amountError || !selectedArn ? {isDisabled: true} : (
-    sendEth.isLoading ? {isLoading: true} : {}); 
+    sendEth.isLoading || sendToken.isLoading ? {isLoading: true} : {}); 
 
   return <Modal isOpen={disclosure.isOpen} onClose={() => {
     setSelectedArn(arn);
@@ -409,7 +417,13 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
             </FormControl> }
           <HStack width='100%'>
             <Spacer/>
-            <Button onClick={() => {sendEth.write?.();}} {... buttonProps} leftIcon={<FiSend/>} colorScheme='yellow'>Send</Button>
+            <Button onClick={() => {
+              if(asset.standard === 0) {
+                sendEth.write?.();
+              } else if (asset.standard === 20) {
+                sendToken.write?.();
+              }
+            }} {... buttonProps} leftIcon={<FiSend/>} colorScheme='yellow'>Send</Button>
           </HStack>
         </VStack>
       </ModalBody>
