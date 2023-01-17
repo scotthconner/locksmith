@@ -15,6 +15,11 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalOverlay,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
   Tag,
   TagLabel,
   TagLeftIcon,
@@ -35,11 +40,13 @@ import {
 import { QRCode } from 'react-qrcode-logo';
 import { 
   AiOutlineWarning,
-  AiOutlineQuestion
+  AiOutlineQuestion,
+  AiOutlineRobot,
 } from 'react-icons/ai';
 import { 
-  FiCopy, 
-  FiSend 
+  FiCopy,
+  FiInbox,
+  FiSend, 
 } from 'react-icons/fi';
 import { BiGhost } from 'react-icons/bi';
 import { ImQrcode } from 'react-icons/im';
@@ -68,6 +75,7 @@ import {
 } from './hooks/LocksmithHooks.js';
 import {
   useInboxTransactionCount,
+  useInboxTransaction,
   useSend,
   useSendToken,
 } from './hooks/VirtualKeyAddressHooks.js';
@@ -107,10 +115,30 @@ export function Inbox({...rest}) {
 }
 
 const VirtualKeyInbox = ({keyId, keyInfo, address, ...rest}) => {
+  const boxColor = useColorModeValue('white', 'gray.800');
+  const tab = 'assets';
+  
   return <>
     <InboxHeader keyId={keyId} keyInfo={keyInfo} address={address}/>
     <InboxAssetBalance keyId={keyId} keyInfo={keyInfo} address={address}/>
-    <InboxAssetList keyId={keyId} keyInfo={keyInfo} address={address}/>
+    <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'>
+      <Tabs isLazy isFitted defaultIndex={['assets','transactions'].indexOf(tab)}>
+        <TabList>
+          <Tab>Assets</Tab>
+          <Tab>Transactions</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel p='0'>
+            <VStack spacing='1.5em' align='stretch' mt='1em'>
+              <InboxAssetList keyId={keyId} keyInfo={keyInfo} address={address}/>
+            </VStack>
+          </TabPanel>
+          <TabPanel p='0'>
+            <TransactionHistory keyId={keyId} keyInfo={keyInfo} address={address}/>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </Box>
   </>
 }
 
@@ -238,7 +266,7 @@ const InboxAssetArn = ({keyId, keyInfo, address, arn, balance, ...rest}) => {
   const assetValue = assetPrice.isSuccess ? USDFormatter.format(assetPrice.data * formatted) : null;
   const sendDisclosure = useDisclosure();
 
-  return <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'> 
+  return <> 
     <HStack onClick={sendDisclosure.onToggle} cursor='pointer'>
       {asset.icon()}
       <Text>{asset.name}</Text>
@@ -250,7 +278,7 @@ const InboxAssetArn = ({keyId, keyInfo, address, arn, balance, ...rest}) => {
     </HStack>
     <SendAssetDialog keyId={keyId} keyInfo={keyInfo} address={address} 
       arn={arn} disclosure={sendDisclosure}/>
-  </Box>
+  </>
 }
 
 const InboxAssetArnProviderList = ({keyId, keyInfo, arn, ...rest}) => {
@@ -410,7 +438,7 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
           { selectedArn && selectedAmount > 0 && !amountError &&
             <FormControl key='send_destination_form' isInvalid={addressError}>
               <FormLabel>Send where?</FormLabel>
-              <Input placeholder='0x000000000000000000000000' size='lg' onChange={(e) => {
+              <Input placeholder='0x000000000000000000000000' fontSize='12px' size='lg' onChange={(e) => {
                 setSelectedAddress(e.target.value);
               }}/>
               <FormErrorMessage>{selectedAddress === address ? 'This is your own virtual address!' : 'Address looks kinda invalid?'}</FormErrorMessage>
@@ -440,4 +468,50 @@ const ProviderOption = ({keyId, keyInfo, provider, arn, ...rest}) => {
     <option value={provider} {...rest}>
       {providerAlias.data} ({ethers.utils.formatUnits(providerBalance.data[0], asset.decimals)} {asset.symbol})
     </option>
+}
+
+const TransactionHistory = ({keyId, keyInfo, address, ...rest}) => {
+  const transactionCount = useInboxTransactionCount(address);
+  
+  return !transactionCount.isSuccess ? <VStack p='5em'>
+    <Spinner size='lg'/>
+  </VStack> : <VStack spacing='1em' mt='1em'>
+    { transactionCount.data.eq(0) && <Text>You have no transactions.</Text> }
+    { transactionCount.data.gt(0) &&
+     <TransactionUnroll address={address} index={transactionCount.data - 1} pageSize={5} depth={5}/> }
+  </VStack>
+}
+
+const TransactionUnroll = ({address, index, pageSize, depth, ...rest}) => {
+  const tx = useInboxTransaction(address, index);
+  const asset = AssetResource.getMetadata(!tx.isSuccess ? null : tx.data.arn);
+  const [wantMore, setWantMore] = useState(false);
+
+  const txTypeStrings    = ['Invalid', 'Send', 'Receive', 'Batch']; 
+  const txTypeTarget     = ['', 'To', 'From', 'Target']; 
+  const txTypeAmountSign = ['', '-', '+', '-']; 
+
+  return !tx.isSuccess ? <Skeleton width='100%' height='3em'/> : <>
+    <HStack width='100%'>
+      {asset.icon()}
+      <VStack align='stretch' spacing='0'>
+        <Text fontWeight='bold'>{txTypeStrings[tx.data.type]}</Text>
+        <Text>{(new Date(1000*tx.data.blockTime.toNumber())).toLocaleDateString()}</Text>
+      </VStack>
+      <Spacer/>
+      <VStack align='stretch' spacing='0'>
+        <HStack>
+          <Spacer/>
+          <Text fontWeight='bold'>{txTypeAmountSign[tx.data.type]}{ethers.utils.formatUnits(tx.data.amount, asset.decimals)} {asset.symbol}</Text>
+        </HStack>
+        <Text>{txTypeTarget[tx.data.type]}: <DisplayAddress address={tx.data.target}/></Text>
+      </VStack>
+    </HStack>
+    { depth > 0 && index > 0 && 
+      <TransactionUnroll address={address} index={index-1} pageSize={pageSize} depth={depth-1}/> }
+    { depth == 0 && index > 0 && !wantMore &&
+      <Button onClick={() => {setWantMore(true);}}width='100%' size='lg'>More</Button> }
+    { depth == 0 && index > 0 && wantMore &&
+      <TransactionUnroll address={address} index={index-1} depth={pageSize} pageSize={pageSize}/> }
+  </>
 }

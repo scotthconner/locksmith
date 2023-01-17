@@ -21,6 +21,35 @@ export function useInboxTransactionCount(address) {
 }
 
 /**
+ * useInboxTransaction
+ *
+ * For a given inbox address and transaction index, return the transaction metadata. 
+ */
+export function useInboxTransaction(address, index) {
+  const provider = useProvider();
+  const inbox = useContract(Locksmith.getContract('VirtualKeyAddress', provider, address));
+  return useQuery('VirtualKeyAddress::transactions at ' + address + " " + index, async function() {
+    if (address === null) {
+      return null;
+    }
+
+    const tx = await inbox.transactions(index);
+
+    return {
+      type: tx[0],
+      blockTime: tx[1],
+      operator: tx[2],
+      target: tx[3],
+      provider: tx[4],
+      arn: tx[5],
+      amount: tx[6]
+    }
+  });
+}
+
+
+
+/**
  * useSend
  * 
  * Will send ethereum out of an inbox.

@@ -256,7 +256,7 @@ export function Trust() {
         {trustInfo.data.trustKeyCount < 1 ? 'Invalid Trust' : trustInfo.data.name}
       </Heading>
     }
-    <Tabs isLazy isFitted mt='1.5em' defaultIndex={['assets','keys','events','policies','notary','scribes'].indexOf(tab)}>
+    <Tabs isLazy isFitted mt='1.5em' defaultIndex={['assets','keys','events','policies','notary'].indexOf(tab)}>
       <TabList>
         <Tab>{trustArnCount}Assets</Tab>
         <Tab>{trustKeyCount}Keys</Tab>
