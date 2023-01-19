@@ -47,10 +47,25 @@ const devnet = {
   rpcUrls: { 
     default: "http://127.0.0.1:1234/rpc/v0",
   },
+};
+
+const hyperspace = {
+  id: 3_141,
+  name: 'Hyperspace',
+  network: 'Hyperspace',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Filecoin',
+    symbol: 'tFIL',
+  },
+  rpcUrls: {
+    default: "https://api.hyperspace.node.glif.io/rpc/v0",
+  },
 }
+
 // We are using alchemy for now
 // Choose which chains you'd like to show
-const {chains, provider, webSocketProvider} = configureChains([chain.goerli, chain.hardhat, devnet], [
+const {chains, provider, webSocketProvider} = configureChains([chain.goerli, chain.hardhat, hyperspace, devnet], [
   alchemyProvider({apiKey:'8TN4uRz1cIbyDUgHZ80u0tKdQA2Qsc8j'}),
   publicProvider(),
 ]);

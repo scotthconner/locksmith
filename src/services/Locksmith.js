@@ -1,12 +1,12 @@
 // local nets
 import * as hardhatContracts from '../registries/network-contracts-31337.json';
 import * as hardhatAssets    from '../registries/network-assets-31337.json';
-import * as devnetContracts from '../registries/network-contracts-31415926.json';
-import * as devnetAssets from '../registries/network-assets-31415926.json';
 
 // test nets
 import * as goerliContracts  from '../registries/network-contracts-5.json';
 import * as goerliAssets     from '../registries/network-assets-5.json';
+import * as hyperspaceContracts from '../registries/network-contracts-3141.json';
+import * as hyperspaceAssets from '../registries/network-assets-3141.json';
 
 import * as shadowERC from  "../contracts/stubs/ShadowERC.sol/ShadowERC.json";
 import * as keyVault from  "../contracts/KeyVault.sol/KeyVault.json";
@@ -36,8 +36,8 @@ const Locksmith = (function() {
 
   contractAddresses[31337] = hardhatContracts;
   assetAddresses[31337] = hardhatAssets;
-  contractAddresses[31415926] = devnetContracts;
-  assetAddresses[31415926] = devnetAssets;
+  contractAddresses[3141] = hyperspaceContracts;
+  assetAddresses[3141] = hyperspaceAssets;
 
   contractAddresses[5] = goerliContracts;
   assetAddresses[5] = goerliAssets;

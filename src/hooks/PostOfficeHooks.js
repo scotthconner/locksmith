@@ -1,6 +1,7 @@
 import Locksmith from '../services/Locksmith.js';
 import {useQuery} from 'react-query';
 import {
+  useNetwork,
   useProvider,
   useContract
 } from 'wagmi';
@@ -13,8 +14,9 @@ import {
  */
 export function useKeyInboxAddress(keyId) {
   const provider = useProvider();
+  const network = useNetwork();
   const postOffice = useContract(Locksmith.getContract('PostOffice', provider));
-  return useQuery('PostOffice::getKeyId-' + keyId, async function() {
+  return useQuery('PostOffice::getKeyId-' + network.chain.id + keyId, async function() {
       return await postOffice.getKeyInbox(keyId);
   });
 }

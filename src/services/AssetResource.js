@@ -11,6 +11,8 @@ import { AVAX } from '../components/icons/AVAX.js';
 import { ETH } from '../components/icons/ETH.js';
 import { GRT } from '../components/icons/GRT.js';
 
+import { HyperspaceAssets } from './HyperspaceAssets.js';
+
 /**
  * AssetResource 
  *
@@ -37,10 +39,10 @@ export const AssetResource = (function() {
   // to reconstitute this each time.
   var metadata = {};
 
-  var freshenUp = function() {
-    metadata = {}
+  var freshenUpEth = function() {
+    var d = {}
     // Gas Token
-    metadata[getArn(ethers.constants.AddressZero, 0, 0)] = {
+    d[getArn(ethers.constants.AddressZero, 0, 0)] = {
       name: 'Ethereum',
       symbol: 'ETH',
       decimals: 18,
@@ -54,7 +56,7 @@ export const AssetResource = (function() {
     };
   
     // Shadow ERC20s
-    metadata[getArn(Locksmith.getAssetAddress('link'), 20, 0)] = {
+    d[getArn(Locksmith.getAssetAddress('link'), 20, 0)] = {
       name: 'Chainlink',
       symbol: 'LINK',
       decimals: 18,
@@ -66,7 +68,7 @@ export const AssetResource = (function() {
         return <LINK {...props} color='#375BD2'/>;
       }
     };
-    metadata[getArn(Locksmith.getAssetAddress('avax'), 20, 0)] = {
+    d[getArn(Locksmith.getAssetAddress('avax'), 20, 0)] = {
       name: 'Wormhole',
       symbol: 'WAVAX',
       decimals: 18,
@@ -78,7 +80,7 @@ export const AssetResource = (function() {
         return <AVAX color='#e84142' {...props}/>;
       }
     };
-    metadata[getArn(Locksmith.getAssetAddress('grt'), 20, 0)] = {
+    d[getArn(Locksmith.getAssetAddress('grt'), 20, 0)] = {
       name: 'The Graph',
       symbol: 'GRT',
       decimals: 18,
@@ -90,7 +92,7 @@ export const AssetResource = (function() {
         return <GRT color='#6f4cff' {...props}/>;
       }
     };
-    metadata[getArn(Locksmith.getAssetAddress('usdc'), 20, 0)] = {
+    d[getArn(Locksmith.getAssetAddress('usdc'), 20, 0)] = {
       name: 'USDC',
       symbol: 'USDC',
       decimals: 6,
@@ -102,7 +104,7 @@ export const AssetResource = (function() {
         return <USDC color='#2775ca' {...props}/>;
       }
     };
-    metadata[getArn(Locksmith.getAssetAddress('dai'), 20, 0)] = {
+    d[getArn(Locksmith.getAssetAddress('dai'), 20, 0)] = {
       name: 'Dai',
       symbol: 'DAI',
       decimals: 18,
@@ -114,8 +116,15 @@ export const AssetResource = (function() {
         return <DAI color='#febe44' {...props}/>;
       }
     };
+    return d;
   };
-  freshenUp();
+ 
+  var loadAssets = {
+    31337: freshenUpEth,                  // local hardhat
+    5:     freshenUpEth,                  // goerli
+    3141:  HyperspaceAssets.assetMetadata // Filecoin testnet 
+  }
+  metadata = loadAssets[Locksmith.getChainId()]();
 
   return {
     /////////////////////////////////////////////
@@ -124,7 +133,9 @@ export const AssetResource = (function() {
     // If a network changes, you'll want to re-cache
     // the addresses.
     /////////////////////////////////////////////
-    refreshMetadata: function() { freshenUp(); },
+    refreshMetadata: function() { 
+      metadata = loadAssets[Locksmith.getChainId()](); 
+    },
     /////////////////////////////////////////////
     // getGasArn
     // 

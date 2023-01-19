@@ -2,6 +2,7 @@ import Locksmith from '../services/Locksmith.js';
 import { BigNumber } from 'ethers';
 import {useQuery} from 'react-query';
 import {
+  useNetwork,
   useProvider,
   useContract,
   usePrepareContractWrite,
@@ -17,8 +18,9 @@ import {
  */
 export function useTrustPolicyKeys(trustId) {
   const provider = useProvider();
+  const network = useNetwork();
   const Trustee = useContract(Locksmith.getContract('Trustee', provider));
-  return useQuery('getTrustPolicyKeys for ' + trustId, async function() {
+  return useQuery('getTrustPolicyKeys for ' + network.chain.id + trustId, async function() {
     return await Trustee.getTrustPolicyKeys(trustId);
   });
 }
@@ -37,8 +39,9 @@ export function useTrustPolicyKeys(trustId) {
  */
 export function usePolicy(keyId) {
   const provider = useProvider();
+  const network = useNetwork();
   const Trustee = useContract(Locksmith.getContract('Trustee', provider));
-  return useQuery('usePolicy for ' + keyId, async function() {
+  return useQuery('usePolicy for ' + network.chain.id + keyId, async function() {
     return await Trustee.getPolicy(keyId);
   });
 }

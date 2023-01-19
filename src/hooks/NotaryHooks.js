@@ -1,6 +1,7 @@
 import Locksmith from '../services/Locksmith.js';
 import {useQuery} from 'react-query';
 import {
+  useNetwork,
   useProvider,
   useContract,
   usePrepareContractWrite,
@@ -24,9 +25,10 @@ export const DISPATCHER = 2;
  */
 export function useTrustedActors(trustId, role, ledgerContractAlias = 'Ledger') {
   const provider = useProvider();
+  const network = useNetwork();
   const ledgerAddress = Locksmith.getContractAddress(ledgerContractAlias); 
   const Notary = useContract(Locksmith.getContract('Notary', provider));
-  return useQuery('getTrustedActors for ' + trustId + " " + role + " " + ledgerAddress, async function() {
+  return useQuery('getTrustedActors for ' + network.chain.id + trustId + " " + role + " " + ledgerAddress, async function() {
     return await Notary.getTrustedActors(ledgerAddress, trustId, role);
   });
 }
@@ -38,9 +40,10 @@ export function useTrustedActors(trustId, role, ledgerContractAlias = 'Ledger') 
  */
 export function useTrustedActorAlias(trustId, role, address, ledgerContractAlias = 'Ledger') {
   const provider = useProvider();
+  const network = useNetwork();
   const ledgerAddress = Locksmith.getContractAddress(ledgerContractAlias);
   const Notary = useContract(Locksmith.getContract('Notary', provider));
-  return useQuery('getTrustedActorAlias for ' + trustId + " " + role + " " + address + " " + ledgerAddress, async function() {
+  return useQuery('getTrustedActorAlias for ' + network.chain.id + trustId + " " + role + " " + address + " " + ledgerAddress, async function() {
     return (null !== trustId && null !== role && null !== address) ? ethers.utils.parseBytes32String(
         await Notary.actorAliases(ledgerAddress, trustId, role, address) 
     ) : '';
@@ -82,9 +85,10 @@ export function useSetTrustedLedgerRole(rootKeyId, trustId, role, address, trust
  */
 export function useWithdrawalAllowance(ledgerProvider, key, arn) {
   const provider = useProvider();
+  const network = useNetwork();
   const ledgerAddress = Locksmith.getContractAddress('Ledger');
   const Notary = useContract(Locksmith.getContract('Notary', provider));
-  return useQuery('useWithdrawalAllowance for ' + ledgerProvider + " " + key + " " + arn, async function() {
+  return useQuery('useWithdrawalAllowance for ' + network.chain.id + ledgerProvider + " " + key + " " + arn, async function() {
     if(ledgerProvider === null || key === null || arn === null) {
       return 0;
     }

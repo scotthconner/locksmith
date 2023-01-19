@@ -1,6 +1,7 @@
 import Locksmith from '../services/Locksmith.js';
 import {useQuery} from 'react-query';
 import {
+  useNetwork,
   useProvider,
   useContract,
   usePrepareContractWrite,
@@ -20,8 +21,9 @@ import {ethers} from 'ethers';
  */
 export function useEventKey(eventHash) {
   const provider = useProvider();
+  const network = useNetwork();
   const KeyOracle = useContract(Locksmith.getContract('KeyOracle', provider));
-  return useQuery('getOracleKey for ' + eventHash, async function() {
+  return useQuery('getOracleKey for ' + network.chain.id + eventHash, async function() {
     return await KeyOracle.eventKeys(eventHash);
   });
 }
