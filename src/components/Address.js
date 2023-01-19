@@ -2,9 +2,6 @@ import {
   Button,
   useToast
 } from '@chakra-ui/react';
-import {
-  FiCopy
-} from 'react-icons/fi';
 
 
 export function DisplayAddress({address, ...rest}) {

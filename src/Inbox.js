@@ -1,14 +1,11 @@
 import {
   Box,
   Button,
-  Collapse,
   FormControl,
   FormErrorMessage,
   FormLabel,
   HStack,
   Input,
-  List,
-  ListItem,
   Modal,
   ModalBody,
   ModalContent,
@@ -41,11 +38,9 @@ import { QRCode } from 'react-qrcode-logo';
 import { 
   AiOutlineWarning,
   AiOutlineQuestion,
-  AiOutlineRobot,
 } from 'react-icons/ai';
 import { 
   FiCopy,
-  FiInbox,
   FiSend, 
 } from 'react-icons/fi';
 import { BiGhost } from 'react-icons/bi';
@@ -58,7 +53,7 @@ import { AssetResource } from './services/AssetResource.js';
 import Locksmith from './services/Locksmith.js';
 
 // Raw Hooks
-import { ethers, BigNumber } from 'ethers';
+import { ethers } from 'ethers';
 import { useKeyInboxAddress } from './hooks/PostOfficeHooks.js';
 import { 
   KEY_CONTEXT_ID,
@@ -69,7 +64,6 @@ import {
 import { 
   useKeyBalance,
   useInspectKey,
-  useKeyHolders,
   useSoulboundKeyAmounts,
   useTrustInfo,
 } from './hooks/LocksmithHooks.js';
@@ -259,7 +253,6 @@ const InboxAssetList = ({keyId, keyInfo, address, ...rest}) => {
 }
 
 const InboxAssetArn = ({keyId, keyInfo, address, arn, balance, ...rest}) => {
-  const boxColor = useColorModeValue('white', 'gray.800');
   const asset = AssetResource.getMetadata(arn);
   const assetPrice = useCoinCapPrice(asset.coinCapId);
   const formatted = ethers.utils.formatUnits(balance, asset.decimals);
@@ -279,29 +272,6 @@ const InboxAssetArn = ({keyId, keyInfo, address, arn, balance, ...rest}) => {
     <SendAssetDialog keyId={keyId} keyInfo={keyInfo} address={address} 
       arn={arn} disclosure={sendDisclosure}/>
   </>
-}
-
-const InboxAssetArnProviderList = ({keyId, keyInfo, arn, ...rest}) => {
-  const providers = useContextProviderRegistry(KEY_CONTEXT_ID, keyId, arn);
-  const stripeColor = useColorModeValue('gray.100', 'gray.700');
-
-  return <List>
-    {!providers.isSuccess && [...Array(2)].map((y,x) =>
-      <ListItem key={'lie-'+arn+x} padding='1em' width='100%' bg={x % 2 === 0 ? stripeColor : ''}>
-        <HStack spacing='1em'>
-          <Skeleton width='10em' height='1em'/>
-          <Spacer/>
-          <Skeleton width='3em' height='1em'/>
-        </HStack>
-      </ListItem>)}
-    {providers.isSuccess &&
-      providers.data.map((provider, x) => (
-        <ListItem key={'li-'+arn+provider} p='0.5em' width='100%'
-          bg={x % 2 === 0 ? stripeColor : ''}>
-          <KeyArnProvider keyId={keyId} keyInfo={keyInfo} arn={arn} provider={provider}/>
-        </ListItem>
-      ))
-    }</List>
 }
 
 export function KeyArnProvider({keyId, keyInfo, arn, provider, ...rest}) {
@@ -343,7 +313,6 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   // grab the asset list for the key
   const keyBalanceSheet = useContextBalanceSheet(KEY_CONTEXT_ID, keyId);
   const keyArns = keyBalanceSheet.isSuccess ? keyBalanceSheet.data[0] : [];
-  const keyArnBalances = keyBalanceSheet.isSuccess ? keyBalanceSheet.data[1] : [];
   
   // grab the arn providers for a given key assuming the arn is set.
   // NOTE: if this comes from the 'send' button and arn is null, it will default to
@@ -353,7 +322,7 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   const keyArnProviders = useContextProviderRegistry(KEY_CONTEXT_ID, keyId, selectedArn);
 
   // error conditions
-  const addressError = !ethers.utils.isAddress(selectedAddress) || selectedAddress == address;
+  const addressError = !ethers.utils.isAddress(selectedAddress) || selectedAddress === address;
   const amountError = !selectedProviderBalance.isSuccess || selectedProviderBalance.data.length < 1 ? true :
     rawAmount.gt(selectedProviderBalance.data[0]);
 
@@ -509,9 +478,9 @@ const TransactionUnroll = ({address, index, pageSize, depth, ...rest}) => {
     </HStack>
     { depth > 0 && index > 0 && 
       <TransactionUnroll address={address} index={index-1} pageSize={pageSize} depth={depth-1}/> }
-    { depth == 0 && index > 0 && !wantMore &&
+    { depth === 0 && index > 0 && !wantMore &&
       <Button onClick={() => {setWantMore(true);}}width='100%' size='lg'>More</Button> }
-    { depth == 0 && index > 0 && wantMore &&
+    { depth === 0 && index > 0 && wantMore &&
       <TransactionUnroll address={address} index={index-1} depth={pageSize} pageSize={pageSize}/> }
   </>
 }
