@@ -71,7 +71,7 @@ function Home() {
           <Button variant='ghost' colorScheme='twitter' leftIcon={<AiOutlineTwitter/>}
             onClick={() => window.open('https://twitter.com/LocksmithWallet')}>Twitter</Button>
           <Button variant='ghost' colorScheme='purple' leftIcon={<FaDiscord/>}
-            onClick={() => window.open('https://discord.gg/PErVhWqr')}>Discord</Button>
+            onClick={() => window.open('https://discord.gg/Drwrw4gmqP')}>Discord</Button>
           <Button variant='ghost' colorScheme='gray' leftIcon={<AiOutlineGithub/>}
             onClick={() => window.open('https://github.com/scotthconner?tab=repositories')}>Github</Button>
         </HStack>

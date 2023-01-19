@@ -42,7 +42,7 @@ export function Footer() {
           <Stack align={'flex-start'}>
             <ListHeader>Follow Us</ListHeader>
             <Link target='_blank' href={'https://twitter.com/LocksmithWallet'}>Twitter</Link>
-            <Link target='_blank' href={'https://discord.gg/PErVhWqr'}>Discord</Link>
+            <Link target='_blank' href={'https://discord.gg/Drwrw4gmqP'}>Discord</Link>
           </Stack>
         </SimpleGrid>
       </Container>

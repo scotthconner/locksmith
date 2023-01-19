@@ -35,20 +35,6 @@ import { Footer } from './Footer.js';
 import { TrustWizard } from './TrustWizard.js';
 import { Inbox } from './Inbox.js';
 
-const devnet = {
-  id: 31_415_926,
-  name: 'Filecoin',
-  network: 'Filecoin',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Filecoin',
-    symbol: 'FIL',
-  },
-  rpcUrls: { 
-    default: "http://127.0.0.1:1234/rpc/v0",
-  },
-};
-
 const hyperspace = {
   id: 3_141,
   name: 'Hyperspace',
@@ -65,7 +51,7 @@ const hyperspace = {
 
 // We are using alchemy for now
 // Choose which chains you'd like to show
-const {chains, provider, webSocketProvider} = configureChains([chain.goerli, chain.hardhat, hyperspace, devnet], [
+const {chains, provider, webSocketProvider} = configureChains([chain.goerli, chain.hardhat, hyperspace], [
   alchemyProvider({apiKey:'8TN4uRz1cIbyDUgHZ80u0tKdQA2Qsc8j'}),
   publicProvider(),
 ]);
