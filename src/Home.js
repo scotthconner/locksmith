@@ -16,6 +16,7 @@ import { CheckIcon } from '@chakra-ui/icons';
 import { AiOutlineTwitter, AiOutlineGithub } from 'react-icons/ai';
 import { FaDiscord, FaPaintBrush } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
+import { IoIosDocument } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 
 //////////////////////////////////////
@@ -66,7 +67,11 @@ function Home() {
         <Text pb='1em' color={'gray.600'} fontSize={'xl'}>
           Your Keys. Your Locks. Your Wallet. 
         </Text>
-        <Button leftIcon={<FaPaintBrush/>} colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Wallet</Button>
+        <HStack>
+          <Button leftIcon={<IoIosDocument/>} colorScheme='gray' 
+            onClick={() => { window.open('https://locksmith-wallet.gitbook.io/whitepaper/');}}>Read Whitepaper</Button> 
+          <Button leftIcon={<FaPaintBrush/>} colorScheme='blue' onClick={() => { navigate('/wizard'); }}>Design Wallet</Button>
+        </HStack>
         <HStack pt='1em'>
           <Button variant='ghost' colorScheme='twitter' leftIcon={<AiOutlineTwitter/>}
             onClick={() => window.open('https://twitter.com/LocksmithWallet')}>Twitter</Button>
