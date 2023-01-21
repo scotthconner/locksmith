@@ -63,10 +63,12 @@ import {
   useKeyBalance,
   useSoulboundKeyAmounts,
   useCopyKey,
-  useCreateKey,
   useBurnKey,
   useSoulbindKey,
 } from '../hooks/LocksmithHooks.js';
+import {
+  useMegaKeyCreator 
+} from '../hooks/MegaKeyCreatorHooks.js';
 import {
   useKeyInboxAddress
 } from '../hooks/PostOfficeHooks.js';
@@ -477,7 +479,10 @@ export function CreateKeyModal({trustId, rootKeyId, isOpen, onClose, ...rest}) {
       setAlias(e.target.value);
     }
   }
-  var createKey = useCreateKey(rootKeyId, alias, address, bind, 
+  
+  // note: when creating a key, we are ASSUMING default EtherVault Provider
+  var createKey = useMegaKeyCreator(rootKeyId, alias, Locksmith.getContractAddress('EtherVault'), 
+    address, bind, 
     function(error) {
       toast({
         title: 'Transaction Error!',

@@ -21,6 +21,7 @@ import * as alarmClock from "../contracts/dispatchers/AlarmClock.sol/AlarmClock.
 import * as trustee from "../contracts/scribes/Trustee.sol/Trustee.json";
 import * as creator from "../contracts/agents/TrustCreator.sol/TrustCreator.json";
 import * as postOffice from '../contracts/PostOffice.sol/PostOffice.json';
+import * as megaKey from '../contracts/agents/MegaKeyCreator.sol/MegaKeyCreator.json';
 import * as inbox from '../contracts/agents/VirtualKeyAddress.sol/VirtualKeyAddress.json';
 
 /**
@@ -57,6 +58,7 @@ const Locksmith = (function() {
     Trustee: trustee,
     TrustCreator: creator,
     VirtualKeyAddress: inbox,
+    MegaKeyCreator: megaKey,
     PostOffice: postOffice,
   };
 
