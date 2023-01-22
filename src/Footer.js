@@ -36,7 +36,7 @@ export function Footer() {
           </Stack>
           <Stack align={'flex-start'}>
             <ListHeader>Company</ListHeader>
-            <Link href={'#'}>About Us</Link>
+            <Link href={'https://locksmith-wallet.gitbook.io/whitepaper/team/about-the-team'}>About Us</Link>
             <Link href={'#'}>Terms of Service</Link>
           </Stack>
           <Stack align={'flex-start'}>
