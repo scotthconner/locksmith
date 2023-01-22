@@ -65,7 +65,7 @@ function Home() {
           <Heading fontSize={'5xl'}>cksmith</Heading>
         </HStack>
         <Text pb='1em' color={'gray.600'} fontSize={'xl'}>
-          Your Keys. Your Locks. Your Wallet. 
+          Keep your existing wallet. Extend it with Locksmith. 
         </Text>
         <HStack>
           <Button leftIcon={<IoIosDocument/>} colorScheme='gray' 
@@ -81,7 +81,6 @@ function Home() {
             onClick={() => window.open('https://github.com/scotthconner?tab=repositories')}>Github</Button>
         </HStack>
         <Heading pt='0.5em' fontSize='3xl'>The Next Generation Wallet is Virtual.</Heading>
-        <Text pt='0.5em' fontSize='lg'>Keep your existing wallet. Extend it with Locksmith.</Text>
       </VStack>
 
       <Container maxW={'6xl'} mt={10} mb='4em'>
