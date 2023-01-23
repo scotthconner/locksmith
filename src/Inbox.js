@@ -91,7 +91,7 @@ import { KeyIcon } from './components/KeyInfo.js';
 import { DisplayAddress } from './components/Address.js';
 import { ConnectWalletPrompt } from './components/Locksmith.js';
 export function InboxDirectory({...rest}) {
-  const {isConnected, address} = useAccount();
+  const {isConnected} = useAccount();
   const keys = useWalletKeys();
   return !isConnected ? <ConnectWalletPrompt/> : (
     !keys.isSuccess ? <VStack p='3em'><Spinner size='lg'/></VStack> :
@@ -387,13 +387,13 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   };
 
   // sending ethereum, only when arn is ethereum arn
-  const sendEth = {}; useSend(address, selectedArn === AssetResource.getGasArn() ? 
+  const sendEth = useSend(address, selectedArn === AssetResource.getGasArn() ? 
     selectedProvider || (keyArnProviders.data||[null])[0] : null, amountError ? null : rawAmount, selectedAddress, error, success);
   
   // sending erc-20
-  const sendToken = {}; /*useSendToken(address, selectedProvider || (keyArnProviders.data||[null])[0],
+  const sendToken = useSendToken(address, selectedProvider || (keyArnProviders.data||[null])[0],
     (asset||{}).standard === 20 ? asset.contractAddress : null,
-    amountError ? null : rawAmount, selectedAddress, error, success); */ 
+    amountError ? null : rawAmount, selectedAddress, error, success);
 
   const buttonProps = addressError || amountError || !selectedArn ? {isDisabled: true} : (
     sendEth.isLoading || sendToken.isLoading ? {isLoading: true} : {}); 
