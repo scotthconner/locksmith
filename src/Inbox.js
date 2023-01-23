@@ -93,7 +93,7 @@ import { ConnectWalletPrompt } from './components/Locksmith.js';
 export function InboxDirectory({...rest}) {
   const {isConnected} = useAccount();
   const keys = useWalletKeys();
-  return !isConnected ? <ConnectWalletPrompt/> : (
+  return !isConnected || (keys.isSuccess && keys.data.length < 1)? <ConnectWalletPrompt/> : (
     !keys.isSuccess ? <VStack p='3em'><Spinner size='lg'/></VStack> :
       <VStack>{keys.data.map((k) => <InboxChoice keyId={k} key={k}/>)}</VStack> 
   )
