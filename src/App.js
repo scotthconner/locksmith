@@ -33,7 +33,7 @@ import Events from './Events.js';
 import { Security } from './Security.js'
 import { Footer } from './Footer.js';
 import { TrustWizard } from './TrustWizard.js';
-import { Inbox } from './Inbox.js';
+import { Inbox, InboxDirectory } from './Inbox.js';
 
 const hyperspace = {
   id: 3_141,
@@ -86,7 +86,8 @@ function App() {
               <Route path='/trustees' element={<Trustees/>} />
               <Route path='/events' element={<Events/>} />
               <Route path='/wizard' element={<TrustWizard/>} />
-              <Route path='/key/:keyId/inbox' element={<Inbox/>} />
+              <Route path='/inbox/:keyId' element={<Inbox/>} />
+              <Route path='/inbox' element={<InboxDirectory/>} />
               <Route path='/security' element={<Security/>} />
             </Routes>
             <Footer/>

@@ -103,10 +103,10 @@ export function Trusts() {
   return !isConnected ? <ConnectWalletPrompt/> : (
     <Stack m='1em' spacing='1em'>
       <HStack width='100%'>
-        <Heading size='md'>Your Wallet Participation</Heading>
+        <Heading size='md'>Your Trust Participation</Heading>
         <Spacer/>
         <Button leftIcon={<IoIosAdd/>} colorScheme='blue'
-          onClick={() => { navigate('/wizard'); }}>Create Wallet</Button>
+          onClick={() => { navigate('/wizard'); }}>Create Trust</Button>
       </HStack>
       <Wrap padding='3em' spacing='2em' pb='6em'>
         {!trusts.isSuccess && <> 
@@ -121,7 +121,7 @@ export function Trusts() {
         </WrapItem></>}
         { trusts.isSuccess && trusts.data.length < 1 &&
           <VStack spacing='1em' width='100%'>
-            <Text fontSize='30px'>You have no wallets.</Text>
+            <Text fontSize='30px'>You have no trusts.</Text>
             <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Wallet</Button>
           </VStack>
         }
@@ -269,7 +269,7 @@ export function Trust() {
           {!trustBalanceSheet.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
             <HStack mt='1.5em'>
               <Text fontSize='lg'>
-                This wallet has <b>{trustArns.length}</b> asset&nbsp;
+                This trust has <b>{trustArns.length}</b> asset&nbsp;
                 {trustArns.length > 1 || trustArns.length === 0 ? 'types' : 'type'}.
               </Text>
               <Spacer/>
@@ -304,7 +304,7 @@ export function Trust() {
           {!trustInfo.isSuccess ? <Skeleton width='14em' height='1.1em' mt='1.5em'/> :
             <HStack mt='1.5em'>
               <Text fontSize='lg'>
-                This wallet has <b>{trustInfo.data.trustKeyCount.toString()}</b>&nbsp;
+                This trust has <b>{trustInfo.data.trustKeyCount.toString()}</b>&nbsp;
                 {trustInfo.data.trustKeyCount > 1 ? 'keys' : 'key'}.
               </Text>
               <Spacer/>
@@ -345,7 +345,7 @@ export function Trust() {
           {registeredEvents.isSuccess && <>
               <HStack mt='1.5em'>
                 <Text fontSize='lg'>
-                  This wallet has <b>{registeredEvents.data.length}</b>&nbsp;
+                  This trust has <b>{registeredEvents.data.length}</b>&nbsp;
                   {registeredEvents.data.length > 1 || 
                     registeredEvents.data.length === 0 ? 'events' : 'event'}.
                 </Text>
@@ -377,7 +377,7 @@ export function Trust() {
           }{ trustPolicyKeys.isSuccess && trustInfo.isSuccess &&
             <><HStack mt='1.5em'>
                 <Text fontSize='lg'>
-                  This wallet has <b>{trustPolicyKeys.data.length}</b> trustee&nbsp;
+                  This trust has <b>{trustPolicyKeys.data.length}</b> trustee&nbsp;
                   {trustPolicyKeys.data.length === 1 ? 'policy' : 'policies'}.
                 </Text>
                 <Spacer/>
@@ -407,7 +407,7 @@ export function Trust() {
             </VStack></> : <>
               <HStack mt='1.5em'> 
                 <Text fontSize='lg'>
-                  This wallet has <b>{trustedProviders.data.length}</b>&nbsp;
+                  This trust has <b>{trustedProviders.data.length}</b>&nbsp;
                   trusted collateral {trustedProviders.data.length > 1 || 
                     trustedProviders.data.length === 0 ? 'providers' : 'provider'}.
                 </Text>
@@ -449,7 +449,7 @@ export function Trust() {
             </VStack></> : <>
             <HStack mt='1.5em'>
               <Text fontSize='lg'>
-                This wallet has <b>{trustedScribes.data.length}</b> trusted ledger&nbsp;
+                This trust has <b>{trustedScribes.data.length}</b> trusted ledger&nbsp;
                 {trustedScribes.data.length > 1 || trustedScribes.data.length === 0 ? 'scribes' : 'scribe'}. 
               </Text>
               <Spacer/>
@@ -466,7 +466,7 @@ export function Trust() {
                   roleName='Scribe'
                   roleIcon={<RiQuillPenLine/>}>
                   <Text>By trusting a <b>scribe</b>, you enable that address&nbsp;
-                    to <b>distribute</b> funds between keys in your wallet. 
+                    to <b>distribute</b> funds between keys in your trust. 
                   </Text>
                 </AddTrustedLedgerActorModal>}
             </HStack>
@@ -492,7 +492,7 @@ export function Trust() {
             </VStack></> : <>
             <HStack mt='1.5em'>
               <Text fontSize='lg'>
-                This wallet has <b>{trustedDispatchers.data.length}</b> trusted event&nbsp; 
+                This trust has <b>{trustedDispatchers.data.length}</b> trusted event&nbsp; 
                 {trustedDispatchers.data.length === 1 ? 'dispatcher' : 'dispatchers'}.
               </Text>
               <Spacer/>
@@ -509,7 +509,7 @@ export function Trust() {
                   roleName='Event Dispatcher'
                   roleIcon={<AiOutlineRobot/>}>
                   <Text>By trusting a <b>dispatcher</b>, you enable that address&nbsp;
-                    to <b>register</b> and <b>fire</b> events in your wallet.
+                    to <b>register</b> and <b>fire</b> events in your trust.
                   </Text>
                 </AddTrustedLedgerActorModal>}
             </HStack>

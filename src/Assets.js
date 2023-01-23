@@ -84,8 +84,8 @@ function Assets() {
           </VStack> }
         { keys.isSuccess && keys.data.length < 1 && <VStack spacing='1em'>
           <Text fontSize='30px'>You have no keys, and thus - no assets.</Text>
-          <Text fontSize='30px' pb='1em'>Create a wallet to deposit funds.</Text>
-          <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Wallet</Button>
+          <Text fontSize='30px' pb='1em'>Create a trust to deposit funds.</Text>
+          <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Design Trust</Button>
         </VStack> }
         {(keys.isSuccess && keys.data.length > 0) && 
           <WalletBalanceSheet keys={keys.data} position={0} balanceSheet={{}}/>} 

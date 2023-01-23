@@ -19,6 +19,7 @@ import {
   FiMenu,
   FiShare2,
 } from 'react-icons/fi';
+import { AiOutlineWallet } from 'react-icons/ai';
 import { BiCoinStack } from 'react-icons/bi';
 import {
   HiOutlineKey,
@@ -44,7 +45,8 @@ interface LinkItemProps {
   href: string;
 }
 const LinkItems: Array<LinkItemProps> = [
-  { name: 'Wallets', icon: BsShieldLock, href: '/trusts'},
+  { name: 'Wallets', icon: AiOutlineWallet, href: '/inbox' },
+  { name: 'Trusts', icon: BsShieldLock, href: '/trusts'},
   { name: 'Keys', icon: HiOutlineKey, href: '/keys'},
   { name: 'Assets', icon: BiCoinStack, href: '/assets'},
   { name: 'Distribute', icon: FiShare2, href: '/trustees'},

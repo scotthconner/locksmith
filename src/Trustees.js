@@ -93,13 +93,13 @@ function Trustees() {
       ) } 
       { keys.isSuccess && keys.data.length < 1 && <VStack spacing='1em'>
         <Text fontSize='30px'>You have no keys.</Text>
-        <Text fontSize='30px' pb='1em'>Create a wallet and get a root key.</Text>
-        <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Create Wallet</Button>
+        <Text fontSize='30px' pb='1em'>Create a trust to get a root key.</Text>
+        <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Create Trust</Button>
       </VStack> }
       { keys.isSuccess && keys.data.map((k) => 
         <TrusteeKey keyId={k} key={'trustee-key-component-' + k}/>
       ) }
-      <Text fontSize='30px'>That's all, folks!</Text>
+      { keys.isSuccess && keys.data.length > 1 && <Text fontSize='30px'>That's all, folks!</Text> }
     </VStack>
   </Stack>
 }

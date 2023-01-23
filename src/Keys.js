@@ -93,15 +93,15 @@ function Keys() {
     keyBody = keys.data.length < 1 ?
       <VStack spacing='1em' width='100%'>
         <Text fontSize='30px'>You have no keys.</Text>
-        <Text pb='1em' fontSize='30px'>Design your wallet to create a root key.</Text>
-        <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Create Wallet</Button>
+        <Text pb='1em' fontSize='30px'>Design your trust to create a root key.</Text>
+        <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Create Trust</Button>
       </VStack> :
       (keys.data.map((k) => (<Key key={k} keyId={k}/>)));
   }
 
   return !isConnected ? <ConnectWalletPrompt/> : 
     <Stack m='1em' spacing='1em'>
-      <Heading size='md'>Keys in Your Wallet</Heading>
+      <Heading size='md'>Your Keys</Heading>
       <Wrap padding='3em' spacing='2em' pb='6em'>
         {keyBody}
       </Wrap>
@@ -228,7 +228,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
               <Tag colorScheme='purple'><TagLabel>{keyInfo.data.soulbound.toString()} × Soulbound</TagLabel></Tag>}
           </VStack>
           <VStack ml='1em' spacing='0.1em' align='stretch'>
-            <Text><b>Wallet Name:</b> {keyInfo.data.trust.name}</Text>
+            <Text><b>Trust Name:</b> {keyInfo.data.trust.name}</Text>
             <Text><b>Key Alias:</b> {keyInfo.data.alias}</Text>
             <Text><b>Key ID:</b> {keyInfo.data.keyId}</Text>
             <HStack>
@@ -242,7 +242,7 @@ const KeyDetailBody = ({keyInfo, onClose, ...rest}: KeyProps) => {
           <Spacer/>
           <VStack>
             <Link to={'/trust/' + keyInfo.data.trust.id + '/keys/'}>
-              <Button colorScheme='gray' leftIcon={<BsEye/>}>See Wallet</Button>
+              <Button colorScheme='gray' leftIcon={<BsEye/>}>See Trust</Button>
             </Link>
             {!transferBound && (
               <Button colorScheme='blue' 

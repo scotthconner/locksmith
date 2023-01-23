@@ -43,6 +43,7 @@ import {
   FiCopy,
   FiSend, 
 } from 'react-icons/fi';
+import { AiOutlineNumber } from 'react-icons/ai';
 import { BiGhost } from 'react-icons/bi';
 import { ImQrcode } from 'react-icons/im';
 import { BsShieldLock } from 'react-icons/bs';
@@ -54,6 +55,7 @@ import Locksmith from './services/Locksmith.js';
 
 // Raw Hooks
 import { ethers } from 'ethers';
+import { useNavigate } from 'react-router-dom';
 import { useKeyInboxAddress } from './hooks/PostOfficeHooks.js';
 import { 
   KEY_CONTEXT_ID,
@@ -62,6 +64,7 @@ import {
   useContextArnBalances,
 } from './hooks/LedgerHooks.js';
 import { 
+  useWalletKeys,
   useKeyBalance,
   useInspectKey,
   useSoulboundKeyAmounts,
@@ -86,6 +89,40 @@ import {
 import { ContextBalanceUSD } from './components/Trust.js';
 import { KeyIcon } from './components/KeyInfo.js';
 import { DisplayAddress } from './components/Address.js';
+import { ConnectWalletPrompt } from './components/Locksmith.js';
+export function InboxDirectory({...rest}) {
+  const {isConnected, address} = useAccount();
+  const keys = useWalletKeys();
+  return !isConnected ? <ConnectWalletPrompt/> : (
+    !keys.isSuccess ? <VStack p='3em'><Spinner size='lg'/></VStack> :
+      <VStack>{keys.data.map((k) => <InboxChoice keyId={k} key={k}/>)}</VStack> 
+  )
+}
+
+const InboxChoice = ({keyId, ...rest}) => {
+  const boxColor = useColorModeValue('white', 'gray.800');
+  const keyInfo = useInspectKey(keyId);
+  const navigate = useNavigate();
+
+  return !keyInfo.isSuccess ? <Skeleton width='90%' height='3em'/> : <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'
+      border={keyInfo.data.isRoot ? '2px' : '0px'}
+      borderColor={keyInfo.data.isRoot ? 'yellow.400' : 'white'}
+      onClick={() => { navigate('/inbox/' + keyId.toString()); }}
+      _hover= {{
+        transform: 'scale(1.1)',
+      }}>
+     <HStack>
+       <Tag>
+         <TagLeftIcon boxSize='12px' as={AiOutlineNumber} />
+         <TagLabel>{keyId.toString()}</TagLabel>
+       </Tag>
+       <Text><b>{keyInfo.data.alias}</b></Text>
+       <Spacer/>
+       <ContextBalanceUSD contextId={KEY_CONTEXT_ID} 
+         identifier={keyId}/>
+     </HStack>
+  </Box>
+}
 
 export function Inbox({...rest}) {
   const { keyId } = useParams();
@@ -295,7 +332,7 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   const toast = useToast();
 
   // form inputs
-  const [selectedArn, setSelectedArn] = useState(arn);
+  const [selectedArn, setSelectedArn] = useState(arn||AssetResource.getGasArn());
   const [selectedProvider, setSelectedProvider] = useState(null); 
   const [selectedAmount, setSelectedAmount] = useState('0'); // this will be in "units" by decimal, not wei.
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -350,13 +387,13 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   };
 
   // sending ethereum, only when arn is ethereum arn
-  const sendEth = useSend(address, selectedArn === AssetResource.getGasArn() ? 
+  const sendEth = {}; useSend(address, selectedArn === AssetResource.getGasArn() ? 
     selectedProvider || (keyArnProviders.data||[null])[0] : null, amountError ? null : rawAmount, selectedAddress, error, success);
   
   // sending erc-20
-  const sendToken = useSendToken(address, selectedProvider || (keyArnProviders.data||[null])[0],
+  const sendToken = {}; /*useSendToken(address, selectedProvider || (keyArnProviders.data||[null])[0],
     (asset||{}).standard === 20 ? asset.contractAddress : null,
-    amountError ? null : rawAmount, selectedAddress, error, success); 
+    amountError ? null : rawAmount, selectedAddress, error, success); */ 
 
   const buttonProps = addressError || amountError || !selectedArn ? {isDisabled: true} : (
     sendEth.isLoading || sendToken.isLoading ? {isLoading: true} : {}); 
