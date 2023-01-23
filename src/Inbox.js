@@ -93,9 +93,16 @@ import { ConnectWalletPrompt } from './components/Locksmith.js';
 export function InboxDirectory({...rest}) {
   const {isConnected} = useAccount();
   const keys = useWalletKeys();
-  return !isConnected || (keys.isSuccess && keys.data.length < 1)? <ConnectWalletPrompt/> : (
+  const navigate = useNavigate();
+
+  return !isConnected ? <ConnectWalletPrompt/> : (
     !keys.isSuccess ? <VStack p='3em'><Spinner size='lg'/></VStack> :
-      <VStack>{keys.data.map((k) => <InboxChoice keyId={k} key={k}/>)}</VStack> 
+    (keys.data.length < 1 ? 
+      <VStack spacing='1em' width='100%' p='3em'>
+        <Text fontSize='30px'>You have no keys.</Text>
+        <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Create Trust</Button>
+      </VStack>
+    : <VStack>{keys.data.map((k) => <InboxChoice keyId={k} key={k}/>)}</VStack>)
   )
 }
 
