@@ -1,16 +1,20 @@
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
   FormErrorMessage,
   FormLabel,
   HStack,
   Input,
+  List,
+  ListItem,
   Modal,
   ModalBody,
   ModalContent,
   ModalCloseButton,
   ModalHeader,
+  ModalFooter,
   ModalOverlay,
   Tabs,
   TabList,
@@ -56,6 +60,7 @@ import Locksmith from './services/Locksmith.js';
 // Raw Hooks
 import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
+import { useBalance } from 'wagmi';
 import { useKeyInboxAddress } from './hooks/PostOfficeHooks.js';
 import { 
   KEY_CONTEXT_ID,
@@ -75,6 +80,7 @@ import {
   useInboxTransaction,
   useSend,
   useSendToken,
+  useAcceptTokenBatch
 } from './hooks/VirtualKeyAddressHooks.js';
 import {
   useTrustedActorAlias,
@@ -114,6 +120,7 @@ const InboxChoice = ({keyId, ...rest}) => {
   return !keyInfo.isSuccess ? <Skeleton width='90%' height='3em'/> : <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'
       border={keyInfo.data.isRoot ? '2px' : '0px'}
       borderColor={keyInfo.data.isRoot ? 'yellow.400' : 'white'}
+      cursor='pointer'
       onClick={() => { navigate('/inbox/' + keyId.toString()); }}
       _hover= {{
         transform: 'scale(1.1)',
@@ -159,6 +166,7 @@ const VirtualKeyInbox = ({keyId, keyInfo, address, ...rest}) => {
   return <>
     <InboxHeader keyId={keyId} keyInfo={keyInfo} address={address}/>
     <InboxAssetBalance keyId={keyId} keyInfo={keyInfo} address={address}/>
+    <TokenAcceptBox keyId={keyId} keyInfo={keyInfo} address={address}/>
     <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'>
       <Tabs isLazy isFitted defaultIndex={['assets','transactions'].indexOf(tab)}>
         <TabList>
@@ -178,6 +186,137 @@ const VirtualKeyInbox = ({keyId, keyInfo, address, ...rest}) => {
       </Tabs>
     </Box>
   </>
+}
+
+const TokenAcceptBox = ({keyId, keyInfo, address, ...rest}) => {
+  // at this address, we are going to check the balance of any known
+  // ERC20 that is in our asset resource bin.
+  var assets = AssetResource.getMetadata();
+  var tokens = Object.keys(assets)
+    .map((arn) => assets[arn].standard === 20 ? assets[arn].contractAddress : null)
+    .filter((ca) => ca !== null); 
+  
+  return <RecursiveAcceptBox keyId={keyId} keyInfo={keyInfo}
+    address={address} tokens={tokens} position={0} balanceCount={0}/> 
+}
+
+const RecursiveAcceptBox = ({keyId, keyInfo, address, tokens, position, balanceCount}) => {
+  // first thing we want to do is get the ERC20 balance
+  // of the inbox address for the position token
+  const balance = useBalance({
+    addressOrName: address, 
+    token: tokens[position] 
+  });
+  // we try to see if we have a non-zero balance for this token
+  const myBalanceCount = balanceCount + 
+    (balance.isSuccess && balance.data.value.gt(0) ? 1 : 0);
+
+  return position >= (tokens.length-1) ?
+    <FinalAcceptBoxDisplay keyId={keyId} keyInfo={keyInfo} address={address}
+      balanceCount={myBalanceCount} tokens={tokens}/> :
+    <RecursiveAcceptBox keyId={keyId} keyInfo={keyInfo} address={address}
+      tokens={tokens} position={position+1} balanceCount={myBalanceCount}/>
+}
+
+const FinalAcceptBoxDisplay = ({keyId, keyInfo, address, tokens, balanceCount, ...rest}) => {
+  const boxColor = useColorModeValue('white', 'gray.800');
+  const modalDisclosure = useDisclosure();
+
+  return balanceCount > 0 && 
+      <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'>
+        <HStack>
+          <Text>You have tokens to accept.</Text>
+          <Spacer/>
+          <Button onClick={() => { modalDisclosure.onOpen(); }}>Review</Button>
+          <ReviewTokenModal keyId={keyId} keyInfo={keyInfo} address={address} tokens={tokens}
+            disclosure={modalDisclosure}/>
+        </HStack>
+      </Box>
+}
+
+const ReviewTokenModal = ({keyId, keyInfo, address, tokens, disclosure, ...rest}) => {
+  const toast = useToast();
+  const [selectedTokens, setSelectedTokens] = useState([]);
+
+  const addToken = function(token) {
+    setSelectedTokens([token, selectedTokens].flat());
+  };
+
+  const removeToken = function(token) {
+    setSelectedTokens(selectedTokens.filter((t) => t !== token));
+  };
+
+  const sweepTokens = useAcceptTokenBatch(address, selectedTokens,
+    function(error) {
+      toast({
+        title: 'Transaction Error!',
+        description: error.toString(),
+        status: 'error',
+        duration: 9000,
+        isClosable: true
+      });
+    },
+    function(data) {
+      Locksmith.watchHash(data.hash);
+      toast({
+        title: 'Accepted!',
+        description: 'The tokens have been deposited.',
+        status: 'success',
+        duration: 9000,
+        isClosable: true
+      });
+      disclosure.onClose();
+    }
+  );
+
+  const buttonProps = selectedTokens.length < 1 ? {isDisabled: true} : (
+    sweepTokens.isLoading ? {isLoading: true } : {} 
+  );
+
+  return <Modal isOpen={disclosure.isOpen} onClose={disclosure.onClose} isCentered size='xl'>
+    <ModalOverlay backdropFilter='blur(10px)'/>
+    <ModalContent>
+      <ModalHeader>Accept Token Review</ModalHeader>
+      <ModalCloseButton />
+      <ModalBody>
+        <List spacing='2em'>
+          { tokens.map((t) => <ListItem key={'aac-'+t}>
+            <AssetApprovalChoice token={t} address={address} addToken={addToken} removeToken={removeToken}/>
+          </ListItem>) }
+        </List>
+      </ModalBody>
+      <ModalFooter>
+        <Button {... buttonProps} 
+          onClick={() => { sweepTokens.write?.(); }}
+          leftIcon={<RiSafeLine/>} colorScheme='yellow'>Deposit</Button>
+      </ModalFooter>
+    </ModalContent>
+  </Modal>
+}
+
+const AssetApprovalChoice = ({token, address, addToken, removeToken, ...rest}) => {
+  const asset = AssetResource.getMetadata(AssetResource.getTokenArn(token));
+  const balance = useBalance({
+    addressOrName: address,
+    token: token 
+  });
+  return !balance.isSuccess ? <Skeleton width='100%' height='3em'/> : (
+    balance.data.value.gt(0) ? <HStack>
+      <Checkbox value={token} size='lg'
+        onChange={(e) => {
+          if (e.target.checked) {
+            addToken(token);
+          } else {
+            removeToken(token);
+          }
+          return false; 
+        }}><HStack>
+      {asset.icon()}
+      <Text>{asset.name}</Text></HStack>
+    </Checkbox>
+    <Spacer/>
+    <Text>{balance.data.formatted} {asset.symbol}</Text>
+    </HStack> : '');
 }
 
 const InboxHeader= ({keyId, keyInfo, address, ...rest}) => {

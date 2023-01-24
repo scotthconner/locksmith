@@ -91,3 +91,32 @@ export function useSendToken(inboxAddress, provider, token, amount, destination,
     }
   });
 }
+
+export function useAcceptTokenBatch(inboxAddress, tokens, errorFunc, successFunc) {
+  const provider = useProvider();
+  const inbox = useContract(Locksmith.getContract('VirtualKeyAddress', provider, inboxAddress));
+
+  // we are going to make an assumption they are using the token
+  // vault for now
+  const tokenVault = Locksmith.getContractAddress('TokenVault');
+
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('VirtualKeyAddress', 'multicall',
+      [[], tokens.map((t) => {
+        return {
+          target: inboxAddress,
+          callData: inbox.interface.encodeFunctionData("acceptToken", [t, tokenVault]),
+          msgValue: 0
+        }
+      })],
+      tokens.length > 0 && inboxAddress, inboxAddress))
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  }); 
+}
