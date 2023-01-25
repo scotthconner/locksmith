@@ -108,7 +108,7 @@ export function InboxDirectory({...rest}) {
         <Text fontSize='30px'>You have no keys.</Text>
         <Button colorScheme='blue' onClick={() => {navigate('/wizard');}}>Create Trust</Button>
       </VStack>
-    : <VStack>{keys.data.map((k) => <InboxChoice keyId={k} key={k}/>)}</VStack>)
+    : <VStack mb='2em'>{keys.data.map((k) => <InboxChoice keyId={k} key={k}/>)}</VStack>)
   )
 }
 
