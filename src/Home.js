@@ -65,7 +65,7 @@ function Home() {
           <Heading fontSize={'5xl'}>cksmith</Heading>
         </HStack>
         <Text pb='1em' color={'gray.600'} fontSize={'xl'}>
-          Keep your existing wallet. Extend it with Locksmith. 
+          Keep your wallet. Build your trust with Locksmith. 
         </Text>
         <HStack>
           <Button leftIcon={<IoIosDocument/>} colorScheme='gray' 
