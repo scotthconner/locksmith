@@ -16,7 +16,7 @@ export function useKeyInboxAddress(keyId) {
   const provider = useProvider();
   const network = useNetwork();
   const postOffice = useContract(Locksmith.getContract('PostOffice', provider));
-  return useQuery('PostOffice::getKeyId-' + network.chain.id + keyId, async function() {
+  return useQuery('PostOffice::getKeyId-' + (network.chain||{id: 0}).id + keyId, async function() {
       return await postOffice.getKeyInbox(keyId);
   });
 }

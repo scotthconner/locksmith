@@ -28,7 +28,7 @@ export function useTrustedActors(trustId, role, ledgerContractAlias = 'Ledger') 
   const network = useNetwork();
   const ledgerAddress = Locksmith.getContractAddress(ledgerContractAlias); 
   const Notary = useContract(Locksmith.getContract('Notary', provider));
-  return useQuery('getTrustedActors for ' + network.chain.id + trustId + " " + role + " " + ledgerAddress, async function() {
+  return useQuery('getTrustedActors for ' + (network.chain||{id: 0}).id + trustId + " " + role + " " + ledgerAddress, async function() {
     return await Notary.getTrustedActors(ledgerAddress, trustId, role);
   });
 }
@@ -43,7 +43,7 @@ export function useTrustedActorAlias(trustId, role, address, ledgerContractAlias
   const network = useNetwork();
   const ledgerAddress = Locksmith.getContractAddress(ledgerContractAlias);
   const Notary = useContract(Locksmith.getContract('Notary', provider));
-  return useQuery('getTrustedActorAlias for ' + network.chain.id + trustId + " " + role + " " + address + " " + ledgerAddress, async function() {
+  return useQuery('getTrustedActorAlias for ' + (network.chain||{id: 0}).id + trustId + " " + role + " " + address + " " + ledgerAddress, async function() {
     return (null !== trustId && null !== role && null !== address) ? ethers.utils.parseBytes32String(
         await Notary.actorAliases(ledgerAddress, trustId, role, address) 
     ) : '';
@@ -88,7 +88,7 @@ export function useWithdrawalAllowance(ledgerProvider, key, arn) {
   const network = useNetwork();
   const ledgerAddress = Locksmith.getContractAddress('Ledger');
   const Notary = useContract(Locksmith.getContract('Notary', provider));
-  return useQuery('useWithdrawalAllowance for ' + network.chain.id + ledgerProvider + " " + key + " " + arn, async function() {
+  return useQuery('useWithdrawalAllowance for ' + (network.chain||{id: 0}).id + ledgerProvider + " " + key + " " + arn, async function() {
     if(ledgerProvider === null || key === null || arn === null) {
       return 0;
     }

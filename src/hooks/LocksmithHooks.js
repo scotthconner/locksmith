@@ -28,7 +28,7 @@ export function useWalletKeys(address) {
   const provider   = useProvider();
   const network    = useNetwork();
   const KeyVault   = useContract(Locksmith.getContract('KeyVault', provider));
-  const walletKeys = useQuery('walletKeys for ' + network.chain.id + wallet, async function() {
+  const walletKeys = useQuery('walletKeys for ' + ((network.chain||{id: 0})||{id: 0}).id + wallet, async function() {
     return await KeyVault.getKeys(wallet);
   });
 
@@ -52,7 +52,7 @@ export function useWalletTrusts(address) {
   const network    = useNetwork();
   const KeyVault   = useContract(Locksmith.getContract('KeyVault', provider));
   const locksmith  = useContract(Locksmith.getContract('Locksmith', provider));
-  return useQuery('wallet trusts for ' + network.chain.id + wallet, async function() {
+  return useQuery('wallet trusts for ' + (network.chain||{id: 0}).id + wallet, async function() {
     // here are the trust IDs we want to ultimately return
     let walletTrusts = [];
 
@@ -93,7 +93,7 @@ export function useKeyBalance(keyId, address) {
   const provider   = useProvider();
   const network    = useNetwork();
   const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  return useQuery('keyBalance for ' + network.chain.id + keyId + ' with holder ' + address, async function() {
+  return useQuery('keyBalance for ' + (network.chain||{id: 0}).id + keyId + ' with holder ' + address, async function() {
     return keyId ? await KeyVault.balanceOf(address, keyId) : 0;
   });
 }
@@ -107,7 +107,7 @@ export function useSoulboundKeyAmounts(keyId, address) {
   const provider   = useProvider();
   const network    = useNetwork();
   const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  return useQuery('soulbound count for ' + network.chain.id + keyId + ' with holder ' + address, async function() {
+  return useQuery('soulbound count for ' + (network.chain||{id: 0}).id + keyId + ' with holder ' + address, async function() {
     return await KeyVault.keyBalanceOf(address, keyId, true);
   });
 }
@@ -121,7 +121,7 @@ export function useKeySupply(keyId) {
   const provider   = useProvider();
   const network    = useNetwork();
   const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  return useQuery('key count for ' + network.chain.id + keyId, async function() { 
+  return useQuery('key count for ' + (network.chain||{id: 0}).id + keyId, async function() { 
     return await KeyVault.keySupply(keyId);
   });
 }
@@ -135,7 +135,7 @@ export function useInspectKey(keyId) {
   const provider   = useProvider();
   const network    = useNetwork();
   const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
-  return useQuery('inspectKey for ' + network.chain.id + keyId, async function() {
+  return useQuery('inspectKey for ' + (network.chain||{id: 0}).id + keyId, async function() {
     if(null === keyId || keyId === '') { return null; }
 
     let response = await locksmith.inspectKey(keyId);
@@ -167,7 +167,7 @@ export function useKeyInfo(keyId, address = null) {
   const network    = useNetwork();
   const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
   const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  const keyInfo = useQuery('keyInfo for ' + network.chain.id + keyId + ' with holder ' + address, async function() {
+  const keyInfo = useQuery('keyInfo for ' + (network.chain||{id: 0}).id + keyId + ' with holder ' + address, async function() {
     let trust = null;
     let held = null;
     let soulboundCount = null;
@@ -217,7 +217,7 @@ export function useKeyHolders(keyId) {
   const provider = useProvider();
   const network  = useNetwork();
   const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  const keyHolders = useQuery('keyHolders for ' + network.chain.id + keyId, async function() {
+  const keyHolders = useQuery('keyHolders for ' + (network.chain||{id: 0}).id + keyId, async function() {
     return await KeyVault.getHolders(keyId);
   });
   return keyHolders;
@@ -423,7 +423,7 @@ export function useTrustInfo(trustId) {
   const network   = useNetwork();
   const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
 
-  const trustInfo = useQuery('trust for ' + network.chain.id + trustId, async function() {
+  const trustInfo = useQuery('trust for ' + (network.chain||{id: 0}).id + trustId, async function() {
     if( null === trustId ) {
       return {};
     }
@@ -454,7 +454,7 @@ export function useTrustKeys(trustId) {
   const network   = useNetwork();
   const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
 
-  const trustKeys = useQuery('getKeys for trust ' + network.chain.id + trustId, async function() {
+  const trustKeys = useQuery('getKeys for trust ' + (network.chain||{id: 0}).id + trustId, async function() {
     // if the input is invalid just forget it  
     return trustId == null ? [] : await locksmith.getKeys(trustId.toString());
   })

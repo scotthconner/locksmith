@@ -20,7 +20,7 @@ export function useTrustPolicyKeys(trustId) {
   const provider = useProvider();
   const network = useNetwork();
   const Trustee = useContract(Locksmith.getContract('Trustee', provider));
-  return useQuery('getTrustPolicyKeys for ' + network.chain.id + trustId, async function() {
+  return useQuery('getTrustPolicyKeys for ' + (network.chain||{id: 0}).id + trustId, async function() {
     return await Trustee.getTrustPolicyKeys(trustId);
   });
 }
@@ -41,7 +41,7 @@ export function usePolicy(keyId) {
   const provider = useProvider();
   const network = useNetwork();
   const Trustee = useContract(Locksmith.getContract('Trustee', provider));
-  return useQuery('usePolicy for ' + network.chain.id + keyId, async function() {
+  return useQuery('usePolicy for ' + (network.chain||{id: 0}).id + keyId, async function() {
     return await Trustee.getPolicy(keyId);
   });
 }

@@ -27,7 +27,7 @@ export function useTokenAllowance(tokenAddress, userAddress) {
   // will break for test-net.
   const token = useContract(Locksmith.getContract('ShadowERC', provider));
   
-  return useQuery('useTokenAllowance' + network.chain.id + tokenAddress + userAddress, async function() {
+  return useQuery('useTokenAllowance' + (network.chain||{id: 0}).id + tokenAddress + userAddress, async function() {
     return tokenAddress !== null ? await token.attach(tokenAddress).allowance(userAddress, tokenVault) :
       ethers.constants.MaxUint256; // if the token address is null, its ether so allowance isn't needed
   });

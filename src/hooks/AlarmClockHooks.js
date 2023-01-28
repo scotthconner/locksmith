@@ -18,7 +18,7 @@ export function useAlarm(eventHash) {
   const provider = useProvider();
   const network = useNetwork(); 
   const AlarmClock = useContract(Locksmith.getContract('AlarmClock', provider));
-  return useQuery('alarms for ' + network.chain.id + eventHash, async function() {
+  return useQuery('alarms for ' + (network.chain||{id: 0}).id + eventHash, async function() {
     var response = await AlarmClock.alarms(eventHash);
     return {
       eventHash: response[0],

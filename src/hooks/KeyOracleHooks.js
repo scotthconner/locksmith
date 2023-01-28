@@ -23,7 +23,7 @@ export function useEventKey(eventHash) {
   const provider = useProvider();
   const network = useNetwork();
   const KeyOracle = useContract(Locksmith.getContract('KeyOracle', provider));
-  return useQuery('getOracleKey for ' + network.chain.id + eventHash, async function() {
+  return useQuery('getOracleKey for ' + (network.chain||{id: 0}).id + eventHash, async function() {
     return await KeyOracle.eventKeys(eventHash);
   });
 }

@@ -24,7 +24,7 @@ export function useContextArnRegistry(context, context_id, collateralProvider = 
   const provider = useProvider();
   const network = useNetwork();
   const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery('getContextArnRegistry ' + network.chain.id + context + ' ' + context_id + ' ' + collateralProvider, async function() {
+  return useQuery('getContextArnRegistry ' + (network.chain||{id: 0}).id + context + ' ' + context_id + ' ' + collateralProvider, async function() {
     return await Ledger.getContextArnRegistry(context, context_id, collateralProvider);
   });
 }
@@ -39,7 +39,7 @@ export function useContextProviderRegistry(context, context_id, arn = ethers.con
   const provider = useProvider();
   const network = useNetwork();
   const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery('getContextProviderRegistry ' + network.chain.id + context + ' ' + context_id + ' ' + arn, async function() {
+  return useQuery('getContextProviderRegistry ' + (network.chain||{id: 0}).id + context + ' ' + context_id + ' ' + arn, async function() {
     return await Ledger.getContextProviderRegistry(context, context_id, arn);
   });
 }
@@ -54,7 +54,7 @@ export function useContextArnBalances(context, context_id, arns, collateralProvi
   const provider = useProvider();
   const network = useNetwork();
   const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery('getContextArnBalance ' + network.chain.id + context + context_id + 
+  return useQuery('getContextArnBalance ' + (network.chain||{id: 0}).id + context + context_id + 
     arns + collateralProvider, async function() {
       return arns ? await Ledger.getContextArnBalances(context, context_id, collateralProvider, arns) : [];
   });
@@ -71,7 +71,7 @@ export function useContextBalanceSheet(context, context_id, collateralProvider =
   const provider = useProvider();
   const network = useNetwork();
   const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery('getContextBalanceSheet' + network.chain.id + context + context_id + collateralProvider, async function() {
+  return useQuery('getContextBalanceSheet' + (network.chain||{id: 0}).id + context + context_id + collateralProvider, async function() {
       return context_id && collateralProvider ? 
         await Ledger.getContextBalanceSheet(context, context_id, collateralProvider) : [[],[]];
   });
@@ -87,7 +87,7 @@ export function useContextArnAllocations(context, context_id, arn) {
   const provider = useProvider();
   const network = useNetwork();
   const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery('getContextArnAllocations ' + network.chain.id + context + context_id + arn, async function() {
+  return useQuery('getContextArnAllocations ' + (network.chain||{id: 0}).id + context + context_id + arn, async function() {
       return context && context_id && arn ?
         await Ledger.getContextArnAllocations(context, context_id, arn) : [[],[]];
   });
