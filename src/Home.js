@@ -65,7 +65,7 @@ function Home() {
           <Heading fontSize={'5xl'}>cksmith</Heading>
         </HStack>
         <Text pb='1em' color={'gray.600'} fontSize={'xl'}>
-          Keep your wallet. Turn it into a bank.
+          Turn your wallet into a bank. 
         </Text>
         <HStack>
           <Button leftIcon={<IoIosDocument/>} colorScheme='gray' 
