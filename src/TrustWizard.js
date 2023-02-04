@@ -127,9 +127,9 @@ export function TrustWizard({...rest}) {
   
   return <Stack spacing='1em' p='1em'>
     <Stack spacing='1em' mb='3em'>
-      <Heading size='lg'>Design Your Trust</Heading>
-      <Text fontSize='xl'>Use the Locksmith key system to secure your assets <i>without</i> sharing your private key in just a few quick steps.</Text>
-      <Text fontSize='xl'>You will get a set of NFT keys, a vault to store your ether and ERC20s, and an optional trustee and deadman switch. You can re-configure your trust at any time.</Text>
+      <Heading size='lg'>Design Your Trust Model</Heading>
+      <Text fontSize='xl'>Permissions are attached to NFTs called keys. Let's make a few now to enable recovery.</Text>
+      <Text fontSize='xl'>Each key also acts as a virtual wallet that holds, sends, receives, and invests funds.</Text>
     </Stack>
     <Center><Progress hasStripe value={20 * (step + 1)} width='60%'/></Center>
     <Collapse in={(trustName.length === 0) || step === 0 || trustNameDisclosure.isOpen}>
@@ -323,8 +323,8 @@ const CreateBeneficiaries = ({trustName, beneficiaries, setBeneficiaries, step, 
 
   return <VStack spacing='2em' mt='2em'>
     <VStack>
-      <Text fontSize='xl'>Next, name some beneficiaries - and where to send their Trust Key.</Text>
-      <Text fontSize='xl'>These keys will have permission to take distributions from trustees you configure.</Text>
+      <Text fontSize='xl'>Next, name some beneficiaries.</Text>
+      <Text fontSize='xl'>These keys will have permission to receive recovered funds.</Text>
     </VStack>
     <List spacing='3em'>
       { beneficiaries.map((b, x) => 
@@ -388,7 +388,7 @@ const SetTrustee = ({trustee, setTrustee, step, changeStep}) => {
   const canNext = (trustee.sendToRoot || ethers.utils.isAddress(trustee.destination)) && trustee.alias.length > 0 
 
   return <VStack spacing='2em' pb='2em'> 
-    <Text fontSize='xl'>Do you want to add a trustee? A trustee is a key holder that can distribute funds to beneficiaries.</Text>
+    <Text fontSize='xl'>Do you want to add a recovery trustee? This key holder is responsible for the recovery process.</Text>
     <Box bg={boxColor} p='1em' borderRadius='lg' boxShadow='lg' minWidth='23em'> 
       <FormControl>
         <FormLabel>Trustee Name:</FormLabel>
