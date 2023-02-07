@@ -1,5 +1,6 @@
 import Locksmith from '../services/Locksmith.js';
 import {useQuery} from 'react-query';
+import { useCacheKey } from './LocksmithHooks.js';
 import {
   useNetwork,
   useProvider,
@@ -15,9 +16,8 @@ import {ethers} from 'ethers';
  */
 export function useTrustEventRegistry(trustId, dispatcher = ethers.constants.AddressZero) {
   const provider = useProvider();
-  const network = useNetwork();
   const TrustEventLog = useContract(Locksmith.getContract('TrustEventLog', provider));
-  return useQuery('getTrustEventRegistry for ' + (network.chain||{id: 0}).id + trustId + dispatcher, async function() {
+  return useQuery(useCacheKey('getTrustEventRegistry for ' + trustId + dispatcher), async function() {
     return await TrustEventLog.getRegisteredTrustEvents(trustId, dispatcher);
   });
 }
@@ -29,9 +29,8 @@ export function useTrustEventRegistry(trustId, dispatcher = ethers.constants.Add
  */
 export function useEventDescription(eventHash) {
   const provider = useProvider();
-  const network = useNetwork();
   const TrustEventLog = useContract(Locksmith.getContract('TrustEventLog', provider));
-  return useQuery('eventDescription for ' + (network.chain||{id: 0}).id + eventHash, async function() {
+  return useQuery(useCacheKey('eventDescription for ' + eventHash), async function() {
     return ethers.utils.parseBytes32String(await TrustEventLog.eventDescriptions(eventHash));
   });
 }
@@ -43,9 +42,8 @@ export function useEventDescription(eventHash) {
  */
 export function useEventDispatcher(eventHash) {
   const provider = useProvider();
-  const network = useNetwork();
   const TrustEventLog = useContract(Locksmith.getContract('TrustEventLog', provider));
-  return useQuery('eventDispatcher for ' + (network.chain||{id: 0}).id + eventHash, async function() {
+  return useQuery(useCacheKey('eventDispatcher for ' + eventHash), async function() {
     return await TrustEventLog.eventDispatchers(eventHash);
   });
 }
@@ -58,9 +56,8 @@ export function useEventDispatcher(eventHash) {
  */
 export function useEventState(eventHash) {
   const provider = useProvider();
-  const network = useNetwork();
   const TrustEventLog = useContract(Locksmith.getContract('TrustEventLog', provider));
-  return useQuery('firedEvents for ' + (network.chain||{id: 0}).id + eventHash, async function() {
+  return useQuery(useCacheKey('firedEvents for ' + eventHash), async function() {
     return eventHash ? await TrustEventLog.firedEvents(eventHash) : null;
   });
 }

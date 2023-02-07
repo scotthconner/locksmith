@@ -6,10 +6,23 @@ import {
   useAccount, 
   useProvider, 
   useContract,
+  useContractRead,
   usePrepareContractWrite,
   useContractWrite
 } from 'wagmi';
+import { useState } from 'react';
 import {ethers} from 'ethers';
+
+/**
+ * useCacheKey
+ *
+ * Encapsulates some of the salts needed to refresh
+ * large swaths of hooks across a frontend application.
+ */
+export function useCacheKey(cacheKey) {
+  const network = useNetwork();
+  return "" + ((network.chain||{id: 0}).id) + cacheKey;
+}
 
 /**
  * useWalletKeys
@@ -25,14 +38,8 @@ import {ethers} from 'ethers';
 export function useWalletKeys(address) {
   const account    = useAccount(); 
   const wallet     = address || account.address;
-  const provider   = useProvider();
-  const network    = useNetwork();
-  const KeyVault   = useContract(Locksmith.getContract('KeyVault', provider));
-  const walletKeys = useQuery('walletKeys for ' + ((network.chain||{id: 0})||{id: 0}).id + wallet, async function() {
-    return await KeyVault.getKeys(wallet);
-  });
-
-  return walletKeys;
+  return useContractRead(Locksmith.getContractRead('KeyVault', 'getKeys',
+    [wallet], wallet != null));
 }
 
 /**
@@ -49,10 +56,9 @@ export function useWalletTrusts(address) {
   const account    = useAccount();
   const wallet     = address || account.address;
   const provider   = useProvider();
-  const network    = useNetwork();
   const KeyVault   = useContract(Locksmith.getContract('KeyVault', provider));
   const locksmith  = useContract(Locksmith.getContract('Locksmith', provider));
-  return useQuery('wallet trusts for ' + (network.chain||{id: 0}).id + wallet, async function() {
+  return useQuery(useCacheKey('wallet trusts for ' + wallet), async function() {
     // here are the trust IDs we want to ultimately return
     let walletTrusts = [];
 
@@ -90,12 +96,9 @@ export function useWalletTrusts(address) {
  * Gets the key balance of an address
  **/
 export function useKeyBalance(keyId, address) {
-  const provider   = useProvider();
-  const network    = useNetwork();
-  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  return useQuery('keyBalance for ' + (network.chain||{id: 0}).id + keyId + ' with holder ' + address, async function() {
-    return keyId ? await KeyVault.balanceOf(address, keyId) : 0;
-  });
+  return useContractRead(Locksmith.getContractRead('KeyVault', 'balanceOf', 
+    [address, keyId],
+    keyId != null));
 }
 
 /**
@@ -104,12 +107,9 @@ export function useKeyBalance(keyId, address) {
  * Gets the soulbound count of an address
  **/
 export function useSoulboundKeyAmounts(keyId, address) {
-  const provider   = useProvider();
-  const network    = useNetwork();
-  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  return useQuery('soulbound count for ' + (network.chain||{id: 0}).id + keyId + ' with holder ' + address, async function() {
-    return await KeyVault.keyBalanceOf(address, keyId, true);
-  });
+  return useContractRead(Locksmith.getContractRead('KeyVault', 'keyBalanceOf', 
+    [address, keyId, true],
+    keyId != null && address != null));
 }
 
 /**
@@ -118,12 +118,9 @@ export function useSoulboundKeyAmounts(keyId, address) {
  * Returns the total number of keys for a given id.
  */
 export function useKeySupply(keyId) {
-  const provider   = useProvider();
-  const network    = useNetwork();
-  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  return useQuery('key count for ' + (network.chain||{id: 0}).id + keyId, async function() { 
-    return await KeyVault.keySupply(keyId);
-  });
+  return useContractRead(Locksmith.getContractRead('KeyVault', 'keySupply', 
+    [keyId],
+    keyId != null));
 }
 
 /**
@@ -133,9 +130,8 @@ export function useKeySupply(keyId) {
  */
 export function useInspectKey(keyId) {
   const provider   = useProvider();
-  const network    = useNetwork();
   const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
-  return useQuery('inspectKey for ' + (network.chain||{id: 0}).id + keyId, async function() {
+  return useQuery(useCacheKey('inspectKey for ' + keyId), async function() {
     if(null === keyId || keyId === '') { return null; }
 
     let response = await locksmith.inspectKey(keyId);
@@ -164,10 +160,9 @@ export function useInspectKey(keyId) {
  */
 export function useKeyInfo(keyId, address = null) {
   const provider   = useProvider();
-  const network    = useNetwork();
   const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
   const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  const keyInfo = useQuery('keyInfo for ' + (network.chain||{id: 0}).id + keyId + ' with holder ' + address, async function() {
+  const keyInfo = useQuery(useCacheKey('keyInfo for ' + keyId + ' with holder ' + address), async function() {
     let trust = null;
     let held = null;
     let soulboundCount = null;
@@ -214,13 +209,9 @@ export function useKeyInfo(keyId, address = null) {
  * Hook into the addresses holding the given key.
  */
 export function useKeyHolders(keyId) {
-  const provider = useProvider();
-  const network  = useNetwork();
-  const KeyVault = useContract(Locksmith.getContract('KeyVault', provider));
-  const keyHolders = useQuery('keyHolders for ' + (network.chain||{id: 0}).id + keyId, async function() {
-    return await KeyVault.getHolders(keyId);
-  });
-  return keyHolders;
+  return useContractRead(Locksmith.getContractRead('KeyVault', 'getHolders', 
+    [keyId],
+    keyId != null));
 }
 
 /**
@@ -420,10 +411,9 @@ export function useCreateKey(rootKeyId, keyName, receiver, bind, errorFunc, succ
  */
 export function useTrustInfo(trustId) {
   const provider  = useProvider();
-  const network   = useNetwork();
   const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
 
-  const trustInfo = useQuery('trust for ' + (network.chain||{id: 0}).id + trustId, async function() {
+  const trustInfo = useQuery(useCacheKey('trust for ' + trustId), async function() {
     if( null === trustId ) {
       return {};
     }
@@ -450,16 +440,9 @@ export function useTrustInfo(trustId) {
  * This is useful when chaining hooks. 
  */
 export function useTrustKeys(trustId) {
-  const provider  = useProvider();
-  const network   = useNetwork();
-  const locksmith = useContract(Locksmith.getContract('Locksmith', provider));
-
-  const trustKeys = useQuery('getKeys for trust ' + (network.chain||{id: 0}).id + trustId, async function() {
-    // if the input is invalid just forget it  
-    return trustId == null ? [] : await locksmith.getKeys(trustId.toString());
-  })
-
-  return trustKeys;
+  return useContractRead(Locksmith.getContractRead('Locksmith', 'getKeys', 
+    [trustId],
+    trustId != null));
 }
 
 export function usePendingHashes() {

@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import {
   useQuery
 } from 'react-query';
+import { useCacheKey } from './LocksmithHooks.js';
 import {
   useNetwork,
   useProvider,
@@ -19,7 +20,6 @@ import {
  */
 export function useTokenAllowance(tokenAddress, userAddress) {
   const provider   = useProvider();
-  const network = useNetwork();
   const tokenVault = Locksmith.getContractAddress('TokenVault');
   
   // we are going to cut a corner here. We should have an ERC20 ABI
@@ -27,7 +27,7 @@ export function useTokenAllowance(tokenAddress, userAddress) {
   // will break for test-net.
   const token = useContract(Locksmith.getContract('ShadowERC', provider));
   
-  return useQuery('useTokenAllowance' + (network.chain||{id: 0}).id + tokenAddress + userAddress, async function() {
+  return useQuery(useCacheKey('useTokenAllowance' + tokenAddress + userAddress), async function() {
     return tokenAddress !== null ? await token.attach(tokenAddress).allowance(userAddress, tokenVault) :
       ethers.constants.MaxUint256; // if the token address is null, its ether so allowance isn't needed
   });

@@ -1,5 +1,6 @@
 import Locksmith from '../services/Locksmith.js';
-import {useQuery} from 'react-query';
+import { useQuery } from 'react-query';
+import { useCacheKey } from './LocksmithHooks.js';
 import {
   useNetwork,
   useProvider,
@@ -16,9 +17,8 @@ import {ethers} from 'ethers';
  */
 export function useAlarm(eventHash) {
   const provider = useProvider();
-  const network = useNetwork(); 
   const AlarmClock = useContract(Locksmith.getContract('AlarmClock', provider));
-  return useQuery('alarms for ' + (network.chain||{id: 0}).id + eventHash, async function() {
+  return useQuery(useCacheKey('alarms for ' + eventHash), async function() {
     var response = await AlarmClock.alarms(eventHash);
     return {
       eventHash: response[0],

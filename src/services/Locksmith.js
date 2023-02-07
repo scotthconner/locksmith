@@ -104,6 +104,22 @@ const Locksmith = (function() {
       }
     },
     ////////////////////////////////////////////
+    // getContractRead
+    //
+    // Given a contract alias, produce a wagmi hash
+    // for the useContractRead hook
+    ////////////////////////////////////////////
+    getContractRead: function(contract, method, _args = [], _enabled = true, _watch = true) {
+      return {
+        addressOrName: Locksmith.getContractAddress(contract),
+        contractInterface: interfaces[contract].abi,
+        functionName: method,
+        args: _args,
+        watch: _watch,
+        enabled: _enabled
+      }
+    },
+    ////////////////////////////////////////////
     // getContractWrite
     //
     // Given a contract alias, produce the

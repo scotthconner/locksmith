@@ -52,7 +52,7 @@ const hyperspace = {
 // We are using alchemy for now
 // Choose which chains you'd like to show
 const {chains, provider, webSocketProvider} = configureChains([chain.goerli, chain.hardhat, hyperspace], [
-  alchemyProvider({apiKey:'8TN4uRz1cIbyDUgHZ80u0tKdQA2Qsc8j'}),
+  alchemyProvider({apiKey:'WSAWLyjeB3wKvm1lqL1umFKBoYzETSQ5'}),
   publicProvider(),
 ]);
 

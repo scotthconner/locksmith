@@ -1,5 +1,6 @@
 import Locksmith from '../services/Locksmith.js';
 import {useQuery} from 'react-query';
+import { useCacheKey } from './LocksmithHooks.js';
 import {
   useNetwork,
   useProvider,
@@ -15,9 +16,8 @@ import {
  */
 export function useInboxTransactionCount(address) {
   const provider = useProvider();
-  const network = useNetwork();
   const inbox = useContract(Locksmith.getContract('VirtualKeyAddress', provider, address));
-  return useQuery('VirtualKeyAddress::transactionCount at ' + (network.chain||{id: 0}).id + address , async function() {
+  return useQuery(useCacheKey('VirtualKeyAddress::transactionCount at ' + address), async function() {
     return address !== null ? await inbox.transactionCount() : 0;
   });
 }
@@ -29,9 +29,8 @@ export function useInboxTransactionCount(address) {
  */
 export function useInboxTransaction(address, index) {
   const provider = useProvider();
-  const network = useNetwork();
   const inbox = useContract(Locksmith.getContract('VirtualKeyAddress', provider, address));
-  return useQuery('VirtualKeyAddress::transactions at ' + (network.chain||{id: 0}).id + address + " " + index, async function() {
+  return useQuery(useCacheKey('VirtualKeyAddress::transactions at ' + address + " " + index), async function() {
     if (address === null) {
       return null;
     }
