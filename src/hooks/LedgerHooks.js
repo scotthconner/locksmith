@@ -47,12 +47,8 @@ export function useContextProviderRegistry(context, context_id, arn = ethers.con
  * level balance, or per-provider within the context if provided.
  */
 export function useContextArnBalances(context, context_id, arns, collateralProvider = ethers.constants.AddressZero) {
-  const provider = useProvider();
-  const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery(useCacheKey('getContextArnBalance ' + context + context_id + 
-    arns + collateralProvider), async function() {
-      return arns ? await Ledger.getContextArnBalances(context, context_id, collateralProvider, arns) : [];
-  });
+  return useContractRead(Locksmith.getContractRead('Ledger', 'getContextArnBalances',
+    [context, context_id, collateralProvider, arns], arns != null));
 }
 
 /**
@@ -63,12 +59,8 @@ export function useContextArnBalances(context, context_id, arns, collateralProvi
  * within the context if provided.
  */
 export function useContextBalanceSheet(context, context_id, collateralProvider = ethers.constants.AddressZero) {
-  const provider = useProvider();
-  const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery(useCacheKey('getContextBalanceSheet' + context + context_id + collateralProvider), async function() {
-      return context_id && collateralProvider ? 
-        await Ledger.getContextBalanceSheet(context, context_id, collateralProvider) : [[],[]];
-  });
+  return useContractRead(Locksmith.getContractRead('Ledger', 'getContextBalanceSheet',
+    [context, context_id, collateralProvider], context_id && collateralProvider));
 }
 
 /**
@@ -78,10 +70,6 @@ export function useContextBalanceSheet(context, context_id, collateralProvider =
  * provider and available amounts.
  */
 export function useContextArnAllocations(context, context_id, arn) {
-  const provider = useProvider();
-  const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery(useCacheKey('getContextArnAllocations ' + context + context_id + arn), async function() {
-      return context && context_id && arn ?
-        await Ledger.getContextArnAllocations(context, context_id, arn) : [[],[]];
-  });
+  return useContractRead(Locksmith.getContractRead('Ledger', 'getContextArnAllocations',
+    [context, context_id, arn], context_id && context && arn));
 }
