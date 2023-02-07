@@ -10,7 +10,6 @@ import {
   usePrepareContractWrite,
   useContractWrite
 } from 'wagmi';
-import { useState } from 'react';
 import {ethers} from 'ethers';
 
 /**

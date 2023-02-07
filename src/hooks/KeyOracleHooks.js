@@ -1,10 +1,5 @@
 import Locksmith from '../services/Locksmith.js';
-import {useQuery} from 'react-query';
-import { useCacheKey } from './LocksmithHooks.js';
 import {
-  useNetwork,
-  useProvider,
-  useContract,
   usePrepareContractWrite,
   useContractRead,
   useContractWrite

@@ -24,7 +24,7 @@ export function ConnectWalletPrompt() {
   </VStack>
 }
 
-export function PendingTransactionMonitor({}) {
+export function PendingTransactionMonitor() {
   const hashes = usePendingHashes();
   return hashes.isSuccess && hashes.data.length > 0 && 
     <Tag mr='1em' size='lg' colorScheme='red' borderRadius='full'>
