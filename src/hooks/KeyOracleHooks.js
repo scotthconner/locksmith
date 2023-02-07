@@ -6,6 +6,7 @@ import {
   useProvider,
   useContract,
   usePrepareContractWrite,
+  useContractRead,
   useContractWrite
 } from 'wagmi';
 import {ethers} from 'ethers';
@@ -21,11 +22,8 @@ import {ethers} from 'ethers';
  * address from the dispatch registery in the event log.
  */
 export function useEventKey(eventHash) {
-  const provider = useProvider();
-  const KeyOracle = useContract(Locksmith.getContract('KeyOracle', provider));
-  return useQuery(useCacheKey('getOracleKey for ' + eventHash), async function() {
-    return await KeyOracle.eventKeys(eventHash);
-  });
+  return useContractRead(Locksmith.getContractRead('KeyOracle', 'eventKeys',
+    [eventHash]));
 }
 
 /**
@@ -35,11 +33,8 @@ export function useEventKey(eventHash) {
  * with that key in the KeyOracle event dispatcher.
  */
 export function useOracleKeyEvents(keyId) {
-  const provider = useProvider();
-  const KeyOracle = useContract(Locksmith.getContract('KeyOracle', provider));
-  return useQuery(useCacheKey('getOracleKeyEvents for ' + keyId), async function() {
-    return await KeyOracle.getOracleKeyEvents(keyId);
-  });
+  return useContractRead(Locksmith.getContractRead('KeyOracle', 'getOracleKeyEvents',
+    [keyId], keyId != null));
 }
 
 /**

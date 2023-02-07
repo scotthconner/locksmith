@@ -5,6 +5,7 @@ import {
   useNetwork,
   useProvider,
   useContract,
+  useContractRead
 } from 'wagmi';
 import {ethers} from 'ethers';
 
@@ -22,11 +23,8 @@ export const KEY_CONTEXT_ID = 2;
  * context.
  */
 export function useContextArnRegistry(context, context_id, collateralProvider = ethers.constants.AddressZero) {
-  const provider = useProvider();
-  const Ledger = useContract(Locksmith.getContract('Ledger', provider));
-  return useQuery(useCacheKey('getContextArnRegistry ' + context + ' ' + context_id + ' ' + collateralProvider), async function() {
-    return await Ledger.getContextArnRegistry(context, context_id, collateralProvider);
-  });
+  return useContractRead(Locksmith.getContractRead('Ledger', 'getContextArnRegistry',
+    [context, context_id, collateralProvider]));
 }
 
 /**
