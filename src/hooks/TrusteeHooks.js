@@ -3,7 +3,6 @@ import { BigNumber } from 'ethers';
 import {useQuery} from 'react-query';
 import { useCacheKey } from './LocksmithHooks.js';
 import {
-  useNetwork,
   useProvider,
   useContract,
   usePrepareContractWrite,

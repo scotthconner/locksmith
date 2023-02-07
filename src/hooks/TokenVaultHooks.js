@@ -5,7 +5,6 @@ import {
 } from 'react-query';
 import { useCacheKey } from './LocksmithHooks.js';
 import {
-  useNetwork,
   useProvider,
   useContract,
   usePrepareContractWrite,
