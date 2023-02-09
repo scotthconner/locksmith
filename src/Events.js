@@ -130,7 +130,7 @@ const AlarmClockItem = ({trustId, eventHash, ...rest}) => {
         </HStack>
       </VStack>
       <Spacer/>
-      { alarmInfo.isSuccess && <AlarmClockSnoozeButton trustId={trustId} eventHash={eventHash}
+      { alarmInfo.isSuccess && eventState.isSuccess && !eventState.data && <AlarmClockSnoozeButton trustId={trustId} eventHash={eventHash}
         alarmTime={1000*alarmInfo.data.alarmTime.toNumber()} snoozeInterval={1000*alarmInfo.data.snoozeInterval.toNumber()}
         snoozeKeyId={alarmInfo.data.snoozeKeyId}/> }
       { alarmInfo.isSuccess && eventState.isSuccess && !eventState.data &&
