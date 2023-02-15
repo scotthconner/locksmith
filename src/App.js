@@ -45,7 +45,7 @@ const hyperspace = {
     symbol: 'tFIL',
   },
   rpcUrls: {
-    default: "https://api.hyperspace.node.glif.io/rpc/v0",
+    default: "https://api.hyperspace.node.glif.io/rpc/v1",
   },
 }
 

@@ -1,0 +1,425 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IAllowance",
+  "sourceName": "contracts/interfaces/IAllowance.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "allowanceId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "redeemedTranches",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "nextVestTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "allowanceAwarded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "allowanceId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32[]",
+          "name": "events",
+          "type": "bytes32[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rootKeyId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "recipientKeyId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tranches",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "interval",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "vestTime",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "sourceKey",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "arn",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IAllowance.Entitlement[]",
+          "name": "assets",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "allowanceCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "allowanceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "allowanceRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "allowanceId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "trancheCount",
+          "type": "uint256"
+        }
+      ],
+      "name": "allowanceTrancheCountChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "rootKeyId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "recipientKeyId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "trancheCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "vestInterval",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "firstVestTime",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "sourceKey",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "arn",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct IAllowance.Entitlement[]",
+          "name": "entitlements",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "events",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "createAllowance",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "allowanceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getAllowance",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rootKeyId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "recipientKeyId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "remainingTrancheCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "vestingInterval",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nextVestTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "requiredEvents",
+              "type": "bytes32[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "sourceKey",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "arn",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "provider",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct IAllowance.Entitlement[]",
+              "name": "entitlements",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct IAllowance.Allowance",
+          "name": "",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "sourceKey",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "arn",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct IAllowance.Entitlement[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "keys",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "getKeyAllowances",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32[]",
+              "name": "allowanceIds",
+              "type": "bytes32[]"
+            }
+          ],
+          "internalType": "struct IAllowance.KeyAllowanceSet[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "allowanceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "redeemAllowance",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "allowanceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "removeAllowance",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "allowanceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tranches",
+          "type": "uint256"
+        }
+      ],
+      "name": "setTrancheCount",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
