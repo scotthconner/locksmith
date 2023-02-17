@@ -4,6 +4,7 @@ import {
   Box,
   CloseButton,
   Flex,
+  Heading,
   HStack,
   Icon,
   useColorModeValue,
@@ -66,9 +67,11 @@ export default function SidebarWithHeader({
   // if it looks like we've switched, reload
   // the contract addresses
   if(network.chain && network.chain.id !== chain) {
-    Locksmith.setChainId(network.chain.id); 
-    AssetResource.refreshMetadata(); 
-    setChain(network.chain.id);
+    if(network.chain.id !== 1) {
+      Locksmith.setChainId(network.chain.id); 
+      AssetResource.refreshMetadata(); 
+      setChain(network.chain.id);
+    }
   }
 
   return (
@@ -93,7 +96,10 @@ export default function SidebarWithHeader({
       {/* mobilenav */}
       <MobileNav onOpen={onOpen}/>
       <Box ml={{ base: 0, md: 60 }}>
-        {children}
+        {network.chain.id !== 1 && children}
+        {network.chain.id === 1 && 
+          <Heading>We are currently not yet on mainnet. Please switch to Goerli or another network.</Heading>
+        }
       </Box>
     </Box>
     </ConnectKitProvider>
