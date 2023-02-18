@@ -96,8 +96,8 @@ export default function SidebarWithHeader({
       {/* mobilenav */}
       <MobileNav onOpen={onOpen}/>
       <Box ml={{ base: 0, md: 60 }}>
-        {network.chain.id !== 1 && children}
-        {network.chain.id === 1 && 
+        {(!network.chain || network.chain.id !== 1) && children}
+        {network && network.chain && network.chain.id === 1 && 
           <Heading>We are currently not yet on mainnet. Please switch to Goerli or another network.</Heading>
         }
       </Box>
