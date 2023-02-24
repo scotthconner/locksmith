@@ -49,9 +49,23 @@ const hyperspace = {
   },
 }
 
+const basegoerli = {
+  id: 84531,
+  name: 'Base Goerli',
+  network: 'Base Goerli',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ethereum',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: "https://goerli.base.org",
+  },
+}
+
 // We are using alchemy for now
 // Choose which chains you'd like to show
-const {chains, provider, webSocketProvider} = configureChains([chain.goerli, chain.hardhat, hyperspace], [
+const {chains, provider, webSocketProvider} = configureChains([chain.goerli, basegoerli, chain.hardhat, hyperspace], [
   alchemyProvider({apiKey:'WSAWLyjeB3wKvm1lqL1umFKBoYzETSQ5'}),
   publicProvider(),
 ]);
