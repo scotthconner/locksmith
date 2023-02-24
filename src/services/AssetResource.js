@@ -121,9 +121,10 @@ export const AssetResource = (function() {
  
   var loadAssets = {
     31337: freshenUpEth,                  // local hardhat
+    84531: freshenUpEth,                  // local hardhat
     5:     freshenUpEth,                  // goerli
     3141:  HyperspaceAssets.assetMetadata // Filecoin testnet 
-  }
+  };
   metadata = loadAssets[Locksmith.getChainId()]();
 
   return {
