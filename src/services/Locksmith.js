@@ -4,7 +4,9 @@ import * as hardhatAssets    from '../registries/network-assets-31337.json';
 
 // test nets
 import * as goerliContracts  from '../registries/network-contracts-5.json';
+import * as baseGoerliContracts from '../registries/network-contracts-84531.json';
 import * as goerliAssets     from '../registries/network-assets-5.json';
+import * as baseGoerliAssets     from '../registries/network-assets-84531.json';
 import * as hyperspaceContracts from '../registries/network-contracts-3141.json';
 import * as hyperspaceAssets from '../registries/network-assets-3141.json';
 
@@ -19,6 +21,7 @@ import * as trustEventLog from "../contracts/TrustEventLog.sol/TrustEventLog.jso
 import * as keyOracle from "../contracts/dispatchers/KeyOracle.sol/KeyOracle.json";
 import * as alarmClock from "../contracts/dispatchers/AlarmClock.sol/AlarmClock.json";
 import * as trustee from "../contracts/scribes/Trustee.sol/Trustee.json";
+import * as allowance from "../contracts/scribes/Allowance.sol/Allowance.json";
 import * as creator from "../contracts/agents/TrustCreator.sol/TrustCreator.json";
 import * as postOffice from '../contracts/PostOffice.sol/PostOffice.json';
 import * as megaKey from '../contracts/agents/MegaKeyCreator.sol/MegaKeyCreator.json';
@@ -39,10 +42,12 @@ const Locksmith = (function() {
   assetAddresses[31337] = hardhatAssets;
   contractAddresses[3141] = hyperspaceContracts;
   assetAddresses[3141] = hyperspaceAssets;
+  
 
   contractAddresses[5] = goerliContracts;
   assetAddresses[5] = goerliAssets;
-
+  contractAddresses[84531] = baseGoerliContracts;
+  assetAddresses[84531] = baseGoerliAssets;
 
   const interfaces = {
     ShadowERC: shadowERC, 
@@ -56,6 +61,7 @@ const Locksmith = (function() {
     KeyOracle: keyOracle, 
     AlarmClock: alarmClock, 
     Trustee: trustee,
+    Allowance: allowance,
     TrustCreator: creator,
     VirtualKeyAddress: inbox,
     MegaKeyCreator: megaKey,
@@ -133,7 +139,9 @@ const Locksmith = (function() {
         args: args,
         enabled: enabled,
         onError(error) {
-          console.log("Something really bad happened: " + error);
+          console.log("There was an error prepping a contract write on: " + contract + "::" + method);
+          console.log(args);
+          console.log("Something really bad happened " + error);
         }
       }
     },
