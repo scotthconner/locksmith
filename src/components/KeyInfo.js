@@ -1,5 +1,5 @@
 import { useInspectKey } from '../hooks/LocksmithHooks.js';
-import { Skeleton, Text } from '@chakra-ui/react';
+import { Skeleton, Text, HStack } from '@chakra-ui/react';
 import { FcKey } from 'react-icons/fc';
 import { HiOutlineKey } from 'react-icons/hi';
 
@@ -17,5 +17,12 @@ export function KeyInfoIcon(keyInfo, size = null, props = {}) {
 export function KeyName({keyId, ...rest}) {
   const key = useInspectKey(keyId);
   return !key.isSuccess ? <Skeleton width='6em' height='1em'/> : 
-    <Text>{key.data.alias}</Text>
+    <Text {... rest}>{key.data.alias}</Text>
+}
+
+export function KeyLabel({keyId, ...rest}) {
+  return <HStack {...rest}>
+    <KeyIcon keyId={keyId}/>
+    <KeyName keyId={keyId}/>
+  </HStack>
 }

@@ -48,7 +48,7 @@ export function useContextProviderRegistry(context, context_id, arn = ethers.con
  */
 export function useContextArnBalances(context, context_id, arns, collateralProvider = ethers.constants.AddressZero) {
   return useContractRead(Locksmith.getContractRead('Ledger', 'getContextArnBalances',
-    [context, context_id, collateralProvider, arns], arns != null));
+    [context, context_id, collateralProvider, arns], arns !== null && context_id !== null));
 }
 
 /**

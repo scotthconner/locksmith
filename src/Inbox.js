@@ -51,14 +51,14 @@ import { AiOutlineNumber } from 'react-icons/ai';
 import { BiGhost } from 'react-icons/bi';
 import { ImQrcode } from 'react-icons/im';
 import { BsShieldLock } from 'react-icons/bs';
-import { RiSafeLine } from 'react-icons/ri';
+import { RiSafeLine, RiHandCoinLine } from 'react-icons/ri';
 import { useAccount } from 'wagmi';
 import { useParams } from 'react-router-dom';
 import { AssetResource } from './services/AssetResource.js';
 import Locksmith from './services/Locksmith.js';
 
 // Raw Hooks
-import { ethers } from 'ethers';
+import { ethers, BigNumber } from 'ethers';
 import { useNavigate } from 'react-router-dom';
 import { useBalance } from 'wagmi';
 import { useKeyInboxAddress } from './hooks/PostOfficeHooks.js';
@@ -80,7 +80,8 @@ import {
   useInboxTransaction,
   useSend,
   useSendToken,
-  useAcceptTokenBatch
+  useAcceptTokenBatch,
+  useAcceptPaymentBatch,
 } from './hooks/VirtualKeyAddressHooks.js';
 import {
   useTrustedActorAlias,
@@ -90,6 +91,12 @@ import {
   useCoinCapPrice,
   USDFormatter,
 } from './hooks/PriceHooks.js';
+import {
+  useKeyAllowances,
+  useAllowance,
+  useRedeemableTrancheCount,
+  mapAllowanceData,
+} from './hooks/AllowanceHooks.js';
 
 // Components
 import { ContextBalanceUSD } from './components/Trust.js';
@@ -167,6 +174,7 @@ const VirtualKeyInbox = ({keyId, keyInfo, address, ...rest}) => {
     <InboxHeader keyId={keyId} keyInfo={keyInfo} address={address}/>
     <InboxAssetBalance keyId={keyId} keyInfo={keyInfo} address={address}/>
     <TokenAcceptBox keyId={keyId} keyInfo={keyInfo} address={address}/>
+    <PaymentAcceptBox keyId={keyId} address={address}/>
     <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'>
       <Tabs isLazy isFitted defaultIndex={['assets','transactions'].indexOf(tab)}>
         <TabList>
@@ -205,7 +213,8 @@ const RecursiveAcceptBox = ({keyId, keyInfo, address, tokens, position, balanceC
   // of the inbox address for the position token
   const balance = useBalance({
     addressOrName: address, 
-    token: tokens[position] 
+    token: tokens[position],
+    watch: true
   });
   // we try to see if we have a non-zero balance for this token
   const myBalanceCount = balanceCount + 
@@ -317,6 +326,94 @@ const AssetApprovalChoice = ({token, address, addToken, removeToken, ...rest}) =
     <Spacer/>
     <Text>{balance.data.formatted} {asset.symbol}</Text>
     </HStack> : '');
+}
+
+const PaymentAcceptBox = ({keyId, address, ...rest}) => {
+  const allowances = useKeyAllowances([BigNumber.from(keyId)]);
+  return allowances.isSuccess && allowances.data.flat(2).length > 0 && 
+    <RecursivePaymentAccept keyId={BigNumber.from(keyId)} address={address} removeAllowances={[]} 
+      allowances={allowances.data.flat(2)} position={0} structure={[]} paymentCount={BigNumber.from(0)}/>
+}
+
+const RecursivePaymentAccept = ({keyId, address, allowances, position, structure, paymentCount, removeAllowances, ...rest}) => {
+  const boxColor = useColorModeValue('white', 'gray.800');
+  const allowance = useAllowance(allowances[position]);
+  const tranches = useRedeemableTrancheCount(allowances[position]);
+  const allowanceObject = mapAllowanceData(allowance.data);
+  const newPaymentCount = tranches.isSuccess ? paymentCount.add(tranches.data) : paymentCount;
+  const newStructure = !allowance.isSuccess || !tranches.isSuccess ? structure : [structure, 
+    (tranches.data.gt(0) ? allowanceObject.entitlements.map((e) => {
+      return {
+        arn: e.arn,
+        amount: e.amount,
+        tranche: tranches.data
+      };
+    }) : [])
+  ].flat();
+  
+  // if there are no tranches on an allowance, make sure to remove it from the multicall
+  var newRemoveAllowances = [...removeAllowances];
+  if (tranches.isSuccess && tranches.data.lt(1)) {
+    newRemoveAllowances.push(allowances[position]);
+  }
+
+  return (position >= allowances.length - 1) ?
+    (newPaymentCount.gt(0) && <Box bg={boxColor} borderRadius='lg' boxShadow='md' p='1em' mt='1em' width='90%'>
+      <HStack>
+        <Text>You have <b>{newPaymentCount.toString()}</b> payments to accept.</Text>
+        <Spacer/>
+        <TotalPaymentAmount address={address} allowances={allowances} removeAllowances={newRemoveAllowances} structure={newStructure} position={0} total={0}/>
+      </HStack>
+    </Box>) : 
+    <RecursivePaymentAccept keyId={keyId} allowances={allowances} position={position+1} removeAllowances={newRemoveAllowances}
+      structure={newStructure} paymentCount={newPaymentCount} address={address}/>
+}
+
+/*
+ * structure:
+ *  [{arn, amount, tranche}]
+ */
+const TotalPaymentAmount = ({allowances, structure, position, total, address, removeAllowances, ...rest}) => {
+  const asset = AssetResource.getMetadata(structure[position].arn);
+  const assetPrice = useCoinCapPrice(asset.coinCapId);
+  const totalAmount = total + (!assetPrice.isSuccess ? 0 :
+    assetPrice.data * ethers.utils.formatUnits(structure[position].amount, asset.decimals) *
+      structure[position].tranche);
+
+  return position === (structure.length-1) ?
+    <AcceptPaymentsButton allowances={allowances.filter((a) => !removeAllowances.includes(a))} totalAmount={totalAmount} address={address}/> :
+    <TotalPaymentAmount allowances={allowances} structure={structure} removeAllowances={removeAllowances} 
+      position={position+1} total={totalAmount} address={address} {...rest}/>
+}
+
+const AcceptPaymentsButton = ({address, allowances, totalAmount, ...rest}) => {
+  const toast = useToast();
+  const accept = useAcceptPaymentBatch(address, allowances,
+    function(error) {
+      toast({
+        title: 'Transaction Error!',
+        description: error.toString(),
+        status: 'error',
+        duration: 9000,
+        isClosable: true
+      });
+    },
+    function(data) {
+      Locksmith.watchHash(data.hash);
+      toast({
+        title: 'Payments Received!',
+        description: 'The payments have been received.',
+        status: 'success',
+        duration: 9000,
+        isClosable: true
+      });
+    }
+  );
+
+  return <Button isLoading={accept.isLoading} colorScheme='yellow' leftIcon={<RiHandCoinLine/>}
+    onClick={() => { accept.write?.(); }}>
+    {USDFormatter.format(totalAmount)}
+  </Button>
 }
 
 const InboxHeader= ({keyId, keyInfo, address, ...rest}) => {
@@ -611,7 +708,7 @@ const SendAssetDialog = ({keyId, keyInfo, address, arn, disclosure, ...rest}) =>
   </Modal>
 }
 
-const ProviderOption = ({keyId, keyInfo, provider, arn, ...rest}) => {
+export function ProviderOption({keyId, keyInfo, provider, arn, ...rest}) {
   const providerAlias = useTrustedActorAlias(keyInfo.trustId, COLLATERAL_PROVIDER, provider);
   const providerBalance = useContextArnBalances(KEY_CONTEXT_ID, keyId, [arn], provider);
   const asset = AssetResource.getMetadata(arn);

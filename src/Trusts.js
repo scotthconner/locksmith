@@ -55,6 +55,11 @@ import {
   TrustPolicy,
   AddPolicyDialog,
 } from './trusts/Policies.js';
+import {
+  TrustAllowance,
+  AddAllowanceDialog,
+} from './trusts/Allowances.js';
+
 import { useNavigate } from 'react-router-dom';
 
 //////////////////////////////////////
@@ -84,6 +89,9 @@ import {
 import {
   useTrustPolicyKeys,
 } from './hooks/TrusteeHooks.js';
+import {
+  useKeyAllowances,
+} from './hooks/AllowanceHooks.js';
 import {
   ContextBalanceUSD
 } from './components/Trust.js';
@@ -215,12 +223,14 @@ export function Trust() {
   const trustArnBalances = trustBalanceSheet.isSuccess ? trustBalanceSheet.data[1] : [];
   const trustKeys = useTrustKeys(trustInfo.isSuccess ? trustInfo.data.trustId : null);
   const trustPolicyKeys = useTrustPolicyKeys(id);
+  const trustAllowanceKeys = useKeyAllowances(trustKeys.isSuccess ? trustKeys.data : null);
   const trustedProviders = useTrustedActors(id, COLLATERAL_PROVIDER);
   const registeredEvents = useTrustEventRegistry(id);
   const trustedScribes = useTrustedActors(id, SCRIBE);
   const trustedDispatchers = useTrustedActors(id, DISPATCHER, 'TrustEventLog'); 
   const providerDisclosure = useDisclosure();
   const scribeDisclosure = useDisclosure();
+  const allowanceDisclosure = useDisclosure();
   const dispatcherDisclosure = useDisclosure();
   const createKeyDisclosure = useDisclosure();
   const depositDisclosure = useDisclosure();
@@ -246,8 +256,10 @@ export function Trust() {
   let eventCount = registeredEvents.isSuccess ?
     <Tag mr='1em'><TagLabel>{registeredEvents.data.length}</TagLabel></Tag> :
     <Skeleton mr='1em' width='1em' height='1em'/>;
-  let trusteeCount = trustPolicyKeys.isSuccess ?
-    <Tag mr='1em'><TagLabel>{trustPolicyKeys.data.length}</TagLabel></Tag> :
+  let trusteeCount = trustPolicyKeys.isSuccess ? trustPolicyKeys.data.length : 0;
+  let allowanceCount = trustAllowanceKeys.isSuccess ? trustAllowanceKeys.data.flat(2).length : 0;
+  let scribeCount = trustPolicyKeys.isSuccess || trustAllowanceKeys.isSuccess ?  
+    <Tag mr='1em'><TagLabel>{trusteeCount + allowanceCount}</TagLabel></Tag> :
     <Skeleton mr='1em' width='1em' height='1em'/>;
   
   return (<>
@@ -261,7 +273,7 @@ export function Trust() {
         <Tab>{trustArnCount}Assets</Tab>
         <Tab>{trustKeyCount}Keys</Tab>
         <Tab>{eventCount}Events</Tab>
-        <Tab>{trusteeCount}Trustees</Tab>
+        <Tab>{scribeCount}Scribes</Tab>
         <Tab>{notaryCount}Notary</Tab>
       </TabList>
       <TabPanels>
@@ -366,7 +378,7 @@ export function Trust() {
           }
         </TabPanel>
         <TabPanel>
-          { !(trustPolicyKeys.isSuccess || trustInfo.isSuccess) && <>
+          { !(trustPolicyKeys.isSuccess || trustInfo.isSuccess || trustAllowanceKeys.isSuccess) && <>
             <Skeleton width='14em' height='1.1em' mt='1.5em'/>
             <VStack mt='1.5em'>
               <Skeleton width='100%' height='4em'/>
@@ -391,10 +403,30 @@ export function Trust() {
               </HStack>
               <VStack spacing='1em' pb='2em' pt='2em'>
               { trustPolicyKeys.data.map((k) => (
-                <TrustPolicy rootKeyId={trustInfo.data.rootKeyId} 
+                <TrustPolicy hasRoot={hasRoot} rootKeyId={trustInfo.data.rootKeyId} 
                   trustId={id} keyId={k} key={'policy-' + k.toString()}/>
               ))}</VStack></>
-          }
+          }{ trustAllowanceKeys.isSuccess && trustInfo.isSuccess && <>
+            <HStack mt='1.5em'>
+                <Text fontSize='lg'>
+                  This trust has <b>{allowanceCount}</b> recurring&nbsp;
+                  {trustAllowanceKeys.data.flat(2).length === 1 ? 'payment' : 'payments'}.
+                </Text>
+                <Spacer/>
+                { hasRoot && <Button
+                    colorScheme='blue'
+                    leftIcon={<IoIosAdd/>}
+                    onClick={allowanceDisclosure.onOpen}>
+                  Add Payment</Button> }
+                { hasRoot && <AddAllowanceDialog trustId={id} rootKeyId={trustInfo.data.rootKeyId}
+                  onClose={allowanceDisclosure.onClose} isOpen={allowanceDisclosure.isOpen}/> }
+            </HStack>
+            <VStack spacing='1em' pb='2em' pt='2em'>
+              { trustAllowanceKeys.data.flat(2).map((a) => 
+                <TrustAllowance hasRoot={hasRoot} trustId={id} allowanceId={a} key={'allowance' + a.toString()}/>
+              )}
+            </VStack>
+          </>}
         </TabPanel>
         <TabPanel>
           {!(trustedProviders.isSuccess && trustInfo.isSuccess) ? <> 

@@ -169,6 +169,11 @@
           "type": "uint256"
         },
         {
+          "internalType": "bytes32",
+          "name": "name",
+          "type": "bytes32"
+        },
+        {
           "internalType": "uint256",
           "name": "recipientKeyId",
           "type": "uint256"
@@ -253,6 +258,11 @@
               "internalType": "uint256",
               "name": "rootKeyId",
               "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "allowanceName",
+              "type": "bytes32"
             },
             {
               "internalType": "uint256",

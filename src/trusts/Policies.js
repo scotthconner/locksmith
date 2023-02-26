@@ -33,7 +33,7 @@ import { BigNumber } from 'ethers';
 import Locksmith from '../services/Locksmith.js';
 
 // icons
-import { KeyInfoIcon, KeyIcon, KeyName } from '../components/KeyInfo.js';
+import { KeyInfoIcon } from '../components/KeyInfo.js';
 import { AiOutlineUser } from 'react-icons/ai';
 import { BsTrash } from 'react-icons/bs';
 import { HiOutlineLightningBolt } from 'react-icons/hi';
@@ -63,7 +63,7 @@ import {
   TrustKeyOption
 } from './Events.js';
 
-export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
+export function TrustPolicy({trustId, hasRoot, rootKeyId, keyId, ...rest}) {
 	var boxColor = useColorModeValue('white', 'gray.800');
 	const toast = useToast();
     const beneficiariesDisclosure = useDisclosure();
@@ -103,21 +103,11 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
 	  <HStack spacing='1em'>
         { !key.isSuccess && policy.isSuccess && <Skeleton width='2em' height='2em'/> }
         { key.isSuccess && policy.isSuccess && KeyInfoIcon(key, 30) }
-        <VStack align='stretch'>
-          <HStack>
-            { !key.isSuccess && <Skeleton width='5em' height='1em'/> }
-            { !key.isSuccess && <Skeleton width='8em' height='1em'/> }
-            { key.isSuccess && <b>{key.data.alias}</b> }
-            { policy.isSuccess && <PolicyActivationTag activated={policy.data[0]}/> }
-            { !policy.isSuccess && <Skeleton width='5em' height='1em'/> }
-          </HStack>
-          <HStack fontSize='sm'>
-            { !policy.isSuccess && <Skeleton width='6em' height='1em'/> }
-            { policy.isSuccess && <Text>Distribute funds from</Text> }
-            { policy.isSuccess && <KeyIcon keyId={policy.data[2]}/> }
-            { policy.isSuccess && <KeyName keyId={policy.data[2]}/> }
-          </HStack>
-        </VStack>
+        { !key.isSuccess && <Skeleton width='5em' height='1em'/> }
+        { !key.isSuccess && <Skeleton width='8em' height='1em'/> }
+        { key.isSuccess && <b>{key.data.alias}</b> }
+        { policy.isSuccess && <PolicyActivationTag activated={policy.data[0]}/> }
+        { !policy.isSuccess && <Skeleton width='5em' height='1em'/> }
         <Spacer/>
         { !policy.isSuccess && <Skeleton width='2.2em' height='1.3em'/> }
         { policy.isSuccess && 
@@ -130,7 +120,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
             </Button> 
           </Tooltip> }
         { !policy.isSuccess && <Skeleton width='2.2em' height='1.3em'/> }
-        { policy.isSuccess && 
+        { policy.isSuccess && policy.data[4].length > 0 && 
           <Tooltip label='Required Events'>
             <Button size='sm' leftIcon={<HiOutlineLightningBolt/>}
               onClick={() => { eventsDisclosure.onToggle(); beneficiariesDisclosure.onClose();}}>
@@ -138,7 +128,7 @@ export function TrustPolicy({trustId, rootKeyId, keyId, ...rest}) {
             </Button>
           </Tooltip>}
         <Tooltip label='Remove Policy'>
-          <Button {...removeProps} colorScheme='red' size='sm'
+          <Button {...removeProps} isDisabled={!hasRoot} colorScheme='red' size='sm'
             onClick={() => {removePolicy.write?.();}}><BsTrash/></Button>
         </Tooltip>
       </HStack>
@@ -180,11 +170,11 @@ export function PolicyEventList({keyId, events, ...rest}) {
   return events.map((e,x) => 
     <ListItem bg={x%2===0 ? stripeColor : ''} p='1em' 
         key={'policy-event-list-item-for-' + keyId + e}>
-      <PolicyEventListItem keyId={keyId} event={e}/>
+      <PolicyEventListItem event={e}/>
     </ListItem>)
 }
 
-export function PolicyEventListItem({keyId, event, ...rest}) {
+export function PolicyEventListItem({event, ...rest}) {
   const state = useEventState(event);
   const description = useEventDescription(event);
 
@@ -284,8 +274,8 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
     {sourceKeyInfo.isSuccess && sourceKeyInfo.data && <Text><b>{sourceKeyInfo.data.alias}</b>.</Text>}
   </HStack>
 
-  const eventReview = <VStack mt='2em' align='stretch' spacing='1em'>
-    { eventHashes.length > 0 && <Text>But only after:</Text> }
+  const eventReview = eventHashes.length > 0 && <VStack mt='1em' align='stretch' spacing='1em'>
+    <Text>But only after:</Text>
     { eventHashes.map((h) =>
       <SelectedTrustEvent hideRemove={true} eventHash={h}
         key={'selected-trust-event-' + h}/>)}
@@ -377,7 +367,7 @@ export function AddPolicyDialog({trustId, rootKeyId, onClose, isOpen, ...rest}) 
             { trusteeReview }
             { sourceReview } 
             { eventReview }
-            <Text mt='2em'>Distribution will be enabled only to:</Text>
+            <Text mt='1em'>Distribution will be enabled only to:</Text>
             <VStack align='stretch' mt='1em' spacing='1em'>
             { beneficiaries.map((b) =>
               <SelectedBeneficiaryKey keyId={b} key={'selected-beneficiary-review-key-' + b}

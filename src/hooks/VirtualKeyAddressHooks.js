@@ -57,7 +57,7 @@ export function useSend(inboxAddress, provider, amount, destination, errorFunc, 
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('VirtualKeyAddress', 'send',
       [provider, amount, destination],
-      inboxAddress && provider && amount && amount.gt(0) && destination, inboxAddress));
+      inboxAddress && (provider !== null) && amount && amount.gt(0) && (destination !== null), inboxAddress));
 
   return useContractWrite({...preparation.config,
     onError(error) {
@@ -78,7 +78,7 @@ export function useSendToken(inboxAddress, provider, token, amount, destination,
   const preparation = usePrepareContractWrite(
     Locksmith.getContractWrite('VirtualKeyAddress', 'sendToken',
       [provider, token, amount, destination],
-      inboxAddress && provider && token && amount && amount.gt(0) && destination, inboxAddress));
+      inboxAddress && (provider !== null) && token && amount && amount.gt(0) && (destination !== null), inboxAddress));
 
   return useContractWrite({...preparation.config,
     onError(error) {
@@ -117,4 +117,29 @@ export function useAcceptTokenBatch(inboxAddress, tokens, errorFunc, successFunc
       successFunc(data);
     }
   }); 
+}
+
+export function useAcceptPaymentBatch(inboxAddress, allowances, errorFunc, successFunc) {
+  const provider = useProvider();
+  const allowance = useContract(Locksmith.getContract('Allowance', provider));
+
+  const preparation = usePrepareContractWrite(
+    Locksmith.getContractWrite('VirtualKeyAddress', 'multicall',
+      [[], (allowances||[]).map((a) => {
+        return {
+          target: allowance.address,
+          callData: allowance.interface.encodeFunctionData("redeemAllowance", [a]),
+          msgValue: 0
+        }
+      })],
+      (allowances||[]).length > 0, inboxAddress))
+
+  return useContractWrite({...preparation.config,
+    onError(error) {
+      errorFunc(error);
+    },
+    onSuccess(data) {
+      successFunc(data);
+    }
+  });
 }

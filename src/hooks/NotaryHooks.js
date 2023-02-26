@@ -4,6 +4,7 @@ import { useCacheKey } from './LocksmithHooks.js';
 import {
   useProvider,
   useContract,
+  useContractRead,
   usePrepareContractWrite,
   useContractWrite
 } from 'wagmi';
@@ -24,12 +25,10 @@ export const DISPATCHER = 2;
  *   
  */
 export function useTrustedActors(trustId, role, ledgerContractAlias = 'Ledger') {
-  const provider = useProvider();
-  const ledgerAddress = Locksmith.getContractAddress(ledgerContractAlias); 
-  const Notary = useContract(Locksmith.getContract('Notary', provider));
-  return useQuery(useCacheKey('getTrustedActors for ' + trustId + " " + role + " " + ledgerAddress), async function() {
-    return await Notary.getTrustedActors(ledgerAddress, trustId, role);
-  });
+  const ledgerAddress = Locksmith.getContractAddress(ledgerContractAlias);
+  return useContractRead(Locksmith.getContractRead('Notary','getTrustedActors',
+    [ledgerAddress, trustId, role],
+    ledgerAddress && (trustId !== null) && (role !== null)));
 }
 
 /**
