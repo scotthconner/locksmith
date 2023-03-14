@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import Locksmith from './Locksmith.js';
 
 import {
   FIL
