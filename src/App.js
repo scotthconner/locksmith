@@ -63,9 +63,23 @@ const basegoerli = {
   },
 }
 
+const filecoin = {
+  id: 314,
+  name: 'Filecoin',
+  network: 'Filecoin',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Filecoin',
+    symbol: 'FIL',
+  },
+  rpcUrls: {
+    default: "https://api.node.glif.io",
+  },
+}
+
 // We are using alchemy for now
 // Choose which chains you'd like to show
-const {chains, provider, webSocketProvider} = configureChains([chain.goerli, basegoerli, chain.hardhat, hyperspace], [
+const {chains, provider, webSocketProvider} = configureChains([chain.goerli, basegoerli, filecoin, chain.hardhat, hyperspace], [
   alchemyProvider({apiKey:'WSAWLyjeB3wKvm1lqL1umFKBoYzETSQ5'}),
   publicProvider(),
 ]);

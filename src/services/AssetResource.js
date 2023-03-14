@@ -12,6 +12,7 @@ import { ETH } from '../components/icons/ETH.js';
 import { GRT } from '../components/icons/GRT.js';
 
 import { HyperspaceAssets } from './HyperspaceAssets.js';
+import { FilecoinAssets } from './FilecoinAssets.js';
 
 /**
  * AssetResource 
@@ -120,10 +121,11 @@ export const AssetResource = (function() {
   };
  
   var loadAssets = {
-    31337: freshenUpEth,                  // local hardhat
-    84531: freshenUpEth,                  // local hardhat
-    5:     freshenUpEth,                  // goerli
-    3141:  HyperspaceAssets.assetMetadata // Filecoin testnet 
+    31337: freshenUpEth,                   // local hardhat
+    84531: freshenUpEth,                   // local hardhat
+    5:     freshenUpEth,                   // goerli
+    3141:  HyperspaceAssets.assetMetadata, // Filecoin testnet 
+    314:   FilecoinAssets.assetMetadata    // Filecoin main net 
   };
   metadata = loadAssets[Locksmith.getChainId()]();
 

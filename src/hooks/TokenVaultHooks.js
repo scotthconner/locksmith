@@ -24,10 +24,16 @@ export function useTokenAllowance(tokenAddress, userAddress) {
   // we are going to cut a corner here. We should have an ERC20 ABI
   // that we could load, but we have the generic ShadowERC. This
   // will break for test-net.
-  const token = useContract(Locksmith.getContract('ShadowERC', provider));
+  // note: also hacking around Filecoin that doesn't have erc20s right now.
+  // this technical debt stems from not separating out tokens from gas in the
+  // UI slider that uses this on deposit.
+  const contract = Locksmith.getContract(tokenAddress === null ? 'Locksmith' : 'ShadowERC', provider);
+  const token = useContract(contract);
   
   return useQuery(useCacheKey('useTokenAllowance' + tokenAddress + userAddress), async function() {
-    return tokenAddress !== null ? await token.attach(tokenAddress).allowance(userAddress, tokenVault) :
+    // we are also checking to make sure the contract hook isn't stubbed out
+    return contract.addressOrName !== Locksmith.getContract('Locksmith',provider).addressOrName && 
+      tokenAddress !== null ? await token.attach(tokenAddress).allowance(userAddress, tokenVault) :
       ethers.constants.MaxUint256; // if the token address is null, its ether so allowance isn't needed
   });
 }

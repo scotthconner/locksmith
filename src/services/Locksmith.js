@@ -10,6 +10,10 @@ import * as baseGoerliAssets     from '../registries/network-assets-84531.json';
 import * as hyperspaceContracts from '../registries/network-contracts-3141.json';
 import * as hyperspaceAssets from '../registries/network-assets-3141.json';
 
+// main nets
+import * as filecoinContracts from '../registries/network-contracts-314.json';
+import * as filecoinAssets from '../registries/network-assets-314.json';
+
 import * as shadowERC from  "../contracts/stubs/ShadowERC.sol/ShadowERC.json";
 import * as keyVault from  "../contracts/KeyVault.sol/KeyVault.json";
 import * as locksmith from "../contracts/Locksmith.sol/Locksmith.json";
@@ -48,6 +52,9 @@ const Locksmith = (function() {
   assetAddresses[5] = goerliAssets;
   contractAddresses[84531] = baseGoerliContracts;
   assetAddresses[84531] = baseGoerliAssets;
+  
+  contractAddresses[314] = filecoinContracts;
+  assetAddresses[314] = filecoinAssets;
 
   const interfaces = {
     ShadowERC: shadowERC, 
